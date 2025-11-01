@@ -10,12 +10,12 @@ export default function TypewriterChangeContentExample({
   const [index, setIndex] = useState(0)
 
   return (
-    <h2 className="flex flex-col items-start gap-1 w-full leading-none">
+    <h2 className="flex flex-col items-center lg:items-start gap-1 w-full leading-none">
       {/* Typed line with warm accent gradient */}
       <Typewriter
         as="div"
         cursorStyle={{
-          background: 'var(--color-accent2)',
+          background: 'var(--color-secondary)',
           width: 3,
           height: '1.1em',
           marginLeft: 2,
@@ -23,14 +23,17 @@ export default function TypewriterChangeContentExample({
         onComplete={() => {
           delay(() => setIndex(wrap(0, text.length, index + 1)), 2)
         }}
-        className="bg-linear-to-r from-accent1 to-accent2 bg-clip-text text-transparent text-5xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight leading-none"
+        className="gradient-text text-5xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight leading-none"
       >
         {text[index]}
       </Typewriter>
 
       {/* Tagline */}
-      <span className="text-2xl sm:text-3xl lg:text-4xl font-semibold text-[--color-muted]">
-        is Fake.
+      <span className="text-md sm:text-xl lg:text-2xl font-semibold text-subtext-0">
+        is{' '}
+        <span className="italic text-2xl sm:text-3xl font-bold lg:text-4xl text-text">
+          Fake.
+        </span>
       </span>
     </h2>
   )

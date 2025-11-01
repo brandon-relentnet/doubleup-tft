@@ -1,148 +1,93 @@
 @import "tailwindcss";
 
-/* =========================
-   Neutral + Warm Accent Palette
-   =========================
-   Light: soft stone + white
-   Dark: zinc + black
-   Accent: amber → rose
-*/
-
-/* Light mode defaults */
-:root {
-  /* Neutrals (Light) */
-  --bg: #f6f6f6;
-  /* page background */
-  --bg-alt: #ffffff;
-  /* surfaces */
-  --elev: #f1f1f1;
-  /* slightly raised */
-  --fg: #1f2937;
-  /* zinc-800-like text */
-  --muted: #4b5563;
-  /* zinc-600-like */
-
-  /* Borders and rings */
-  --ring: color-mix(in oklab, var(--fg) 12%, transparent);
-
-  /* Accent gradient (Warm) */
-  --accent-1: #d97706;
-  /* amber-600 */
-  --accent-2: #e11d48;
-  /* rose-600 */
-
-  /* Optional secondary accents if needed later */
-  --link: #2563eb;
-  /* blue-600 */
-  --link-hover: #1d4ed8;
-  /* blue-700 */
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
+    monospace;
 }
 
-/* Dark mode defaults */
+@theme {
+  --color-rosewater: #dc8a78;
+  --color-flamingo: #dd7878;
+  --color-pink: #ea76cb;
+  --color-mauve: #8839ef;
+  --color-red: #d20f39;
+  --color-maroon: #e64553;
+  --color-peach: #fe640b;
+  --color-yellow: #df8e1d;
+  --color-green: #40a02b;
+  --color-teal: #179299;
+  --color-sky: #04a5e5;
+  --color-sapphire: #209fb5;
+  --color-blue: #1e66f5;
+  --color-lavender: #7287fd;
+
+  --color-text: #4c4f69;
+  --color-subtext-1: #5c5f77;
+  --color-subtext-0: #6c6f85;
+  --color-overlay-2: #7c7f93;
+  --color-overlay-1: #8c8fa1;
+  --color-overlay-0: #9ca0b0;
+  --color-surface-2: #acb0be;
+  --color-surface-1: #bcc0cc;
+  --color-surface-0: #ccd0da;
+  --color-base: #eff1f5;
+  --color-mantle: #e6e9ef;
+  --color-crust: #dce0e8;
+
+  --color-accent: var(--color-green);
+  --color-secondary: var(--color-red);
+  --color-primary: var(--color-peach);
+}
+
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg: #0b0b0b;
-    /* near-black backdrop */
-    --bg-alt: #121212;
-    /* card background */
-    --elev: #1a1a1a;
-    /* raised surface */
-    --fg: #e5e7eb;
-    /* zinc-200-like text */
-    --muted: #a1a1aa;
-    /* zinc-400-like */
+    --color-rosewater: #f5e0dc;
+    --color-flamingo: #f2cdcd;
+    --color-pink: #f5c2e7;
+    --color-mauve: #cba6f7;
+    --color-red: #f38ba8;
+    --color-maroon: #eba0ac;
+    --color-peach: #fab387;
+    --color-yellow: #f9e2af;
+    --color-green: #a6e3a1;
+    --color-teal: #94e2d5;
+    --color-sky: #89dceb;
+    --color-sapphire: #74c7ec;
+    --color-blue: #89b4fa;
+    --color-lavender: #b4befe;
 
-    --ring: color-mix(in oklab, var(--fg) 16%, transparent);
+    --color-text: #cdd6f4;
+    --color-subtext-1: #bac2de;
+    --color-subtext-0: #a6adc8;
+    --color-overlay-2: #9399b2;
+    --color-overlay-1: #7f849c;
+    --color-overlay-0: #6c7086;
+    --color-surface-2: #585b70;
+    --color-surface-1: #45475a;
+    --color-surface-0: #313244;
+    --color-base: #1e1e2e;
+    --color-mantle: #181825;
+    --color-crust: #11111b;
 
-    /* Keep the same warm accent pair for brand consistency */
-    --accent-1: #d97706;
-    /* amber-600 */
-    --accent-2: #e11d48;
-    /* rose-600 */
-
-    --link: #60a5fa;
-    /* blue-400 */
-    --link-hover: #3b82f6;
-    /* blue-500 */
+    --color-accent: var(--color-green);
+    --color-secondary: var(--color-red);
+    --color-primary: var(--color-peach);
   }
 }
 
-/* Map to Tailwind tokens */
-@theme {
-  --color-bg: var(--bg);
-  --color-bg-alt: var(--bg-alt);
-  --color-elev: var(--elev);
-  --color-fg: var(--fg);
-  --color-muted: var(--muted);
-  --color-ring: var(--ring);
-
-  --color-accent1: var(--accent-1);
-  --color-accent2: var(--accent-2);
-
-  --color-link: var(--link);
-  --color-linkhover: var(--link-hover);
-}
-
-/* Base */
-html,
 body {
-  height: 100%;
-}
-
-body {
-  @apply m-0 bg-bg text-fg antialiased;
-  font-family:
-    -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
+  @apply m-0 bg-base text-text;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
     "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
-    system-ui, sans-serif;
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-a {
-  color: var(--color-link);
+.gradient-text {
+  @apply bg-linear-to-r from-primary to-secondary bg-clip-text text-transparent;
 }
 
-a:hover {
-  color: var(--color-linkhover);
-}
-
-/* =========================
-   Reusable utilities
-   ========================= */
-
-/* Page hero background */
-.hero-gradient {
-  @apply bg-linear-to-br from-[--color-bg] via-white/70 to-[--color-bg] dark:via-[--color-elev];
-}
-
-/* Headline accent text */
-.hl-accent {
-  @apply bg-linear-to-r from-accent1 to-accent2 bg-clip-text text-transparent;
-}
-
-/* Readable body copy */
-.prose-hero {
-  @apply text-lg leading-relaxed max-w-prose;
-  color: var(--color-fg);
-}
-
-.prose-hero p+p {
-  @apply mt-5;
-}
-
-/* Elevated image or card frame */
-.frame {
-  @apply rounded-2xl shadow-xl ring-1 ring-[--color-ring];
-}
-
-/* Buttons */
-.btn {
-  @apply inline-flex items-center justify-center gap-2 rounded-xl px-5 py-3 font-semibold transition;
-}
-
-.btn-primary {
-  @apply text-white bg-linear-to-r from-accent1 to-accent2 hover:brightness-110 active:brightness-95;
-}
-
-.btn-secondary {
-  @apply bg-[--color-bg-alt] text-[--color-fg] ring-1 ring-[--color-ring] hover:brightness-105;
+.container {
+  @apply mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-48;
 }
