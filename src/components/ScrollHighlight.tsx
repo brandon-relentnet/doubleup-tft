@@ -1,6 +1,7 @@
 'use client'
 
 import { motion } from 'motion/react'
+import { Link } from '@tanstack/react-router'
 import { useState } from 'react'
 
 interface Skill {
@@ -16,35 +17,49 @@ const skills: Skill[] = [
     subtitle: 'Why this site exists',
     image: '/blt_solo.png',
     description:
-      'We teach fundamentals. Board strength, economy, health, and mental. You have one sandwich worth of focus. Balance the ingredients and learn to cook your own wins.',
+      'We teach fundamentals: board strength, economy, health, and mental. You have one sandwich worth of focus, so how you layer those ingredients decides your result. Learn to balance them and cook your own wins with purpose.',
   },
   {
     name: 'Bread',
     subtitle: 'Board Strength',
     image: '/blt_bread.png',
     description:
-      'Build the strongest board you can with what you have. Stabilize early fights, protect health, and buy time for your economy. A solid base keeps the sandwich together.',
+      'Build the strongest board you can with what you have. Stabilize early, protect health, and keep your gold alive long enough to grow. A firm foundation carries tempo and prevents the whole sandwich from falling apart.',
   },
   {
     name: 'Lettuce',
     subtitle: 'Health',
     image: '/blt_lettuce.png',
     description:
-      'Health is time. Spend it to push power when needed and save it when you can. Learn when to bleed and when to defend so your run does not wilt before it peaks.',
+      'Health is time and space to learn. Spend it to push power when you must, and save it when you can. Know when to bleed and when to defend so your run does not wilt before it peaks.',
   },
   {
     name: 'Tomato',
     subtitle: 'Economy',
     image: '/blt_tomato.png',
     description:
-      'Gold is flavor. Save for interest, roll with purpose, and commit at the right stages. Too dry and you never spike. Too juicy and the whole thing slips.',
+      'Gold is flavor that develops over stages. Save for interest, roll with purpose, and commit when the window opens. Too dry and you never spike, too wet and the whole sandwich slides out of control.',
   },
   {
     name: 'Bacon',
     subtitle: 'Mental',
     image: '/blt_bacon.png',
     description:
-      'Bacon brings the flavor, but it burns fast if you stop paying attention. Your mental works the same way. Stay calm when the pan gets hot. Confidence adds heat to your play, but frustration scorches everything around it. Keep your focus steady so the rest of your sandwich can cook evenly.',
+      'Bacon brings the flavor, but it burns fast if you stop paying attention. Your mental works the same way. Stay calm when the pan gets hot. Confidence adds heat; frustration scorches everything around it. Keep the fire steady.',
+  },
+  {
+    name: 'Seasoning',
+    subtitle: 'Positioning and Adaptation',
+    image: '/blt_seasoning.png',
+    description:
+      'Seasoning ties the plate together. Scout with intent, position for threats, and pivot when the game demands it. It is not a separate bucket. You sprinkle it across everything so each bite tastes right.',
+  },
+  {
+    name: 'Conclusion',
+    subtitle: 'Bringing It All Together',
+    image: '/blt_pengu_blt.png',
+    description:
+      'Balance turns understanding into results. If one part takes everything, the others fail. Keep your board sturdy, your health fresh, your gold purposeful, and your focus steady. That is how consistency forms, and that is farm fresh TFT.',
   },
 ]
 
@@ -61,7 +76,7 @@ function ScrollHighlightItem({
 }) {
   return (
     <motion.li
-      className="py-16 flex items-center gap-8"
+      className="py-16 lg:flex-row flex-col flex justify-center items-center gap-8"
       initial={false}
       animate={{
         opacity: isHighlighted ? 1 : 0.35,
@@ -74,7 +89,7 @@ function ScrollHighlightItem({
       {skill.image ? (
         <img src={skill.image} alt={skill.name} className="size-64" />
       ) : null}
-      <div>
+      <div className="flex flex-col items-center lg:items-start">
         <span className="leading-[0.9] text-[clamp(2rem,8vw,6rem)] font-extrabold uppercase whitespace-nowrap gradient-text">
           {skill.name}
         </span>
@@ -83,10 +98,22 @@ function ScrollHighlightItem({
             {skill.subtitle}
           </div>
         ) : null}
-
         {skill.description ? (
-          <div className="mt-2 text-xl leading-relaxed max-w-3xl text-text">
+          <div className="mt-2 text-xl leading-relaxed max-w-3xl text-text text-center lg:text-left">
             {skill.description}
+          </div>
+        ) : null}
+        {skill.name === 'Conclusion' ? (
+          <div className="mt-2 text-xl leading-relaxed max-w-3xl text-text text-center lg:text-left">
+            Learn more about the BLT Theory here:{' '}
+            <Link
+              to="/discussions/$slug"
+              params={{ slug: 'blt-theory' }}
+              search={{ tag: undefined }}
+              className="underline"
+            >
+              BLT Theory
+            </Link>
           </div>
         ) : null}
       </div>

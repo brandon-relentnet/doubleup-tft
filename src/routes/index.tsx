@@ -77,7 +77,11 @@ function App() {
                       <Link to={link.to} search={link.search} className="p-4">
                         <User className="size-10" />
                       </Link>
-                      <Link to={`${link.to}`} search={link.search} className="p-4">
+                      <Link
+                        to={`${link.to}`}
+                        search={link.search}
+                        className="p-4"
+                      >
                         <Users className="size-10" />
                       </Link>
                     </div>
@@ -107,19 +111,13 @@ function App() {
               to feel the rhythm of the game instead of memorizing it.
               <br className="mb-2" />
               <span className="font-semibold gradient-text">
-                We farm our own knowledge.
-              </span>{' '}
-              We position with intent. We understand when to pivot and when to
-              trust the comp we grew ourselves. No spreadsheets. No borrowed
-              blueprints. Just honest play and stubborn grit.
-              <br className="mb-2" />
-              <span className="font-semibold gradient-text">
                 Every loss adds flavor.
               </span>{' '}
-              Every win feels earned. You cannot mass-produce skill; you have to
-              grow it one game at a time. That is what Free-Range TFT means to
-              us. No shortcuts. No excuses. Just solid boards, steady hearts,
-              and players who cook their own success. We play for the flavor.
+              Every win feels <span className="italic">earned.</span> You cannot
+              mass-produce skill; you have to grow it one game at a time. That
+              is what Free-Range TFT means to us. No shortcuts. No excuses. Just
+              solid boards, steady hearts, and players who cook their own
+              success. We play for the flavor.
             </p>
 
             <ul className="mt-4 space-y-3 text-foreground/90 max-w-3xl list-disc list-inside">
@@ -166,6 +164,7 @@ function App() {
       <section className="container pb-100!">
         <ScrollHighlight />
       </section>
+      <section className="container mb-20"></section>
     </main>
   )
 }

@@ -20,11 +20,11 @@ export function Heading({ level = 2, className, children }: HeadingProps) {
   const Tag: keyof JSX.IntrinsicElements = tagMap[level] ?? 'h2'
   const base =
     {
-      1: 'text-4xl sm:text-5xl font-semibold leading-tight tracking-tight',
-      2: 'text-2xl sm:text-3xl font-semibold tracking-tight',
-      3: 'text-xl font-semibold',
-      4: 'text-lg font-semibold',
-    }[level] ?? 'text-2xl font-semibold'
+      1: 'text-4xl sm:text-5xl font-semibold leading-tight w-fit tracking-tight gradient-text',
+      2: 'text-2xl sm:text-3xl font-semibold tracking-tight w-fit gradient-text',
+      3: 'text-xl font-semibold gradient-text w-fit',
+      4: 'text-lg font-semibold gradient-text w-fit',
+    }[level] ?? 'text-2xl font-semibold gradient-text w-fit'
   return <Tag className={classNames(base, className)}>{children}</Tag>
 }
 
@@ -35,9 +35,7 @@ type ParagraphProps = {
 
 export function Paragraph({ className, children }: ParagraphProps) {
   return (
-    <p className={classNames('text-base leading-7 text-foreground/90', className)}>
-      {children}
-    </p>
+    <p className={classNames('text-text leading-7', className)}>{children}</p>
   )
 }
 
@@ -48,9 +46,14 @@ type LeadProps = {
 
 export function Lead({ className, children }: LeadProps) {
   return (
-    <p className={classNames('text-lg text-muted-foreground', className)}>
-      {children}
-    </p>
+    <blockquote
+      className={classNames(
+        'text-lg text-text font-semibold bg-mantle rounded p-4 italic',
+        className,
+      )}
+    >
+      "{children}"
+    </blockquote>
   )
 }
 
@@ -63,8 +66,8 @@ type ListProps = {
 export function List({ ordered, className, children }: ListProps) {
   const Tag = ordered ? 'ol' : 'ul'
   const base = ordered
-    ? 'list-decimal space-y-2 pl-5 text-base leading-7 text-foreground/90'
-    : 'list-disc space-y-2 pl-5 text-base leading-7 text-foreground/90'
+    ? 'list-decimal space-y-2 pl-5 text-text leading-7'
+    : 'list-disc space-y-2 pl-5 text-text leading-7'
   return <Tag className={classNames(base, className)}>{children}</Tag>
 }
 
