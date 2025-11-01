@@ -1,11 +1,11 @@
 import { Link, createFileRoute } from '@tanstack/react-router'
 import { useMemo } from 'react'
 
-import LearnLayout from '../../components/LearnLayout'
+import DiscussionsLayout from '../../components/DiscussionsLayout'
 import { listPosts } from '../../content/posts'
 
-export const Route = createFileRoute('/learn/')({
-  component: LearnIndexPage,
+export const Route = createFileRoute('/discussions/')({
+  component: DiscussionsIndexPage,
 })
 
 const dateFormatter = new Intl.DateTimeFormat('en', {
@@ -14,7 +14,7 @@ const dateFormatter = new Intl.DateTimeFormat('en', {
   day: 'numeric',
 })
 
-function LearnIndexPage() {
+function DiscussionsIndexPage() {
   const posts = listPosts()
   const { tag } = Route.useSearch()
   const navigate = Route.useNavigate()
@@ -29,8 +29,8 @@ function LearnIndexPage() {
     : posts
 
   return (
-    <LearnLayout
-      title="Learn"
+    <DiscussionsLayout
+      title="Discussions"
       description="Long-form breakdowns, patch reflections, and cheat sheets. Everything here is written in React components so it stays easy to restyle or swap in interactive bits later."
       actions={
         tag ? (
@@ -38,7 +38,7 @@ function LearnIndexPage() {
             type="button"
             onClick={() =>
               navigate({
-                to: '/learn',
+                to: '/discussions',
                 search: () => ({ tag: undefined }),
                 replace: true,
               })
@@ -57,7 +57,7 @@ function LearnIndexPage() {
             return (
               <Link
                 key={availableTag}
-                to="/learn"
+                to="/discussions"
                 search={{ tag: isActive ? undefined : availableTag }}
                 className={`rounded-full border px-3 py-1 text-xs font-semibold transition ${
                   isActive
@@ -104,7 +104,7 @@ function LearnIndexPage() {
 
             <div className="mt-4">
               <Link
-                to="/learn/$slug"
+                to="/discussions/$slug"
                 params={{ slug: post.slug }}
                 search={{ tag }}
                 className="text-sm font-semibold text-primary hover:underline"
@@ -121,7 +121,6 @@ function LearnIndexPage() {
           </div>
         ) : null}
       </section>
-    </LearnLayout>
+    </DiscussionsLayout>
   )
 }
-

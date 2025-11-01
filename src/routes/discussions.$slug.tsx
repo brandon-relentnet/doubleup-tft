@@ -1,9 +1,9 @@
 import { createFileRoute } from '@tanstack/react-router'
 
 import { findPostBySlug } from '../content/posts'
-import LearnLayout from '../components/LearnLayout'
+import DiscussionsLayout from '../components/DiscussionsLayout'
 
-export const Route = createFileRoute('/learn/$slug')({
+export const Route = createFileRoute('/discussions/$slug')({
   component: BlogPostPage,
 })
 
@@ -20,20 +20,20 @@ function BlogPostPage() {
 
   if (!post) {
     return (
-      <LearnLayout
+      <DiscussionsLayout
         backTo={{
-          to: '/learn',
-          label: 'Back to learn',
+          to: '/discussions',
+          label: 'Back to discussions',
           search: { tag },
         }}
         title="Post not found"
         description="The blog entry you are looking for does not exist or has been moved."
       >
         <div className="rounded-xl border border-border bg-card px-6 py-8 text-muted-foreground">
-          Double-check the URL or head back to the learn page to browse the
-          latest strategy notes.
+          Double-check the URL or head back to the discussions page to browse
+          the latest strategy notes.
         </div>
-      </LearnLayout>
+      </DiscussionsLayout>
     )
   }
 
@@ -57,10 +57,10 @@ function BlogPostPage() {
   )
 
   return (
-    <LearnLayout
+    <DiscussionsLayout
       backTo={{
-        to: '/learn',
-        label: 'Back to learn',
+        to: '/discussions',
+        label: 'Back to discussions',
         search: { tag },
       }}
       title={title}
@@ -70,6 +70,6 @@ function BlogPostPage() {
       <article className="flex flex-col gap-6 text-base leading-7">
         <Content />
       </article>
-    </LearnLayout>
+    </DiscussionsLayout>
   )
 }

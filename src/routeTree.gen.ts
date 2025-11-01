@@ -9,14 +9,38 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as LearnRouteImport } from './routes/learn'
+import { Route as UnitsRouteImport } from './routes/units'
+import { Route as StrategiesRouteImport } from './routes/strategies'
+import { Route as ItemsRouteImport } from './routes/items'
+import { Route as DoubleupRouteImport } from './routes/doubleup'
+import { Route as DiscussionsRouteImport } from './routes/discussions'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as LearnIndexRouteImport } from './routes/learn/index'
-import { Route as LearnSlugRouteImport } from './routes/learn.$slug'
+import { Route as DiscussionsIndexRouteImport } from './routes/discussions/index'
+import { Route as DiscussionsSlugRouteImport } from './routes/discussions.$slug'
 
-const LearnRoute = LearnRouteImport.update({
-  id: '/learn',
-  path: '/learn',
+const UnitsRoute = UnitsRouteImport.update({
+  id: '/units',
+  path: '/units',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const StrategiesRoute = StrategiesRouteImport.update({
+  id: '/strategies',
+  path: '/strategies',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ItemsRoute = ItemsRouteImport.update({
+  id: '/items',
+  path: '/items',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DoubleupRoute = DoubleupRouteImport.update({
+  id: '/doubleup',
+  path: '/doubleup',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DiscussionsRoute = DiscussionsRouteImport.update({
+  id: '/discussions',
+  path: '/discussions',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -24,55 +48,123 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const LearnIndexRoute = LearnIndexRouteImport.update({
+const DiscussionsIndexRoute = DiscussionsIndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => LearnRoute,
+  getParentRoute: () => DiscussionsRoute,
 } as any)
-const LearnSlugRoute = LearnSlugRouteImport.update({
+const DiscussionsSlugRoute = DiscussionsSlugRouteImport.update({
   id: '/$slug',
   path: '/$slug',
-  getParentRoute: () => LearnRoute,
+  getParentRoute: () => DiscussionsRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/learn': typeof LearnRouteWithChildren
-  '/learn/$slug': typeof LearnSlugRoute
-  '/learn/': typeof LearnIndexRoute
+  '/discussions': typeof DiscussionsRouteWithChildren
+  '/doubleup': typeof DoubleupRoute
+  '/items': typeof ItemsRoute
+  '/strategies': typeof StrategiesRoute
+  '/units': typeof UnitsRoute
+  '/discussions/$slug': typeof DiscussionsSlugRoute
+  '/discussions/': typeof DiscussionsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/learn/$slug': typeof LearnSlugRoute
-  '/learn': typeof LearnIndexRoute
+  '/doubleup': typeof DoubleupRoute
+  '/items': typeof ItemsRoute
+  '/strategies': typeof StrategiesRoute
+  '/units': typeof UnitsRoute
+  '/discussions/$slug': typeof DiscussionsSlugRoute
+  '/discussions': typeof DiscussionsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/learn': typeof LearnRouteWithChildren
-  '/learn/$slug': typeof LearnSlugRoute
-  '/learn/': typeof LearnIndexRoute
+  '/discussions': typeof DiscussionsRouteWithChildren
+  '/doubleup': typeof DoubleupRoute
+  '/items': typeof ItemsRoute
+  '/strategies': typeof StrategiesRoute
+  '/units': typeof UnitsRoute
+  '/discussions/$slug': typeof DiscussionsSlugRoute
+  '/discussions/': typeof DiscussionsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/learn' | '/learn/$slug' | '/learn/'
+  fullPaths:
+    | '/'
+    | '/discussions'
+    | '/doubleup'
+    | '/items'
+    | '/strategies'
+    | '/units'
+    | '/discussions/$slug'
+    | '/discussions/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/learn/$slug' | '/learn'
-  id: '__root__' | '/' | '/learn' | '/learn/$slug' | '/learn/'
+  to:
+    | '/'
+    | '/doubleup'
+    | '/items'
+    | '/strategies'
+    | '/units'
+    | '/discussions/$slug'
+    | '/discussions'
+  id:
+    | '__root__'
+    | '/'
+    | '/discussions'
+    | '/doubleup'
+    | '/items'
+    | '/strategies'
+    | '/units'
+    | '/discussions/$slug'
+    | '/discussions/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  LearnRoute: typeof LearnRouteWithChildren
+  DiscussionsRoute: typeof DiscussionsRouteWithChildren
+  DoubleupRoute: typeof DoubleupRoute
+  ItemsRoute: typeof ItemsRoute
+  StrategiesRoute: typeof StrategiesRoute
+  UnitsRoute: typeof UnitsRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/learn': {
-      id: '/learn'
-      path: '/learn'
-      fullPath: '/learn'
-      preLoaderRoute: typeof LearnRouteImport
+    '/units': {
+      id: '/units'
+      path: '/units'
+      fullPath: '/units'
+      preLoaderRoute: typeof UnitsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/strategies': {
+      id: '/strategies'
+      path: '/strategies'
+      fullPath: '/strategies'
+      preLoaderRoute: typeof StrategiesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/items': {
+      id: '/items'
+      path: '/items'
+      fullPath: '/items'
+      preLoaderRoute: typeof ItemsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/doubleup': {
+      id: '/doubleup'
+      path: '/doubleup'
+      fullPath: '/doubleup'
+      preLoaderRoute: typeof DoubleupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/discussions': {
+      id: '/discussions'
+      path: '/discussions'
+      fullPath: '/discussions'
+      preLoaderRoute: typeof DiscussionsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -82,38 +174,44 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/learn/': {
-      id: '/learn/'
+    '/discussions/': {
+      id: '/discussions/'
       path: '/'
-      fullPath: '/learn/'
-      preLoaderRoute: typeof LearnIndexRouteImport
-      parentRoute: typeof LearnRoute
+      fullPath: '/discussions/'
+      preLoaderRoute: typeof DiscussionsIndexRouteImport
+      parentRoute: typeof DiscussionsRoute
     }
-    '/learn/$slug': {
-      id: '/learn/$slug'
+    '/discussions/$slug': {
+      id: '/discussions/$slug'
       path: '/$slug'
-      fullPath: '/learn/$slug'
-      preLoaderRoute: typeof LearnSlugRouteImport
-      parentRoute: typeof LearnRoute
+      fullPath: '/discussions/$slug'
+      preLoaderRoute: typeof DiscussionsSlugRouteImport
+      parentRoute: typeof DiscussionsRoute
     }
   }
 }
 
-interface LearnRouteChildren {
-  LearnSlugRoute: typeof LearnSlugRoute
-  LearnIndexRoute: typeof LearnIndexRoute
+interface DiscussionsRouteChildren {
+  DiscussionsSlugRoute: typeof DiscussionsSlugRoute
+  DiscussionsIndexRoute: typeof DiscussionsIndexRoute
 }
 
-const LearnRouteChildren: LearnRouteChildren = {
-  LearnSlugRoute: LearnSlugRoute,
-  LearnIndexRoute: LearnIndexRoute,
+const DiscussionsRouteChildren: DiscussionsRouteChildren = {
+  DiscussionsSlugRoute: DiscussionsSlugRoute,
+  DiscussionsIndexRoute: DiscussionsIndexRoute,
 }
 
-const LearnRouteWithChildren = LearnRoute._addFileChildren(LearnRouteChildren)
+const DiscussionsRouteWithChildren = DiscussionsRoute._addFileChildren(
+  DiscussionsRouteChildren,
+)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  LearnRoute: LearnRouteWithChildren,
+  DiscussionsRoute: DiscussionsRouteWithChildren,
+  DoubleupRoute: DoubleupRoute,
+  ItemsRoute: ItemsRoute,
+  StrategiesRoute: StrategiesRoute,
+  UnitsRoute: UnitsRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

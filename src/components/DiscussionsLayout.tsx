@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react'
 import { Link } from '@tanstack/react-router'
 
-type LearnLayoutProps = {
+type DiscussionsLayoutProps = {
   title: string
   description?: ReactNode
   children: ReactNode
@@ -14,14 +14,14 @@ type LearnLayoutProps = {
   actions?: ReactNode
 }
 
-export default function LearnLayout({
+export default function DiscussionsLayout({
   title,
   description,
   backTo,
   eyebrow,
   actions,
   children,
-}: LearnLayoutProps) {
+}: DiscussionsLayoutProps) {
   return (
     <div className="mx-auto flex w-full max-w-4xl flex-col gap-8 px-6 py-12 sm:gap-10">
       {backTo ? (
