@@ -25,15 +25,19 @@ export default function Header() {
         </h1>
         <button
           onClick={() => setIsOpen(true)}
-          className="p-2 ml-4 hover:bg-gray-700 rounded-lg transition-colors"
+          className="p-2 ml-4 hover:bg-bg-alt rounded-lg transition-colors"
           aria-label="Open menu"
         >
           <Menu size={24} />
         </button>
       </header>
 
+      <div
+        className={`bg-black/30 transition-opacity duration-250 absolute inset-0 h-full w-full z-25 ${isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+      />
+
       <aside
-        className={`fixed top-0 right-0 h-full w-80 bg-mantle shadow-2xl z-50 transform transition-transform duration-300 ease-in-out flex flex-col ${
+        className={`fixed top-0 right-0 h-full w-80 bg-bg-alt shadow-2xl z-50 transform transition-transform duration-300 ease-in-out flex flex-col ${
           isOpen ? 'translate-x-0' : 'translate-x-full'
         }`}
       >
@@ -65,7 +69,7 @@ export default function Header() {
               to={to}
               search={search}
               onClick={() => setIsOpen(false)}
-              className="flex items-center gap-3 p-3 rounded-lg hover:bg-crust transition-colors mb-2"
+              className="flex items-center gap-3 p-3 rounded-lg transition-colors mb-2"
               activeProps={{
                 className:
                   'flex items-center text-base hover:text-text gap-3 p-3 rounded-lg bg-accent transition-colors mb-2',
