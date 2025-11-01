@@ -20,6 +20,56 @@ export type BlogPost = {
 
 const posts: BlogPost[] = [
   {
+    slug: 'farm-fresh-tft',
+    title: 'Farm-Fresh TFT Fundamentals',
+    summary:
+      'A seasonal spotlight on how we cultivate adaptable boards without chasing copy-paste comps.',
+    date: '2025-02-10',
+    readTimeMinutes: 7,
+    tags: ['fundamentals', 'mindset'],
+    Content: () => (
+      <>
+        <Lead>
+          Free-range play is about tending your board like a small farm—rotate
+          crops, respect the soil, and harvest when the timing is right. Farm
+          Fresh TFT lays out the habits that keep our lineups crisp even when
+          the meta wilts.
+        </Lead>
+        <Paragraph>
+          Start by scouting the lobby every carousel. If everyone chases the
+          same 4-cost headliner, switch rows and let them fight over scraps.
+          Like any good harvest, diversification keeps you safe from blight.
+        </Paragraph>
+        <Paragraph>
+          Economy is your irrigation. Hold 30 gold whenever the board can
+          stomach it, then burst spend on key stages (3-2, 4-1, 5-1). Fertilize
+          those spikes with well-timed item slams—waiting for “perfect” best in
+          slot is the same as letting crops rot on the field.
+        </Paragraph>
+        <Heading level={2}>Daily Fieldwork</Heading>
+        <List>
+          <ListItem>
+            Rotate carries like crop cycles. Give the frontline a rest by
+            swapping to a secondary trait when shops dry up.
+          </ListItem>
+          <ListItem>
+            Track opponent win streaks and poke holes with Zephyr or Shroud.
+            We call it “pulling the weeds.”
+          </ListItem>
+          <ListItem>
+            Trade excess units with your Double Up partner so both boards stay
+            nourished.
+          </ListItem>
+        </List>
+        <Paragraph>
+          The goal is not perfection—it is sustainable growth. Play with
+          intention, sell the bruised produce, and celebrate every top 4 as a
+          basket of fresh tomatoes on the counter. That is farm fresh TFT.
+        </Paragraph>
+      </>
+    ),
+  },
+  {
     slug: 'welcome-to-doubleup',
     title: 'Welcome to DoubleUp TFT',
     summary:

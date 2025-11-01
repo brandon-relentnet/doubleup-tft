@@ -14,6 +14,7 @@ const quickLinks = [
     tidbit: 'Farm-Fresh Thoughts',
     description:
       'Get insights into our thoughts and feel free to participate in the conversation.',
+    search: { tag: undefined },
   },
   {
     to: '/items',
@@ -73,10 +74,10 @@ function App() {
 
                   <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200">
                     <div className="flex gap-2 w-full items-center justify-evenly px-4">
-                      <Link to={link.to} className="p-4">
+                      <Link to={link.to} search={link.search} className="p-4">
                         <User className="size-10" />
                       </Link>
-                      <Link to={`${link.to}`} className="p-4">
+                      <Link to={`${link.to}`} search={link.search} className="p-4">
                         <Users className="size-10" />
                       </Link>
                     </div>
@@ -138,13 +139,16 @@ function App() {
 
             <div className="mt-6 flex flex-wrap gap-3">
               <Link
-                to="/discussions"
+                to="/discussions/$slug"
+                params={{ slug: 'farm-fresh-tft' }}
+                search={{ tag: undefined }}
                 className="inline-flex items-center gap-2 bg-linear-to-r from-primary to-secondary text-base font-semibold px-4 py-2 rounded"
               >
                 Learn More
               </Link>
               <Link
-                to="/items"
+                to="/discussions"
+                search={{ tag: undefined }}
                 className="inline-flex items-center gap-2 border border-border px-4 py-2 rounded"
               >
                 See all discussions
