@@ -1,5 +1,3 @@
-import type { ReactNode } from 'react'
-
 import {
   Heading,
   Lead,
@@ -7,6 +5,7 @@ import {
   ListItem,
   Paragraph,
 } from '../components/typography'
+import type { ReactNode } from 'react'
 
 export type BlogPost = {
   slug: string
@@ -14,11 +13,11 @@ export type BlogPost = {
   summary: string
   date: string
   readTimeMinutes: number
-  tags?: string[]
+  tags?: Array<string>
   Content: () => ReactNode
 }
 
-const posts: BlogPost[] = [
+const posts: Array<BlogPost> = [
   {
     slug: 'farm-fresh-tft',
     title: 'Farm-Fresh TFT Fundamentals',

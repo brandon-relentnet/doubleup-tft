@@ -15,7 +15,7 @@ const dateFormatter = new Intl.DateTimeFormat('en', {
 
 function BlogPostPage() {
   const { slug } = Route.useParams()
-  const { tag } = Route.useSearch()
+  const { tag: activeTag } = Route.useSearch()
   const post = findPostBySlug(slug)
 
   if (!post) {
@@ -24,7 +24,7 @@ function BlogPostPage() {
         backTo={{
           to: '/discussions',
           label: 'Back to discussions',
-          search: { tag },
+          search: { tag: activeTag },
         }}
         title="Post not found"
         description="The blog entry you are looking for does not exist or has been moved."
@@ -44,12 +44,12 @@ function BlogPostPage() {
       <span>{dateFormatter.format(new Date(date))}</span>
       <span>{readTimeMinutes} min read</span>
       {tags?.length
-        ? tags.map((tag) => (
+        ? tags.map((badgeTag) => (
             <span
-              key={tag}
+              key={badgeTag}
               className="rounded-full bg-primary/10 px-2 py-0.5 text-[0.65rem] font-semibold text-primary"
             >
-              {tag}
+              {badgeTag}
             </span>
           ))
         : null}
@@ -61,13 +61,13 @@ function BlogPostPage() {
       backTo={{
         to: '/discussions',
         label: 'Back to discussions',
-        search: { tag },
+        search: { tag: activeTag },
       }}
       title={title}
       description={summary}
       eyebrow={eyebrow}
     >
-      <article className="flex flex-col gap-6 text-base leading-7">
+      <article className="flex flex-col gap-6 text-text leading-7">
         <Content />
       </article>
     </DiscussionsLayout>

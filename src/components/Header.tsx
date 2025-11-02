@@ -1,5 +1,4 @@
 import { Link } from '@tanstack/react-router'
-import { useState, type ComponentType } from 'react'
 import {
   Home,
   Menu,
@@ -9,6 +8,8 @@ import {
   Users,
   X,
 } from 'lucide-react'
+import { useState } from 'react'
+import type { ComponentType } from 'react'
 
 type NavItem = {
   to: string
@@ -17,7 +18,7 @@ type NavItem = {
   search?: Record<string, unknown> | undefined
 }
 
-const NAV_ITEMS: NavItem[] = [
+const NAV_ITEMS: Array<NavItem> = [
   { to: '/', icon: Home, label: 'Home' },
   {
     to: '/discussions',
@@ -37,8 +38,8 @@ export default function Header() {
     const Icon = item.icon
     const baseClass =
       variant === 'desktop'
-        ? 'flex items-center gap-2 hover:bg-crust p-2 rounded-lg text-sm transition-colors duration-200'
-        : 'flex items-center gap-3 hover:bg-crust mb-2 p-3 rounded-lg transition-colors duration-200'
+        ? 'flex items-center gap-2 hover:bg-highlight-low p-2 rounded-lg text-sm transition-colors duration-200'
+        : 'flex items-center gap-3 hover:bg-highlight-low mb-2 p-3 rounded-lg transition-colors duration-200'
     const activeClass =
       'flex items-center gap-2 p-2 rounded-lg bg-linear-to-r from-primary to-secondary text-base'
     const iconSize = variant === 'desktop' ? 18 : 20
@@ -78,7 +79,7 @@ export default function Header() {
         {/* Menu button for small screens */}
         <button
           onClick={() => setIsOpen(true)}
-          className="lg:hidden hover:bg-crust ml-4 p-2 rounded-lg transition-colors cursor-pointer"
+          className="lg:hidden hover:bg-highlight-low ml-4 p-2 rounded-lg transition-colors cursor-pointer"
           aria-label="Open menu"
         >
           <Menu size={24} />
@@ -103,7 +104,7 @@ export default function Header() {
           <h2 className="font-bold text-xl">Navigation</h2>
           <button
             onClick={() => setIsOpen(false)}
-            className="hover:bg-crust p-2 rounded-lg transition-colors cursor-pointer"
+            className="hover:bg-highlight-low p-2 rounded-lg transition-colors cursor-pointer"
             aria-label="Close menu"
           >
             <X size={24} />

@@ -5,7 +5,7 @@ import { useState } from 'react'
 export default function TypewriterChangeContentExample({
   text = ['Best in Slot', 'Economy', 'Luck', 'Meta', 'Elo Hell'],
 }: {
-  text?: string[]
+  text?: Array<string>
 }) {
   const [index, setIndex] = useState(0)
 
@@ -29,7 +29,7 @@ export default function TypewriterChangeContentExample({
       </Typewriter>
 
       {/* Tagline */}
-      <span className="text-md sm:text-xl lg:text-2xl font-semibold text-subtext-0">
+      <span className="text-md sm:text-xl lg:text-2xl font-semibold text-muted">
         is{' '}
         <span className="italic text-2xl sm:text-3xl font-bold lg:text-4xl text-text">
           Fake.

@@ -1,6 +1,7 @@
-import { motion } from 'motion/react'
 import { Link } from '@tanstack/react-router'
-import { useState, type Dispatch, type SetStateAction } from 'react'
+import { motion } from 'motion/react'
+import { useState } from 'react'
+import type { Dispatch, SetStateAction } from 'react'
 
 interface Skill {
   name: string
@@ -13,7 +14,7 @@ interface Skill {
   }
 }
 
-const skills: Skill[] = [
+const skills: Array<Skill> = [
   {
     name: 'BLT Theory',
     subtitle: 'Why this site exists',
@@ -100,7 +101,7 @@ function ScrollHighlightItem({
           {skill.name}
         </span>
         {skill.subtitle ? (
-          <div className="mt-3 text-subtext-0 italic text-2xl font-semibold">
+          <div className="mt-3 text-muted italic text-2xl font-semibold">
             {skill.subtitle}
           </div>
         ) : null}

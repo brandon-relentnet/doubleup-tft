@@ -16,7 +16,7 @@ const dateFormatter = new Intl.DateTimeFormat('en', {
 
 function DiscussionsIndexPage() {
   const posts = listPosts()
-  const { tag } = Route.useSearch()
+  const { tag: activeTag } = Route.useSearch()
   const navigate = Route.useNavigate()
   const allTags = useMemo(() => {
     const unique = new Set<string>()
@@ -24,8 +24,8 @@ function DiscussionsIndexPage() {
     return Array.from(unique).sort((a, b) => a.localeCompare(b))
   }, [posts])
 
-  const filteredPosts = tag
-    ? posts.filter((post) => post.tags?.includes(tag))
+  const filteredPosts = activeTag
+    ? posts.filter((post) => post.tags?.includes(activeTag))
     : posts
 
   return (
@@ -33,7 +33,7 @@ function DiscussionsIndexPage() {
       title="Discussions"
       description="Long-form breakdowns, patch reflections, and cheat sheets. Everything here is written in React components so it stays easy to restyle or swap in interactive bits later."
       actions={
-        tag ? (
+        activeTag ? (
           <button
             type="button"
             onClick={() =>
@@ -53,7 +53,7 @@ function DiscussionsIndexPage() {
       {allTags.length ? (
         <div className="flex flex-wrap gap-2">
           {allTags.map((availableTag) => {
-            const isActive = availableTag === tag
+            const isActive = availableTag === activeTag
             return (
               <Link
                 key={availableTag}
@@ -83,12 +83,12 @@ function DiscussionsIndexPage() {
               <span>{post.readTimeMinutes} min read</span>
               {post.tags?.length ? (
                 <span className="flex gap-2">
-                  {post.tags.map((tag) => (
+                  {post.tags.map((badgeTag) => (
                     <span
-                      key={tag}
+                      key={badgeTag}
                       className="rounded-full bg-primary/10 px-2 py-0.5 text-[0.65rem] font-semibold text-primary"
                     >
-                      {tag}
+                      {badgeTag}
                     </span>
                   ))}
                 </span>
@@ -98,15 +98,13 @@ function DiscussionsIndexPage() {
             <h2 className="mt-3 text-2xl font-semibold tracking-tight">
               {post.title}
             </h2>
-            <p className="mt-2 text-base text-muted-foreground">
-              {post.summary}
-            </p>
+            <p className="mt-2 text-muted">{post.summary}</p>
 
             <div className="mt-4">
               <Link
                 to="/discussions/$slug"
                 params={{ slug: post.slug }}
-                search={{ tag }}
+                search={{ tag: activeTag }}
                 className="text-sm font-semibold text-primary hover:underline"
               >
                 Read post →

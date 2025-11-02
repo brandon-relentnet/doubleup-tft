@@ -1,7 +1,8 @@
+import * as motion from 'motion/react-client'
+import { ArrowRight, User, Users } from 'lucide-react'
+import { Link, createFileRoute } from '@tanstack/react-router'
 import ScrollHighlight from '@/components/ScrollHighlight'
 import TypewriterChangeContentExample from '@/components/Typewriter'
-import { createFileRoute, Link } from '@tanstack/react-router'
-import { User, Users, ArrowRight } from 'lucide-react'
 
 export const Route = createFileRoute('/')({
   component: App,
@@ -59,7 +60,7 @@ function App() {
               {quickLinks.map((link) => (
                 <div
                   key={link.to}
-                  className="group relative flex-1 bg-surface-0 p-4 rounded overflow-hidden transition-all hover:-translate-y-1 duration-200"
+                  className="group relative flex-1 bg-surface p-4 rounded overflow-hidden transition-all hover:-translate-y-1 duration-200"
                 >
                   <span className="font-semibold text-lg gradient-text">
                     {link.label}
@@ -128,7 +129,7 @@ function App() {
               <Link
                 to="/discussions"
                 search={{ tag: undefined }}
-                className="group inline-flex items-center text-subtext-0 hover:text-accent transition duration-200"
+                className="group inline-flex items-center text-muted hover:text-accent transition duration-200"
               >
                 See all discussions
                 <ArrowRight className="opacity-0 group-hover:opacity-100 mb-1 ml-2 size-4 transition -translate-x-5 group-hover:translate-x-1 duration-200" />
@@ -143,10 +144,66 @@ function App() {
           />
         </div>
       </section>
-      <section className="pb-100! container">
+      <section className="container">
         <ScrollHighlight />
       </section>
-      <section className="mb-20 container"></section>
+      <section className="container !pb-200">
+        <div className="rounded bg-surface px-8 py-12">
+          <div className="flex flex-col gap-8 lg:flex-row lg:items-center lg:justify-between">
+            <div className="max-w-xl space-y-4">
+              <span className="text-xs font-semibold uppercase w-fit tracking-[0.35em] gradient-text">
+                Fresh From The Coop
+              </span>
+              <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-balance">
+                Get Free-Range TFT field notes and farm tips in your inbox.
+              </h2>
+              <p className="text-lg text-subtle">
+                Subscribe and receive weekly harvest reports, reroll recipes,
+                and mindset resets made for players who grow their own
+                victories. No recycled meta, only honest produce.
+              </p>
+            </div>
+
+            <div className="w-full max-w-md">
+              <form className="flex flex-col gap-3" noValidate>
+                <label htmlFor="coop-email" className="sr-only">
+                  Email address
+                </label>
+                <input
+                  id="coop-email"
+                  name="email"
+                  type="email"
+                  placeholder="you@example.com"
+                  className="w-full rounded-xl border border-highlight-high bg-surface px-4 py-3 text-text outline-none transition focus:border-accent focus:ring-2 focus:ring-accent/40"
+                />
+                <div className="flex flex-wrap gap-3">
+                  <motion.button
+                    type="submit"
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.9 }}
+                    className="inline-flex flex-1 items-center justify-center gap-2 rounded-xl bg-linear-to-r from-primary to-secondary px-5 py-3 font-semibold text-base"
+                  >
+                    Join Newsletter
+                  </motion.button>
+                  <Link to="/discussions" search={{ tag: undefined }}>
+                    <motion.div
+                      whileHover={{ scale: 1.1 }}
+                      whileTap={{ x: 10 }}
+                      className="rounded-xl border border-border px-5 py-3 font-semibold text-muted"
+                    >
+                      Browse Discussions
+                    </motion.div>
+                  </Link>
+                </div>
+                <p className="text-xs text-muted">
+                  Coming soon: tailor your harvest log, sync duo progress, and
+                  share your own pasture reports.
+                </p>
+              </form>
+            </div>
+          </div>
+        </div>
+      </section>
     </main>
   )
 }
