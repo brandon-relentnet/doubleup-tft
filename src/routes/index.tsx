@@ -132,7 +132,7 @@ function App() {
                 className="group inline-flex items-center text-muted hover:text-accent transition duration-200"
               >
                 See all discussions
-                <ArrowRight className="opacity-0 group-hover:opacity-100 mb-1 ml-2 size-4 transition -translate-x-5 group-hover:translate-x-1 duration-200" />
+                <ArrowRight className="opacity-0 group-hover:opacity-100 size-4 transition -translate-x-5 group-hover:translate-x-1 duration-200" />
               </Link>
             </div>
           </div>
@@ -147,10 +147,10 @@ function App() {
       <section className="container">
         <ScrollHighlight />
       </section>
-      <section className="container !pb-200">
+      <section className="container">
         <div className="rounded bg-surface px-8 py-12">
           <div className="flex flex-col gap-8 lg:flex-row lg:items-center lg:justify-between">
-            <div className="max-w-xl space-y-4">
+            <div className="max-w-xl space-y-4 mx-auto lg:mx-0 text-center lg:text-left">
               <span className="text-xs font-semibold uppercase w-fit tracking-[0.35em] gradient-text">
                 Fresh From The Coop
               </span>
@@ -164,7 +164,7 @@ function App() {
               </p>
             </div>
 
-            <div className="w-full max-w-md">
+            <div className="w-full max-w-md mx-auto lg:mx-0">
               <form className="flex flex-col gap-3" noValidate>
                 <label htmlFor="coop-email" className="sr-only">
                   Email address
