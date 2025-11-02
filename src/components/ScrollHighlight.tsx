@@ -1,14 +1,16 @@
-'use client'
-
 import { motion } from 'motion/react'
 import { Link } from '@tanstack/react-router'
-import { useState } from 'react'
+import { useState, type Dispatch, type SetStateAction } from 'react'
 
 interface Skill {
   name: string
   subtitle?: string
   description?: string
   image?: string
+  cta?: {
+    slug: string
+    label: string
+  }
 }
 
 const skills: Skill[] = [
@@ -60,6 +62,10 @@ const skills: Skill[] = [
     image: '/blt_pengu_blt.png',
     description:
       'Balance turns understanding into results. If one part takes everything, the others fail. Keep your board sturdy, your health fresh, your gold purposeful, and your focus steady. That is how consistency forms, and that is farm fresh TFT.',
+    cta: {
+      slug: 'blt-theory',
+      label: 'BLT Theory',
+    },
   },
 ]
 
@@ -72,7 +78,7 @@ function ScrollHighlightItem({
   skill: Skill
   index: number
   isHighlighted: boolean
-  onHighlight: (index: number) => void
+  onHighlight: Dispatch<SetStateAction<number | null>>
 }) {
   return (
     <motion.li
@@ -103,16 +109,16 @@ function ScrollHighlightItem({
             {skill.description}
           </div>
         ) : null}
-        {skill.name === 'Conclusion' ? (
+        {skill.cta ? (
           <div className="mt-2 text-xl leading-relaxed max-w-3xl text-text text-center lg:text-left">
-            Learn more about the BLT Theory here:{' '}
+            Learn more here:{' '}
             <Link
               to="/discussions/$slug"
-              params={{ slug: 'blt-theory' }}
+              params={{ slug: skill.cta.slug }}
               search={{ tag: undefined }}
               className="underline"
             >
-              BLT Theory
+              {skill.cta.label}
             </Link>
           </div>
         ) : null}
@@ -133,7 +139,7 @@ export default function ScrollHighlight() {
             skill={skill}
             index={index}
             isHighlighted={activeSkill === index}
-            onHighlight={() => setActiveSkill(index)}
+            onHighlight={setActiveSkill}
           />
         ))}
       </ul>

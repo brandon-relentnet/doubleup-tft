@@ -72,19 +72,15 @@ function App() {
                     {/**<p>{link.description}</p>**/}
                   </div>
 
-                  <div className="absolute inset-0 flex justify-center items-center opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                    <div className="flex justify-evenly items-center gap-2 px-4 w-full">
-                      <Link to={link.to} search={link.search} className="p-4">
-                        <User className="size-10" />
-                      </Link>
-                      <Link
-                        to={`${link.to}`}
-                        search={link.search}
-                        className="p-4"
-                      >
-                        <Users className="size-10" />
-                      </Link>
-                    </div>
+                  <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                    <Link
+                      to={link.to}
+                      search={link.search}
+                      className="flex w-full items-center justify-evenly gap-4 rounded-lg px-4 py-3"
+                    >
+                      <User className="size-10" />
+                      <Users className="size-10" />
+                    </Link>
                   </div>
                 </div>
               ))}

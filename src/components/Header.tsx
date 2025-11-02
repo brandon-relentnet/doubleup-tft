@@ -1,5 +1,5 @@
 import { Link } from '@tanstack/react-router'
-import { useState } from 'react'
+import { useState, type ComponentType } from 'react'
 import {
   Home,
   Menu,
@@ -12,7 +12,7 @@ import {
 
 type NavItem = {
   to: string
-  icon: React.ComponentType<{ size?: number }>
+  icon: ComponentType<{ size?: number }>
   label: string
   search?: Record<string, unknown> | undefined
 }
@@ -33,6 +33,33 @@ const NAV_ITEMS: NavItem[] = [
 export default function Header() {
   const [isOpen, setIsOpen] = useState(false)
 
+  const renderNavLink = (item: NavItem, variant: 'desktop' | 'mobile') => {
+    const Icon = item.icon
+    const baseClass =
+      variant === 'desktop'
+        ? 'flex items-center gap-2 hover:bg-crust p-2 rounded-lg text-sm transition-colors duration-200'
+        : 'flex items-center gap-3 hover:bg-crust mb-2 p-3 rounded-lg transition-colors duration-200'
+    const activeClass =
+      'flex items-center gap-2 p-2 rounded-lg bg-linear-to-r from-primary to-secondary text-base'
+    const iconSize = variant === 'desktop' ? 18 : 20
+    const handleClick =
+      variant === 'mobile' ? () => setIsOpen(false) : undefined
+
+    return (
+      <Link
+        key={item.to}
+        to={item.to}
+        search={item.search}
+        className={baseClass}
+        activeProps={{ className: activeClass }}
+        onClick={handleClick}
+      >
+        <Icon size={iconSize} />
+        <span className="font-medium">{item.label}</span>
+      </Link>
+    )
+  }
+
   return (
     <>
       <div className="w-full h-20" />
@@ -45,21 +72,7 @@ export default function Header() {
 
         {/* Inline navbar for lg+ */}
         <nav className="hidden lg:flex items-center gap-3">
-          {NAV_ITEMS.map(({ to, icon: Icon, label, search }) => (
-            <Link
-              key={to}
-              to={to}
-              search={search}
-              className="flex items-center gap-2 hover:bg-crust p-2 rounded-lg text-sm transition-colors duration-200"
-              activeProps={{
-                className:
-                  'flex items-center gap-2 p-2 rounded-lg bg-linear-to-r from-primary to-secondary text-base',
-              }}
-            >
-              <Icon size={18} />
-              <span className="font-medium">{label}</span>
-            </Link>
-          ))}
+          {NAV_ITEMS.map((item) => renderNavLink(item, 'desktop'))}
         </nav>
 
         {/* Menu button for small screens */}
@@ -97,22 +110,7 @@ export default function Header() {
           </button>
         </div>
         <nav className="flex-1 p-4 overflow-y-auto">
-          {NAV_ITEMS.map(({ to, icon: Icon, label, search }) => (
-            <Link
-              key={to}
-              to={to}
-              search={search}
-              onClick={() => setIsOpen(false)}
-              className="flex items-center gap-3 hover:bg-crust mb-2 p-3 rounded-lg transition-colors duration-200"
-              activeProps={{
-                className:
-                  'flex items-center gap-2 p-2 rounded-lg bg-linear-to-r from-primary to-secondary text-base',
-              }}
-            >
-              <Icon size={20} />
-              <span className="font-medium">{label}</span>
-            </Link>
-          ))}
+          {NAV_ITEMS.map((item) => renderNavLink(item, 'mobile'))}
         </nav>
       </aside>
     </>
