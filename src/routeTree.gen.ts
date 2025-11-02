@@ -11,10 +11,10 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as UnitsRouteImport } from './routes/units'
 import { Route as StrategiesRouteImport } from './routes/strategies'
-import { Route as LoginRouteImport } from './routes/login'
 import { Route as ItemsRouteImport } from './routes/items'
 import { Route as DoubleupRouteImport } from './routes/doubleup'
 import { Route as DiscussionsRouteImport } from './routes/discussions'
+import { Route as AccountRouteImport } from './routes/account'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as DiscussionsIndexRouteImport } from './routes/discussions/index'
 import { Route as DiscussionsSlugRouteImport } from './routes/discussions.$slug'
@@ -27,11 +27,6 @@ const UnitsRoute = UnitsRouteImport.update({
 const StrategiesRoute = StrategiesRouteImport.update({
   id: '/strategies',
   path: '/strategies',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const LoginRoute = LoginRouteImport.update({
-  id: '/login',
-  path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ItemsRoute = ItemsRouteImport.update({
@@ -47,6 +42,11 @@ const DoubleupRoute = DoubleupRouteImport.update({
 const DiscussionsRoute = DiscussionsRouteImport.update({
   id: '/discussions',
   path: '/discussions',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AccountRoute = AccountRouteImport.update({
+  id: '/account',
+  path: '/account',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -67,10 +67,10 @@ const DiscussionsSlugRoute = DiscussionsSlugRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/account': typeof AccountRoute
   '/discussions': typeof DiscussionsRouteWithChildren
   '/doubleup': typeof DoubleupRoute
   '/items': typeof ItemsRoute
-  '/login': typeof LoginRoute
   '/strategies': typeof StrategiesRoute
   '/units': typeof UnitsRoute
   '/discussions/$slug': typeof DiscussionsSlugRoute
@@ -78,9 +78,9 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/account': typeof AccountRoute
   '/doubleup': typeof DoubleupRoute
   '/items': typeof ItemsRoute
-  '/login': typeof LoginRoute
   '/strategies': typeof StrategiesRoute
   '/units': typeof UnitsRoute
   '/discussions/$slug': typeof DiscussionsSlugRoute
@@ -89,10 +89,10 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/account': typeof AccountRoute
   '/discussions': typeof DiscussionsRouteWithChildren
   '/doubleup': typeof DoubleupRoute
   '/items': typeof ItemsRoute
-  '/login': typeof LoginRoute
   '/strategies': typeof StrategiesRoute
   '/units': typeof UnitsRoute
   '/discussions/$slug': typeof DiscussionsSlugRoute
@@ -102,10 +102,10 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/account'
     | '/discussions'
     | '/doubleup'
     | '/items'
-    | '/login'
     | '/strategies'
     | '/units'
     | '/discussions/$slug'
@@ -113,9 +113,9 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/account'
     | '/doubleup'
     | '/items'
-    | '/login'
     | '/strategies'
     | '/units'
     | '/discussions/$slug'
@@ -123,10 +123,10 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/account'
     | '/discussions'
     | '/doubleup'
     | '/items'
-    | '/login'
     | '/strategies'
     | '/units'
     | '/discussions/$slug'
@@ -135,10 +135,10 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AccountRoute: typeof AccountRoute
   DiscussionsRoute: typeof DiscussionsRouteWithChildren
   DoubleupRoute: typeof DoubleupRoute
   ItemsRoute: typeof ItemsRoute
-  LoginRoute: typeof LoginRoute
   StrategiesRoute: typeof StrategiesRoute
   UnitsRoute: typeof UnitsRoute
 }
@@ -157,13 +157,6 @@ declare module '@tanstack/react-router' {
       path: '/strategies'
       fullPath: '/strategies'
       preLoaderRoute: typeof StrategiesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/login': {
-      id: '/login'
-      path: '/login'
-      fullPath: '/login'
-      preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/items': {
@@ -185,6 +178,13 @@ declare module '@tanstack/react-router' {
       path: '/discussions'
       fullPath: '/discussions'
       preLoaderRoute: typeof DiscussionsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/account': {
+      id: '/account'
+      path: '/account'
+      fullPath: '/account'
+      preLoaderRoute: typeof AccountRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -227,10 +227,10 @@ const DiscussionsRouteWithChildren = DiscussionsRoute._addFileChildren(
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AccountRoute: AccountRoute,
   DiscussionsRoute: DiscussionsRouteWithChildren,
   DoubleupRoute: DoubleupRoute,
   ItemsRoute: ItemsRoute,
-  LoginRoute: LoginRoute,
   StrategiesRoute: StrategiesRoute,
   UnitsRoute: UnitsRoute,
 }
