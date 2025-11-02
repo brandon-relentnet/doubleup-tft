@@ -69,7 +69,7 @@ function App() {
                     <span className="block mb-4 text-md italic">
                       {link.tidbit}
                     </span>
-                    {/**<p>{link.description}</p>**/}
+                    <p>{link.description}</p>
                   </div>
 
                   <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200">
