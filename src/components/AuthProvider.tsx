@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useMemo, useState } from 'react'
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
 import { supabase } from '../lib/supabaseClient'
 import type { ReactNode } from 'react'
 import type { Session, User } from '@supabase/supabase-js'
@@ -7,22 +7,28 @@ type AuthContextValue = {
   user: User | null
   session: Session | null
   loading: boolean
+  isPasswordRecovery: boolean
+  resolvePasswordRecovery: () => void
 }
 
 const AuthContext = createContext<AuthContextValue>({
   user: null,
   session: null,
   loading: !supabase,
+  isPasswordRecovery: false,
+  resolvePasswordRecovery: () => {},
 })
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null)
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState<boolean>(Boolean(supabase))
+  const [isPasswordRecovery, setIsPasswordRecovery] = useState(false)
 
   useEffect(() => {
     if (!supabase) {
       setLoading(false)
+      setIsPasswordRecovery(false)
       return
     }
 
@@ -35,20 +41,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setSession(data.session)
         setUser(data.session?.user ?? null)
         setLoading(false)
+        setIsPasswordRecovery(false)
       })
       .catch(() => {
         if (isMounted) {
           setLoading(false)
+          setIsPasswordRecovery(false)
         }
       })
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, nextSession) => {
+    } = supabase.auth.onAuthStateChange((event, nextSession) => {
       if (!isMounted) return
       setSession(nextSession)
       setUser(nextSession?.user ?? null)
       setLoading(false)
+      setIsPasswordRecovery(event === 'PASSWORD_RECOVERY')
     })
 
     return () => {
@@ -57,13 +66,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [])
 
+  const resolvePasswordRecovery = useCallback(() => setIsPasswordRecovery(false), [])
+
   const value = useMemo(
     () => ({
       user,
       session,
       loading,
+      isPasswordRecovery,
+      resolvePasswordRecovery,
     }),
-    [loading, session, user],
+    [loading, session, user, isPasswordRecovery, resolvePasswordRecovery],
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

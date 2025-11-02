@@ -18,6 +18,7 @@ import { Route as AccountRouteImport } from './routes/account'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as DiscussionsIndexRouteImport } from './routes/discussions/index'
 import { Route as DiscussionsSlugRouteImport } from './routes/discussions.$slug'
+import { Route as AccountVerifyRouteImport } from './routes/account.verify'
 
 const UnitsRoute = UnitsRouteImport.update({
   id: '/units',
@@ -64,37 +65,45 @@ const DiscussionsSlugRoute = DiscussionsSlugRouteImport.update({
   path: '/$slug',
   getParentRoute: () => DiscussionsRoute,
 } as any)
+const AccountVerifyRoute = AccountVerifyRouteImport.update({
+  id: '/verify',
+  path: '/verify',
+  getParentRoute: () => AccountRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/account': typeof AccountRoute
+  '/account': typeof AccountRouteWithChildren
   '/discussions': typeof DiscussionsRouteWithChildren
   '/doubleup': typeof DoubleupRoute
   '/items': typeof ItemsRoute
   '/strategies': typeof StrategiesRoute
   '/units': typeof UnitsRoute
+  '/account/verify': typeof AccountVerifyRoute
   '/discussions/$slug': typeof DiscussionsSlugRoute
   '/discussions/': typeof DiscussionsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/account': typeof AccountRoute
+  '/account': typeof AccountRouteWithChildren
   '/doubleup': typeof DoubleupRoute
   '/items': typeof ItemsRoute
   '/strategies': typeof StrategiesRoute
   '/units': typeof UnitsRoute
+  '/account/verify': typeof AccountVerifyRoute
   '/discussions/$slug': typeof DiscussionsSlugRoute
   '/discussions': typeof DiscussionsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/account': typeof AccountRoute
+  '/account': typeof AccountRouteWithChildren
   '/discussions': typeof DiscussionsRouteWithChildren
   '/doubleup': typeof DoubleupRoute
   '/items': typeof ItemsRoute
   '/strategies': typeof StrategiesRoute
   '/units': typeof UnitsRoute
+  '/account/verify': typeof AccountVerifyRoute
   '/discussions/$slug': typeof DiscussionsSlugRoute
   '/discussions/': typeof DiscussionsIndexRoute
 }
@@ -108,6 +117,7 @@ export interface FileRouteTypes {
     | '/items'
     | '/strategies'
     | '/units'
+    | '/account/verify'
     | '/discussions/$slug'
     | '/discussions/'
   fileRoutesByTo: FileRoutesByTo
@@ -118,6 +128,7 @@ export interface FileRouteTypes {
     | '/items'
     | '/strategies'
     | '/units'
+    | '/account/verify'
     | '/discussions/$slug'
     | '/discussions'
   id:
@@ -129,13 +140,14 @@ export interface FileRouteTypes {
     | '/items'
     | '/strategies'
     | '/units'
+    | '/account/verify'
     | '/discussions/$slug'
     | '/discussions/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  AccountRoute: typeof AccountRoute
+  AccountRoute: typeof AccountRouteWithChildren
   DiscussionsRoute: typeof DiscussionsRouteWithChildren
   DoubleupRoute: typeof DoubleupRoute
   ItemsRoute: typeof ItemsRoute
@@ -208,8 +220,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DiscussionsSlugRouteImport
       parentRoute: typeof DiscussionsRoute
     }
+    '/account/verify': {
+      id: '/account/verify'
+      path: '/verify'
+      fullPath: '/account/verify'
+      preLoaderRoute: typeof AccountVerifyRouteImport
+      parentRoute: typeof AccountRoute
+    }
   }
 }
+
+interface AccountRouteChildren {
+  AccountVerifyRoute: typeof AccountVerifyRoute
+}
+
+const AccountRouteChildren: AccountRouteChildren = {
+  AccountVerifyRoute: AccountVerifyRoute,
+}
+
+const AccountRouteWithChildren =
+  AccountRoute._addFileChildren(AccountRouteChildren)
 
 interface DiscussionsRouteChildren {
   DiscussionsSlugRoute: typeof DiscussionsSlugRoute
@@ -227,7 +257,7 @@ const DiscussionsRouteWithChildren = DiscussionsRoute._addFileChildren(
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  AccountRoute: AccountRoute,
+  AccountRoute: AccountRouteWithChildren,
   DiscussionsRoute: DiscussionsRouteWithChildren,
   DoubleupRoute: DoubleupRoute,
   ItemsRoute: ItemsRoute,

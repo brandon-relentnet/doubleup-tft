@@ -10,15 +10,29 @@ export const Route = createFileRoute('/account')({
 
 type Mode = 'signIn' | 'signUp'
 
-function AccountPage() {
-  const { user, loading } = useAuth()
+type AsyncStatus = 'idle' | 'submitting' | 'success'
+
+export default function AccountPage() {
+  const navigate = Route.useNavigate()
+  const { user, loading, isPasswordRecovery, resolvePasswordRecovery } = useAuth()
+  const supabaseClient = supabase
+
   const [mode, setMode] = useState<Mode>('signIn')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [error, setError] = useState<string | null>(null)
-  const [status, setStatus] = useState<'idle' | 'submitting' | 'success'>('idle')
+  const [authError, setAuthError] = useState<string | null>(null)
+  const [authStatus, setAuthStatus] = useState<AsyncStatus>('idle')
+  const [authMessage, setAuthMessage] = useState<string | null>(null)
 
-  const supabaseClient = supabase
+  const [resetStatus, setResetStatus] = useState<AsyncStatus>('idle')
+  const [resetError, setResetError] = useState<string | null>(null)
+  const [resetMessage, setResetMessage] = useState<string | null>(null)
+
+  const [newPassword, setNewPassword] = useState('')
+  const [confirmNewPassword, setConfirmNewPassword] = useState('')
+  const [passwordStatus, setPasswordStatus] = useState<AsyncStatus>('idle')
+  const [passwordError, setPasswordError] = useState<string | null>(null)
+  const [passwordMessage, setPasswordMessage] = useState<string | null>(null)
 
   if (!supabaseClient) {
     return (
@@ -26,56 +40,116 @@ function AccountPage() {
         <div className="w-full max-w-md space-y-6 rounded-3xl border border-border bg-surface px-8 py-10 text-center shadow-lg shadow-black/10">
           <h1 className="text-2xl font-extrabold tracking-tight">Supabase not configured</h1>
           <p className="text-sm text-muted">
-            Set <code>VITE_SUPABASE_URL</code> and <code>VITE_SUPABASE_ANON_KEY</code> in your environment to enable
-            account management.
+            Set <code>VITE_SUPABASE_URL</code> and <code>VITE_SUPABASE_ANON_KEY</code> to enable account management.
           </p>
         </div>
       </main>
     )
   }
 
-  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+  const handleSignInOrUp = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
-    setError(null)
-    setStatus('submitting')
+    setAuthError(null)
+    setAuthMessage(null)
 
+    if (!email || !password) {
+      setAuthError('Please provide both email and password.')
+      return
+    }
+
+    setAuthStatus('submitting')
     try {
       if (mode === 'signIn') {
-        const { error: signInError } = await supabaseClient.auth.signInWithPassword({
-          email,
-          password,
-        })
-        if (signInError) throw signInError
+        const { error } = await supabaseClient.auth.signInWithPassword({ email, password })
+        if (error) throw error
+        setAuthMessage('Signed in successfully.')
+        setPassword('')
       } else {
-        const { error: signUpError } = await supabaseClient.auth.signUp({
-          email,
-          password,
+        const targetEmail = email
+        const { error } = await supabaseClient.auth.signUp({ email, password })
+        if (error) throw error
+        setEmail('')
+        setPassword('')
+        setAuthMessage('Check your inbox to confirm your account.')
+        navigate({
+          to: '/account/verify',
+          search: { email: targetEmail },
         })
-        if (signUpError) throw signUpError
+        return
       }
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Unable to process request. Please try again.'
+      setAuthError(message)
+    } finally {
+      setAuthStatus('idle')
+    }
+  }
 
-      setStatus('success')
-      setEmail('')
-      setPassword('')
-    } catch (authError: unknown) {
-      const message = authError instanceof Error ? authError.message : 'Unable to process request. Please try again.'
-      setError(message)
-      setStatus('idle')
+  const handlePasswordReset = async () => {
+    setResetError(null)
+    setResetMessage(null)
+    if (!email) {
+      setResetError('Enter the email associated with your account first.')
+      return
+    }
+
+    setResetStatus('submitting')
+    try {
+      const { error } = await supabaseClient.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/account`,
+      })
+      if (error) throw error
+      setResetMessage('Password reset email sent. Check your inbox for further instructions.')
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Unable to send reset email. Please try again.'
+      setResetError(message)
+    } finally {
+      setResetStatus('idle')
+    }
+  }
+
+  const handlePasswordUpdate = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    setPasswordError(null)
+    setPasswordMessage(null)
+
+    if (!newPassword || newPassword.length < 6) {
+      setPasswordError('Password must be at least 6 characters long.')
+      return
+    }
+
+    if (newPassword !== confirmNewPassword) {
+      setPasswordError('Passwords do not match.')
+      return
+    }
+
+    setPasswordStatus('submitting')
+    try {
+      const { error } = await supabaseClient.auth.updateUser({ password: newPassword })
+      if (error) throw error
+      setPasswordMessage('Password updated successfully.')
+      setNewPassword('')
+      setConfirmNewPassword('')
+      resolvePasswordRecovery()
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Unable to update password. Please try again.'
+      setPasswordError(message)
+    } finally {
+      setPasswordStatus('idle')
     }
   }
 
   if (!loading && user) {
-    const lastSignInAt = user.last_sign_in_at
     return (
       <main className="container px-4 py-16 sm:px-6 lg:px-8">
         <div className="grid gap-8 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
-          <section className="space-y-6 rounded-3xl border border-border bg-surface px-8 py-10 shadow-lg shadow-black/10">
-            <div className="space-y-2">
+          <section className="space-y-8 rounded-3xl border border-border bg-surface px-8 py-10 shadow-lg shadow-black/10">
+            <div className="space-y-3">
               <p className="text-xs uppercase tracking-[0.35em] text-subtext-0">Account</p>
               <h1 className="text-3xl font-extrabold tracking-tight">Your coop profile</h1>
               <p className="text-sm text-muted">
-                Manage your credentials and monitor session activity. Posting access will unlock once roles and
-                permissions are configured.
+                Keep your credentials fresh and manage upcoming posting permissions. Stay tuned for author roles and
+                scheduling tools.
               </p>
             </div>
 
@@ -85,30 +159,84 @@ function AccountPage() {
                 <p className="mt-1 text-lg font-semibold text-text">{user.email}</p>
               </div>
               <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.35em] text-subtext-0">Session</p>
+                <p className="text-xs font-semibold uppercase tracking-[0.35em] text-subtext-0">Last sign-in</p>
                 <p className="mt-1 text-sm text-muted">
-                  Last sign in: {lastSignInAt ? new Date(lastSignInAt).toLocaleString() : 'Active'}
+                  {user.last_sign_in_at ? new Date(user.last_sign_in_at).toLocaleString() : 'Active session'}
                 </p>
               </div>
             </div>
 
-            <div className="flex flex-wrap gap-3">
+            <form onSubmit={handlePasswordUpdate} className="space-y-4 rounded-2xl border border-border/70 bg-base/80 px-6 py-6">
+              <div className="flex items-center justify-between">
+                <p className="text-sm font-semibold text-text">Update password</p>
+                {isPasswordRecovery ? (
+                  <span className="text-xs uppercase tracking-[0.2em] text-primary">Recovery mode</span>
+                ) : null}
+              </div>
+
+              <div className="space-y-2">
+                <label htmlFor="new-password" className="text-sm font-medium text-text">
+                  New password
+                </label>
+                <input
+                  id="new-password"
+                  type="password"
+                  required
+                  minLength={6}
+                  value={newPassword}
+                  onChange={(event) => setNewPassword(event.target.value)}
+                  className="w-full rounded-xl border border-border bg-base px-4 py-3 text-text outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/40"
+                  placeholder="Minimum 6 characters"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label htmlFor="confirm-password" className="text-sm font-medium text-text">
+                  Confirm password
+                </label>
+                <input
+                  id="confirm-password"
+                  type="password"
+                  required
+                  minLength={6}
+                  value={confirmNewPassword}
+                  onChange={(event) => setConfirmNewPassword(event.target.value)}
+                  className="w-full rounded-xl border border-border bg-base px-4 py-3 text-text outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/40"
+                  placeholder="Repeat new password"
+                />
+              </div>
+
+              {passwordError ? (
+                <p className="rounded-xl bg-red-500/10 px-4 py-2 text-sm text-red-200">{passwordError}</p>
+              ) : null}
+              {passwordMessage ? (
+                <p className="rounded-xl bg-primary/10 px-4 py-2 text-sm text-primary">{passwordMessage}</p>
+              ) : null}
+
               <button
-                type="button"
-                onClick={() => supabaseClient.auth.signOut()}
-                className="inline-flex items-center justify-center gap-2 rounded-xl border border-border px-5 py-3 text-sm font-semibold text-subtle transition hover:-translate-y-0.5 duration-200"
+                type="submit"
+                disabled={passwordStatus === 'submitting'}
+                className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-linear-to-r from-primary to-secondary px-5 py-3 text-sm font-semibold text-text transition hover:-translate-y-0.5 duration-200 disabled:cursor-not-allowed disabled:opacity-60"
               >
-                Sign out
+                {passwordStatus === 'submitting' ? 'Updating…' : 'Update password'}
               </button>
-            </div>
+            </form>
+
+            <button
+              type="button"
+              onClick={() => supabaseClient.auth.signOut()}
+              className="inline-flex items-center justify-center gap-2 rounded-xl border border-border px-5 py-3 text-sm font-semibold text-subtle transition hover:-translate-y-0.5 duration-200"
+            >
+              Sign out
+            </button>
           </section>
 
-          <aside className="rounded-3xl border border-border/60 bg-base/70 px-6 py-6 shadow-lg shadow-black/10">
+          <aside className="space-y-4 rounded-3xl border border-border/60 bg-base/70 px-6 py-6 shadow-lg shadow-black/10">
             <h2 className="text-lg font-semibold text-text">Coming soon</h2>
             <ul className="mt-4 space-y-3 text-sm text-muted">
               <li>Invite writers and assign roles.</li>
-              <li>Draft and schedule farm-fresh posts.</li>
-              <li>Track engagement from the coop dashboard.</li>
+              <li>Draft, edit, and schedule farm-fresh posts.</li>
+              <li>Monitor coop analytics and pair performance.</li>
             </ul>
           </aside>
         </div>
@@ -131,7 +259,7 @@ function AccountPage() {
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSignInOrUp} className="space-y-4">
           <div className="space-y-2 text-left">
             <label htmlFor="email" className="text-sm font-medium text-text">
               Email
@@ -163,14 +291,15 @@ function AccountPage() {
             />
           </div>
 
-          {error ? <p className="rounded-xl bg-red-500/10 px-4 py-2 text-sm text-red-200">{error}</p> : null}
+          {authError ? <p className="rounded-xl bg-red-500/10 px-4 py-2 text-sm text-red-200">{authError}</p> : null}
+          {authMessage ? <p className="rounded-xl bg-primary/10 px-4 py-2 text-sm text-primary">{authMessage}</p> : null}
 
           <button
             type="submit"
-            disabled={status === 'submitting'}
+            disabled={authStatus === 'submitting'}
             className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-linear-to-r from-primary to-secondary px-5 py-3 font-semibold text-base text-text transition hover:-translate-y-0.5 duration-200 disabled:cursor-not-allowed disabled:opacity-60"
           >
-            {status === 'submitting'
+            {authStatus === 'submitting'
               ? mode === 'signIn'
                 ? 'Signing in…'
                 : 'Creating account…'
@@ -180,17 +309,29 @@ function AccountPage() {
           </button>
         </form>
 
-        <div className="text-center text-sm text-muted">
+        <div className="space-y-2 text-center text-sm text-muted">
           <button
             type="button"
             className="font-semibold text-text underline-offset-4 hover:underline"
             onClick={() => {
               setMode(mode === 'signIn' ? 'signUp' : 'signIn')
-              setError(null)
+              setAuthError(null)
+              setAuthMessage(null)
             }}
           >
             {mode === 'signIn' ? 'Need an account? Create one.' : 'Already have an account? Sign in instead.'}
           </button>
+
+          <button
+            type="button"
+            className="text-xs font-semibold text-subtext-0 underline-offset-4 hover:underline"
+            onClick={handlePasswordReset}
+            disabled={resetStatus === 'submitting'}
+          >
+            {resetStatus === 'submitting' ? 'Sending reset email…' : 'Forgot password? Send reset link.'}
+          </button>
+          {resetError ? <p className="text-xs text-red-300">{resetError}</p> : null}
+          {resetMessage ? <p className="text-xs text-primary">{resetMessage}</p> : null}
         </div>
       </div>
     </main>
