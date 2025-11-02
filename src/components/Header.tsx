@@ -35,9 +35,9 @@ export default function Header() {
 
   return (
     <>
-      <div className="h-20 w-full" />
-      <header className="p-4 flex fixed top-0 left-0 items-center bg-base/30 z-100 backdrop-blur-3xl justify-between h-20 w-full px-6">
-        <h1 className="text-xl font-semibold">
+      <div className="w-full h-20" />
+      <header className="top-0 left-0 z-100 fixed flex justify-between items-center bg-base/30 backdrop-blur-3xl p-4 px-6 w-full h-20">
+        <h1 className="font-semibold text-xl">
           <Link to="/">
             <img src="/blt_solo.png" alt="TanStack Logo" className="h-10" />
           </Link>
@@ -50,7 +50,7 @@ export default function Header() {
               key={to}
               to={to}
               search={search}
-              className="flex items-center gap-2 p-2 rounded-lg transition-colors text-sm hover:bg-crust duration-200"
+              className="flex items-center gap-2 hover:bg-crust p-2 rounded-lg text-sm transition-colors duration-200"
               activeProps={{
                 className:
                   'flex items-center gap-2 p-2 rounded-lg bg-linear-to-r from-primary to-secondary text-base',
@@ -65,7 +65,7 @@ export default function Header() {
         {/* Menu button for small screens */}
         <button
           onClick={() => setIsOpen(true)}
-          className="p-2 ml-4 hover:bg-crust rounded-lg transition-colors cursor-pointer lg:hidden"
+          className="lg:hidden hover:bg-crust ml-4 p-2 rounded-lg transition-colors cursor-pointer"
           aria-label="Open menu"
         >
           <Menu size={24} />
@@ -86,11 +86,11 @@ export default function Header() {
           isOpen ? 'translate-x-0' : 'translate-x-full'
         }`}
       >
-        <div className="flex items-center justify-between p-4">
-          <h2 className="text-xl font-bold">Navigation</h2>
+        <div className="flex justify-between items-center p-4">
+          <h2 className="font-bold text-xl">Navigation</h2>
           <button
             onClick={() => setIsOpen(false)}
-            className="p-2 hover:bg-crust rounded-lg transition-colors cursor-pointer"
+            className="hover:bg-crust p-2 rounded-lg transition-colors cursor-pointer"
             aria-label="Close menu"
           >
             <X size={24} />
@@ -103,7 +103,7 @@ export default function Header() {
               to={to}
               search={search}
               onClick={() => setIsOpen(false)}
-              className="flex items-center gap-3 p-3 rounded-lg transition-colors mb-2 hover:bg-crust duration-200"
+              className="flex items-center gap-3 hover:bg-crust mb-2 p-3 rounded-lg transition-colors duration-200"
               activeProps={{
                 className:
                   'flex items-center gap-2 p-2 rounded-lg bg-linear-to-r from-primary to-secondary text-base',

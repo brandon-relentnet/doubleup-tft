@@ -33,7 +33,7 @@ const quickLinks = [
   {
     to: '/units',
     label: 'Units',
-    tidbit: 'Pasture-Raised Powerhouses',
+    tidbit: 'USDA Certified',
     description:
       'Discover the strengths and synergies of different units to build powerful team compositions.',
   },
@@ -43,7 +43,7 @@ function App() {
   return (
     <main className="hero-gradient">
       <section className="container">
-        <div className="flex items-center justify-center flex-col lg:flex-row gap-12">
+        <div className="flex lg:flex-row flex-col justify-center items-center gap-12">
           {/* Image */}
           <img
             src="/bltft_pengu.png"
@@ -55,25 +55,25 @@ function App() {
 
           <div className="flex-1">
             <TypewriterChangeContentExample />
-            <div className="grid grid-cols-2 gap-6 mt-6 w-full">
+            <div className="gap-6 grid grid-cols-2 mt-6 w-full">
               {quickLinks.map((link) => (
                 <div
                   key={link.to}
-                  className="bg-surface-0 rounded p-4 flex-1 transition-all duration-200 hover:-translate-y-1 relative group overflow-hidden"
+                  className="group relative flex-1 bg-surface-0 p-4 rounded overflow-hidden transition-all hover:-translate-y-1 duration-200"
                 >
-                  <span className="font-semibold gradient-text text-lg">
+                  <span className="font-semibold text-lg gradient-text">
                     {link.label}
-                    <ArrowRight className="ml-2 size-4 mb-1 inline-block text-text opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
+                    <ArrowRight className="inline-block opacity-0 group-hover:opacity-100 mb-1 ml-2 size-4 text-text transition-opacity duration-200" />
                   </span>
                   <div className="group-hover:blur-sm transition-all duration-200">
-                    <span className="text-md italic block mb-4">
+                    <span className="block mb-4 text-md italic">
                       {link.tidbit}
                     </span>
-                    <p>{link.description}</p>
+                    {/**<p>{link.description}</p>**/}
                   </div>
 
-                  <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                    <div className="flex gap-2 w-full items-center justify-evenly px-4">
+                  <div className="absolute inset-0 flex justify-center items-center opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                    <div className="flex justify-evenly items-center gap-2 px-4 w-full">
                       <Link to={link.to} search={link.search} className="p-4">
                         <User className="size-10" />
                       </Link>
@@ -93,13 +93,13 @@ function App() {
         </div>
       </section>
       <section className="container">
-        <div className="flex items-center justify-center flex-col lg:flex-row gap-12">
+        <div className="flex lg:flex-row flex-col justify-center items-center gap-12">
           <div>
-            <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight text-balance">
+            <h1 className="font-extrabold text-4xl sm:text-5xl text-balance tracking-tight">
               Welcome to <span className="gradient-text">Free-Range TFT</span>
             </h1>
 
-            <p className="mt-6 text-lg text-foreground/90 max-w-3xl">
+            <p className="mt-6 max-w-3xl text-lg">
               <span className="font-semibold gradient-text">
                 Out here, we play Free-Range TFT.
               </span>{' '}
@@ -120,36 +120,22 @@ function App() {
               success. We play for the flavor.
             </p>
 
-            <ul className="mt-4 space-y-3 text-foreground/90 max-w-3xl list-disc list-inside">
-              <li>
-                <strong>Craft, don't copy.</strong> Experiment with compositions
-                rather than following the meta.
-              </li>
-              <li>
-                <strong>Learn together.</strong> Strategy writeups and friendly
-                discussion to level up faster.
-              </li>
-              <li>
-                <strong>Keep it human.</strong> Wins, losses, and sandwich jokes
-                encouraged.
-              </li>
-            </ul>
-
-            <div className="mt-6 flex flex-wrap gap-3">
+            <div className="flex flex-wrap gap-3 mt-6">
               <Link
                 to="/discussions/$slug"
                 params={{ slug: 'farm-fresh-tft' }}
                 search={{ tag: undefined }}
-                className="inline-flex items-center gap-2 bg-linear-to-r from-primary to-secondary text-base font-semibold px-4 py-2 rounded"
+                className="inline-flex items-center gap-2 bg-linear-to-r from-primary to-secondary px-4 py-2 rounded font-semibold text-base transition hover:-translate-y-0.5 duration-200"
               >
                 Learn More
               </Link>
               <Link
                 to="/discussions"
                 search={{ tag: undefined }}
-                className="inline-flex items-center gap-2 border border-border px-4 py-2 rounded"
+                className="group inline-flex items-center text-subtext-0 hover:text-accent transition duration-200"
               >
                 See all discussions
+                <ArrowRight className="opacity-0 group-hover:opacity-100 mb-1 ml-2 size-4 transition -translate-x-5 group-hover:translate-x-1 duration-200" />
               </Link>
             </div>
           </div>
@@ -161,10 +147,10 @@ function App() {
           />
         </div>
       </section>
-      <section className="container pb-100!">
+      <section className="pb-100! container">
         <ScrollHighlight />
       </section>
-      <section className="container mb-20"></section>
+      <section className="mb-20 container"></section>
     </main>
   )
 }
