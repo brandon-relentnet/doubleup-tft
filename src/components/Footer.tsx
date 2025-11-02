@@ -1,6 +1,6 @@
+import { motion } from 'framer-motion'
 import { Link } from '@tanstack/react-router'
 import { listPosts } from '../content/posts'
-import * as motion from 'motion/react-client'
 
 type FooterLink = {
   label: string

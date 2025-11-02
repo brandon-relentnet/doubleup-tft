@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as UnitsRouteImport } from './routes/units'
 import { Route as StrategiesRouteImport } from './routes/strategies'
+import { Route as LoginRouteImport } from './routes/login'
 import { Route as ItemsRouteImport } from './routes/items'
 import { Route as DoubleupRouteImport } from './routes/doubleup'
 import { Route as DiscussionsRouteImport } from './routes/discussions'
@@ -26,6 +27,11 @@ const UnitsRoute = UnitsRouteImport.update({
 const StrategiesRoute = StrategiesRouteImport.update({
   id: '/strategies',
   path: '/strategies',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ItemsRoute = ItemsRouteImport.update({
@@ -64,6 +70,7 @@ export interface FileRoutesByFullPath {
   '/discussions': typeof DiscussionsRouteWithChildren
   '/doubleup': typeof DoubleupRoute
   '/items': typeof ItemsRoute
+  '/login': typeof LoginRoute
   '/strategies': typeof StrategiesRoute
   '/units': typeof UnitsRoute
   '/discussions/$slug': typeof DiscussionsSlugRoute
@@ -73,6 +80,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/doubleup': typeof DoubleupRoute
   '/items': typeof ItemsRoute
+  '/login': typeof LoginRoute
   '/strategies': typeof StrategiesRoute
   '/units': typeof UnitsRoute
   '/discussions/$slug': typeof DiscussionsSlugRoute
@@ -84,6 +92,7 @@ export interface FileRoutesById {
   '/discussions': typeof DiscussionsRouteWithChildren
   '/doubleup': typeof DoubleupRoute
   '/items': typeof ItemsRoute
+  '/login': typeof LoginRoute
   '/strategies': typeof StrategiesRoute
   '/units': typeof UnitsRoute
   '/discussions/$slug': typeof DiscussionsSlugRoute
@@ -96,6 +105,7 @@ export interface FileRouteTypes {
     | '/discussions'
     | '/doubleup'
     | '/items'
+    | '/login'
     | '/strategies'
     | '/units'
     | '/discussions/$slug'
@@ -105,6 +115,7 @@ export interface FileRouteTypes {
     | '/'
     | '/doubleup'
     | '/items'
+    | '/login'
     | '/strategies'
     | '/units'
     | '/discussions/$slug'
@@ -115,6 +126,7 @@ export interface FileRouteTypes {
     | '/discussions'
     | '/doubleup'
     | '/items'
+    | '/login'
     | '/strategies'
     | '/units'
     | '/discussions/$slug'
@@ -126,6 +138,7 @@ export interface RootRouteChildren {
   DiscussionsRoute: typeof DiscussionsRouteWithChildren
   DoubleupRoute: typeof DoubleupRoute
   ItemsRoute: typeof ItemsRoute
+  LoginRoute: typeof LoginRoute
   StrategiesRoute: typeof StrategiesRoute
   UnitsRoute: typeof UnitsRoute
 }
@@ -144,6 +157,13 @@ declare module '@tanstack/react-router' {
       path: '/strategies'
       fullPath: '/strategies'
       preLoaderRoute: typeof StrategiesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/items': {
@@ -210,6 +230,7 @@ const rootRouteChildren: RootRouteChildren = {
   DiscussionsRoute: DiscussionsRouteWithChildren,
   DoubleupRoute: DoubleupRoute,
   ItemsRoute: ItemsRoute,
+  LoginRoute: LoginRoute,
   StrategiesRoute: StrategiesRoute,
   UnitsRoute: UnitsRoute,
 }

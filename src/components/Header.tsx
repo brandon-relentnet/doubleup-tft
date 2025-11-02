@@ -1,15 +1,9 @@
 import { Link } from '@tanstack/react-router'
-import {
-  Home,
-  Menu,
-  MessageSquare,
-  Package,
-  Target,
-  Users,
-  X,
-} from 'lucide-react'
+import { Home, LogIn, LogOut, Menu, MessageSquare, Package, Target, Users, X } from 'lucide-react'
 import { useState } from 'react'
+import { useAuth } from './AuthProvider'
 import type { ComponentType } from 'react'
+import { supabase } from '@/lib/supabaseClient'
 
 type NavItem = {
   to: string
@@ -33,6 +27,7 @@ const NAV_ITEMS: Array<NavItem> = [
 
 export default function Header() {
   const [isOpen, setIsOpen] = useState(false)
+  const { user, loading } = useAuth()
 
   const renderNavLink = (item: NavItem, variant: 'desktop' | 'mobile') => {
     const Icon = item.icon
@@ -74,6 +69,28 @@ export default function Header() {
         {/* Inline navbar for lg+ */}
         <nav className="hidden lg:flex items-center gap-3">
           {NAV_ITEMS.map((item) => renderNavLink(item, 'desktop'))}
+          {!loading && supabase && (
+            <>
+              {user ? (
+                <button
+                  type="button"
+                  onClick={() => supabase?.auth.signOut()}
+                  className="inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold text-subtle transition hover:bg-highlight-low"
+                >
+                  <LogOut size={16} />
+                  Sign out
+                </button>
+              ) : (
+                <Link
+                  to="/login"
+                  className="inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold text-subtle transition hover:bg-highlight-low"
+                >
+                  <LogIn size={16} />
+                  Sign in
+                </Link>
+              )}
+            </>
+          )}
         </nav>
 
         {/* Menu button for small screens */}
@@ -112,6 +129,30 @@ export default function Header() {
         </div>
         <nav className="flex-1 p-4 overflow-y-auto">
           {NAV_ITEMS.map((item) => renderNavLink(item, 'mobile'))}
+          {!loading && supabase && (
+            <div className="mt-6 space-y-3">
+              {user ? (
+                <button
+                  type="button"
+                  onClick={() => {
+                    supabase?.auth.signOut()
+                    setIsOpen(false)
+                  }}
+                  className="w-full rounded-lg bg-linear-to-r from-primary to-secondary px-4 py-3 text-sm font-semibold text-text transition hover:-translate-y-0.5 duration-200"
+                >
+                  Sign out
+                </button>
+              ) : (
+                <Link
+                  to="/login"
+                  onClick={() => setIsOpen(false)}
+                  className="w-full rounded-lg border border-border px-4 py-3 text-sm font-semibold text-subtle transition hover:-translate-y-0.5 duration-200"
+                >
+                  Sign in
+                </Link>
+              )}
+            </div>
+          )}
         </nav>
       </aside>
     </>
