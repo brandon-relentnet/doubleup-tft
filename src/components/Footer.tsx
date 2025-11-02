@@ -41,7 +41,7 @@ export default function Footer() {
     <footer className="bg-base">
       <div className="container flex flex-col gap-14 px-4 py-12 sm:px-6 lg:px-8">
         <div className="grid gap-12 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1.85fr)] text-center lg:text-left">
-          <div className="space-y-10">
+          <div className="gap-10 flex flex-col-reverse lg:flex-col">
             <nav>
               <p className="text-xs uppercase tracking-[0.35em] font-bold gradient-text w-fit mx-auto lg:mx-0">
                 Navigation
@@ -61,21 +61,23 @@ export default function Footer() {
                 ))}
               </ul>
             </nav>
-            <div className="flex flex-col lg:flex-row items-center gap-3 mb-2 justify-center lg:justify-start">
-              <img src="/blt_solo.png" alt="BLTFT icon" className="size-12" />
-              <div>
-                <p className="text-xs uppercase tracking-[0.35em] font-bold gradient-text w-fit mx-auto lg:mx-0">
-                  BLTFT
-                </p>
-                <p className="text-lg font-semibold text-text">
-                  Free-Range TFT
-                </p>
+            <div className="flex flex-col items-center lg:items-start gap-3 mb-2 justify-center lg:justify-start">
+              <div className="flex items-center gap-4 lg:flex-row flex-col">
+                <img src="/blt_solo.png" alt="BLTFT icon" className="size-12" />
+                <div>
+                  <p className="text-xs uppercase tracking-[0.35em] font-bold gradient-text w-fit mx-auto lg:mx-0">
+                    BLTFT
+                  </p>
+                  <p className="text-lg font-semibold text-text">
+                    Free-Range TFT
+                  </p>
+                </div>
               </div>
+              <p className="max-w-sm text-sm text-subtle mx-auto lg:mx-0">
+                We raise boards the slow way. No factory builds. Scout with
+                intent, season every move, and share the harvest with the coop.
+              </p>
             </div>
-            <p className="max-w-sm text-sm text-subtle mx-auto lg:mx-0">
-              We raise boards the slow way. No factory builds. Scout with
-              intent, season every move, and share the harvest with the coop.
-            </p>
           </div>
 
           <div>

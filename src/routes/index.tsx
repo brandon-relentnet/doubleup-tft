@@ -90,7 +90,7 @@ function App() {
         </div>
       </section>
       <section className="container">
-        <div className="flex lg:flex-row flex-col justify-center items-center gap-12">
+        <div className="flex lg:flex-row flex-col-reverse justify-center items-center gap-12 text-center lg:text-left">
           <div>
             <h1 className="font-extrabold text-4xl sm:text-5xl text-balance tracking-tight">
               Welcome to <span className="gradient-text">Free-Range TFT</span>
@@ -117,7 +117,7 @@ function App() {
               success. We play for the flavor.
             </p>
 
-            <div className="flex flex-wrap gap-3 mt-6">
+            <div className="flex flex-wrap gap-3 mt-6 justify-center lg:justify-start">
               <Link
                 to="/discussions/$slug"
                 params={{ slug: 'farm-fresh-tft' }}
