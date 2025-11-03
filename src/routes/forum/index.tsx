@@ -13,7 +13,7 @@ type ForumPost = {
   author_display_name: string | null
 }
 
-export const Route = createFileRoute('/discussions/forum/')({
+export const Route = createFileRoute('/forum/')({
   component: ForumListingPage,
 })
 
@@ -89,16 +89,10 @@ function ForumListingPage() {
     <DiscussionsLayout
       title="Community Forum"
       description="Browse farm-fresh thoughts from fellow Free-Range tacticians. Share what you have learned, dissect a duo scramble, or highlight a clever pivot. We will expand these tools as the coop grows."
-      backTo={{
-        to: '/discussions',
-        label: 'Back to discussions',
-        search: { tag: undefined },
-      }}
       actions={
         user ? (
           <Link
-            to="/discussions/forum/create-post"
-            search={{ tag: undefined }}
+            to="/forum/create-post"
             className="rounded-full border border-border px-4 py-2 text-sm font-semibold text-primary transition hover:bg-muted/40"
           >
             Write a post
@@ -147,8 +141,7 @@ function ForumListingPage() {
 
       {user && !loading ? (
         <Link
-          to="/discussions/forum/create-post"
-          search={{ tag: undefined }}
+          to="/forum/create-post"
           className="fixed bottom-6 right-6 z-50 inline-flex h-14 w-14 items-center justify-center rounded-full bg-linear-to-r from-primary to-secondary text-base font-semibold text-base shadow-lg shadow-black/20 transition hover:-translate-y-1"
           aria-label="Write a community post"
         >

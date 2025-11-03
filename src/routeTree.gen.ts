@@ -12,17 +12,17 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as UnitsRouteImport } from './routes/units'
 import { Route as StrategiesRouteImport } from './routes/strategies'
 import { Route as ItemsRouteImport } from './routes/items'
+import { Route as ForumRouteImport } from './routes/forum'
 import { Route as DoubleupRouteImport } from './routes/doubleup'
 import { Route as DiscussionsRouteImport } from './routes/discussions'
 import { Route as AccountRouteImport } from './routes/account'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ForumIndexRouteImport } from './routes/forum/index'
 import { Route as DiscussionsIndexRouteImport } from './routes/discussions/index'
 import { Route as AccountIndexRouteImport } from './routes/account/index'
-import { Route as DiscussionsForumRouteImport } from './routes/discussions/forum'
+import { Route as ForumCreatePostRouteImport } from './routes/forum.create-post'
 import { Route as DiscussionsSlugRouteImport } from './routes/discussions.$slug'
 import { Route as AccountConfirmationRouteImport } from './routes/account/confirmation'
-import { Route as DiscussionsForumIndexRouteImport } from './routes/discussions/forum/index'
-import { Route as DiscussionsForumCreatePostRouteImport } from './routes/discussions/forum.create-post'
 
 const UnitsRoute = UnitsRouteImport.update({
   id: '/units',
@@ -37,6 +37,11 @@ const StrategiesRoute = StrategiesRouteImport.update({
 const ItemsRoute = ItemsRouteImport.update({
   id: '/items',
   path: '/items',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ForumRoute = ForumRouteImport.update({
+  id: '/forum',
+  path: '/forum',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DoubleupRoute = DoubleupRouteImport.update({
@@ -59,6 +64,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ForumIndexRoute = ForumIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => ForumRoute,
+} as any)
 const DiscussionsIndexRoute = DiscussionsIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -69,10 +79,10 @@ const AccountIndexRoute = AccountIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AccountRoute,
 } as any)
-const DiscussionsForumRoute = DiscussionsForumRouteImport.update({
-  id: '/forum',
-  path: '/forum',
-  getParentRoute: () => DiscussionsRoute,
+const ForumCreatePostRoute = ForumCreatePostRouteImport.update({
+  id: '/create-post',
+  path: '/create-post',
+  getParentRoute: () => ForumRoute,
 } as any)
 const DiscussionsSlugRoute = DiscussionsSlugRouteImport.update({
   id: '/$slug',
@@ -84,33 +94,22 @@ const AccountConfirmationRoute = AccountConfirmationRouteImport.update({
   path: '/confirmation',
   getParentRoute: () => AccountRoute,
 } as any)
-const DiscussionsForumIndexRoute = DiscussionsForumIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => DiscussionsForumRoute,
-} as any)
-const DiscussionsForumCreatePostRoute =
-  DiscussionsForumCreatePostRouteImport.update({
-    id: '/create-post',
-    path: '/create-post',
-    getParentRoute: () => DiscussionsForumRoute,
-  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/account': typeof AccountRouteWithChildren
   '/discussions': typeof DiscussionsRouteWithChildren
   '/doubleup': typeof DoubleupRoute
+  '/forum': typeof ForumRouteWithChildren
   '/items': typeof ItemsRoute
   '/strategies': typeof StrategiesRoute
   '/units': typeof UnitsRoute
   '/account/confirmation': typeof AccountConfirmationRoute
   '/discussions/$slug': typeof DiscussionsSlugRoute
-  '/discussions/forum': typeof DiscussionsForumRouteWithChildren
+  '/forum/create-post': typeof ForumCreatePostRoute
   '/account/': typeof AccountIndexRoute
   '/discussions/': typeof DiscussionsIndexRoute
-  '/discussions/forum/create-post': typeof DiscussionsForumCreatePostRoute
-  '/discussions/forum/': typeof DiscussionsForumIndexRoute
+  '/forum/': typeof ForumIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -120,10 +119,10 @@ export interface FileRoutesByTo {
   '/units': typeof UnitsRoute
   '/account/confirmation': typeof AccountConfirmationRoute
   '/discussions/$slug': typeof DiscussionsSlugRoute
+  '/forum/create-post': typeof ForumCreatePostRoute
   '/account': typeof AccountIndexRoute
   '/discussions': typeof DiscussionsIndexRoute
-  '/discussions/forum/create-post': typeof DiscussionsForumCreatePostRoute
-  '/discussions/forum': typeof DiscussionsForumIndexRoute
+  '/forum': typeof ForumIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -131,16 +130,16 @@ export interface FileRoutesById {
   '/account': typeof AccountRouteWithChildren
   '/discussions': typeof DiscussionsRouteWithChildren
   '/doubleup': typeof DoubleupRoute
+  '/forum': typeof ForumRouteWithChildren
   '/items': typeof ItemsRoute
   '/strategies': typeof StrategiesRoute
   '/units': typeof UnitsRoute
   '/account/confirmation': typeof AccountConfirmationRoute
   '/discussions/$slug': typeof DiscussionsSlugRoute
-  '/discussions/forum': typeof DiscussionsForumRouteWithChildren
+  '/forum/create-post': typeof ForumCreatePostRoute
   '/account/': typeof AccountIndexRoute
   '/discussions/': typeof DiscussionsIndexRoute
-  '/discussions/forum/create-post': typeof DiscussionsForumCreatePostRoute
-  '/discussions/forum/': typeof DiscussionsForumIndexRoute
+  '/forum/': typeof ForumIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -149,16 +148,16 @@ export interface FileRouteTypes {
     | '/account'
     | '/discussions'
     | '/doubleup'
+    | '/forum'
     | '/items'
     | '/strategies'
     | '/units'
     | '/account/confirmation'
     | '/discussions/$slug'
-    | '/discussions/forum'
+    | '/forum/create-post'
     | '/account/'
     | '/discussions/'
-    | '/discussions/forum/create-post'
-    | '/discussions/forum/'
+    | '/forum/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -168,26 +167,26 @@ export interface FileRouteTypes {
     | '/units'
     | '/account/confirmation'
     | '/discussions/$slug'
+    | '/forum/create-post'
     | '/account'
     | '/discussions'
-    | '/discussions/forum/create-post'
-    | '/discussions/forum'
+    | '/forum'
   id:
     | '__root__'
     | '/'
     | '/account'
     | '/discussions'
     | '/doubleup'
+    | '/forum'
     | '/items'
     | '/strategies'
     | '/units'
     | '/account/confirmation'
     | '/discussions/$slug'
-    | '/discussions/forum'
+    | '/forum/create-post'
     | '/account/'
     | '/discussions/'
-    | '/discussions/forum/create-post'
-    | '/discussions/forum/'
+    | '/forum/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -195,6 +194,7 @@ export interface RootRouteChildren {
   AccountRoute: typeof AccountRouteWithChildren
   DiscussionsRoute: typeof DiscussionsRouteWithChildren
   DoubleupRoute: typeof DoubleupRoute
+  ForumRoute: typeof ForumRouteWithChildren
   ItemsRoute: typeof ItemsRoute
   StrategiesRoute: typeof StrategiesRoute
   UnitsRoute: typeof UnitsRoute
@@ -221,6 +221,13 @@ declare module '@tanstack/react-router' {
       path: '/items'
       fullPath: '/items'
       preLoaderRoute: typeof ItemsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/forum': {
+      id: '/forum'
+      path: '/forum'
+      fullPath: '/forum'
+      preLoaderRoute: typeof ForumRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/doubleup': {
@@ -251,6 +258,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/forum/': {
+      id: '/forum/'
+      path: '/'
+      fullPath: '/forum/'
+      preLoaderRoute: typeof ForumIndexRouteImport
+      parentRoute: typeof ForumRoute
+    }
     '/discussions/': {
       id: '/discussions/'
       path: '/'
@@ -265,12 +279,12 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AccountIndexRouteImport
       parentRoute: typeof AccountRoute
     }
-    '/discussions/forum': {
-      id: '/discussions/forum'
-      path: '/forum'
-      fullPath: '/discussions/forum'
-      preLoaderRoute: typeof DiscussionsForumRouteImport
-      parentRoute: typeof DiscussionsRoute
+    '/forum/create-post': {
+      id: '/forum/create-post'
+      path: '/create-post'
+      fullPath: '/forum/create-post'
+      preLoaderRoute: typeof ForumCreatePostRouteImport
+      parentRoute: typeof ForumRoute
     }
     '/discussions/$slug': {
       id: '/discussions/$slug'
@@ -285,20 +299,6 @@ declare module '@tanstack/react-router' {
       fullPath: '/account/confirmation'
       preLoaderRoute: typeof AccountConfirmationRouteImport
       parentRoute: typeof AccountRoute
-    }
-    '/discussions/forum/': {
-      id: '/discussions/forum/'
-      path: '/'
-      fullPath: '/discussions/forum/'
-      preLoaderRoute: typeof DiscussionsForumIndexRouteImport
-      parentRoute: typeof DiscussionsForumRoute
-    }
-    '/discussions/forum/create-post': {
-      id: '/discussions/forum/create-post'
-      path: '/create-post'
-      fullPath: '/discussions/forum/create-post'
-      preLoaderRoute: typeof DiscussionsForumCreatePostRouteImport
-      parentRoute: typeof DiscussionsForumRoute
     }
   }
 }
@@ -316,28 +316,13 @@ const AccountRouteChildren: AccountRouteChildren = {
 const AccountRouteWithChildren =
   AccountRoute._addFileChildren(AccountRouteChildren)
 
-interface DiscussionsForumRouteChildren {
-  DiscussionsForumCreatePostRoute: typeof DiscussionsForumCreatePostRoute
-  DiscussionsForumIndexRoute: typeof DiscussionsForumIndexRoute
-}
-
-const DiscussionsForumRouteChildren: DiscussionsForumRouteChildren = {
-  DiscussionsForumCreatePostRoute: DiscussionsForumCreatePostRoute,
-  DiscussionsForumIndexRoute: DiscussionsForumIndexRoute,
-}
-
-const DiscussionsForumRouteWithChildren =
-  DiscussionsForumRoute._addFileChildren(DiscussionsForumRouteChildren)
-
 interface DiscussionsRouteChildren {
   DiscussionsSlugRoute: typeof DiscussionsSlugRoute
-  DiscussionsForumRoute: typeof DiscussionsForumRouteWithChildren
   DiscussionsIndexRoute: typeof DiscussionsIndexRoute
 }
 
 const DiscussionsRouteChildren: DiscussionsRouteChildren = {
   DiscussionsSlugRoute: DiscussionsSlugRoute,
-  DiscussionsForumRoute: DiscussionsForumRouteWithChildren,
   DiscussionsIndexRoute: DiscussionsIndexRoute,
 }
 
@@ -345,11 +330,24 @@ const DiscussionsRouteWithChildren = DiscussionsRoute._addFileChildren(
   DiscussionsRouteChildren,
 )
 
+interface ForumRouteChildren {
+  ForumCreatePostRoute: typeof ForumCreatePostRoute
+  ForumIndexRoute: typeof ForumIndexRoute
+}
+
+const ForumRouteChildren: ForumRouteChildren = {
+  ForumCreatePostRoute: ForumCreatePostRoute,
+  ForumIndexRoute: ForumIndexRoute,
+}
+
+const ForumRouteWithChildren = ForumRoute._addFileChildren(ForumRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AccountRoute: AccountRouteWithChildren,
   DiscussionsRoute: DiscussionsRouteWithChildren,
   DoubleupRoute: DoubleupRoute,
+  ForumRoute: ForumRouteWithChildren,
   ItemsRoute: ItemsRoute,
   StrategiesRoute: StrategiesRoute,
   UnitsRoute: UnitsRoute,

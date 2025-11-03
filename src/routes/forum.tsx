@@ -1,9 +1,13 @@
 import { Outlet, createFileRoute } from '@tanstack/react-router'
 
-export const Route = createFileRoute('/discussions/forum')({
+export const Route = createFileRoute('/forum')({
   component: ForumLayout,
 })
 
 function ForumLayout() {
-  return <Outlet />
+  return (
+    <div className="relative">
+      <Outlet />
+    </div>
+  )
 }

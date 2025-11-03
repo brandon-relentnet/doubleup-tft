@@ -40,7 +40,7 @@ const quickLinks = [
       'Profile headline carries, frontline workhorses, and trait pairings that keep boards hearty.',
   },
   {
-    to: '/discussions/forum',
+    to: '/forum',
     label: 'Forum',
     tidbit: 'Community Coop',
     description:

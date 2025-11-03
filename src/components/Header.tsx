@@ -1,7 +1,20 @@
 import { Link } from '@tanstack/react-router'
-import { BookOpen, ChevronDown, Home, Menu, MessageSquare, Package, Target, UserRound, Users, X } from 'lucide-react'
+import {
+  BookOpen,
+  ChevronDown,
+  Home,
+  Menu,
+  MessageSquare,
+  Package,
+  Scroll,
+  Target,
+  UserRound,
+  Users,
+  X,
+} from 'lucide-react'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import type { ComponentType } from 'react'
+import { useRouterState } from '@tanstack/react-router'
 import { useAuth } from './AuthProvider'
 
 type NavItem = {
@@ -15,16 +28,16 @@ type BaseItem = Omit<NavItem, 'label'> & { label?: string }
 
 const BASE_ITEMS: Array<BaseItem> = [
   { to: '/', icon: Home, label: 'Home' },
+  { to: '/forum', icon: MessageSquare, label: 'Forum' },
+]
+
+const LEARN_ITEMS: Array<BaseItem> = [
   {
     to: '/discussions',
-    icon: MessageSquare,
+    icon: Scroll,
     label: 'Discussions',
     search: { tag: undefined },
   },
-  { to: '/account', icon: UserRound },
-]
-
-const LEARN_ITEMS = [
   { to: '/items', icon: Package, label: 'Items' },
   { to: '/strategies', icon: Target, label: 'Strategies' },
   { to: '/units', icon: Users, label: 'Units' },
@@ -35,6 +48,7 @@ export default function Header() {
   const [learnOpen, setLearnOpen] = useState(false)
   const hoverTimeout = useRef<number | null>(null)
   const { user } = useAuth()
+  const routerState = useRouterState({ select: (state) => state.location })
 
   useEffect(() => {
     return () => {
@@ -44,24 +58,40 @@ export default function Header() {
     }
   }, [])
 
-  const navItems = useMemo<Array<NavItem>>(() => {
-    const displayName =
-      typeof user?.user_metadata?.display_name === 'string'
-        ? user.user_metadata.display_name.trim()
-        : undefined
-    return BASE_ITEMS.map((item) => {
-      if (item.to === '/account') {
-        return {
-          ...item,
-          label: displayName ? displayName : 'Account',
-        } as NavItem
-      }
-      return {
-        ...item,
-        label: item.label ?? '',
-      } as NavItem
-    })
-  }, [user])
+  useEffect(() => {
+    if (!isOpen) {
+      setLearnOpen(false)
+    }
+  }, [isOpen])
+
+  const displayName =
+    typeof user?.user_metadata?.display_name === 'string'
+      ? user.user_metadata.display_name.trim()
+      : undefined
+
+  const normalizePath = (path: string) =>
+    path !== '/' && path.endsWith('/') ? path.slice(0, -1) : path
+
+  const currentPath = normalizePath(routerState?.pathname ?? '/')
+
+  const isPathActive = (path: string) => {
+    const normalized = normalizePath(path)
+    return (
+      currentPath === normalized ||
+      (normalized !== '/' && currentPath.startsWith(`${normalized}/`))
+    )
+  }
+
+  const baseNavItems = useMemo<Array<NavItem>>(
+    () => BASE_ITEMS.map((item) => ({ ...item, label: item.label ?? '' })),
+    [],
+  )
+
+  const accountNavItem: NavItem = {
+    to: '/account',
+    icon: UserRound,
+    label: displayName ? displayName : 'Account',
+  }
 
   const renderLearnMenu = (variant: 'desktop' | 'mobile') => {
     const isDesktop = variant === 'desktop'
@@ -69,17 +99,17 @@ export default function Header() {
       ? 'relative'
       : 'border-t border-border pt-4 mt-4'
 
-    const buttonClass =
-      isDesktop
-        ? 'flex items-center gap-2 hover:bg-highlight-low p-2 rounded text-sm transition-colors duration-200 cursor-pointer'
-        : 'flex items-center gap-3 hover:bg-highlight-low p-3 rounded transition-colors duration-200 cursor-pointer'
+    const buttonClass = isDesktop
+      ? 'flex items-center gap-2 hover:bg-highlight-low p-2 rounded text-sm transition-colors duration-200 cursor-pointer'
+      : 'flex items-center gap-3 hover:bg-highlight-low p-3 rounded transition-colors duration-200 cursor-pointer'
 
-    const listClass =
-      isDesktop
-        ? `absolute right-0 mt-2 w-48 rounded border border-border bg-surface shadow-lg shadow-black/10 transition ${
-            learnOpen ? 'opacity-100 translate-y-0' : 'pointer-events-none opacity-0 -translate-y-2'
-          }`
-        : `mt-2 flex flex-col gap-1 ${learnOpen ? '' : 'hidden'}`
+    const listClass = isDesktop
+      ? `absolute right-0 mt-2 w-48 rounded bg-surface shadow-lg p-2 space-y-2 transition ${
+          learnOpen
+            ? 'opacity-100 translate-y-0'
+            : 'pointer-events-none opacity-0 -translate-y-2'
+        }`
+      : `mt-2 flex flex-col gap-2 ${learnOpen ? '' : 'hidden'}`
 
     const openDropdown = () => {
       if (hoverTimeout.current) {
@@ -99,6 +129,8 @@ export default function Header() {
       }, 120)
     }
 
+    const learnActive = LEARN_ITEMS.some((item) => isPathActive(item.to))
+
     return (
       <div className={containerClass}>
         <button
@@ -107,10 +139,12 @@ export default function Header() {
           onMouseLeave={isDesktop ? closeDropdown : undefined}
           onFocus={isDesktop ? openDropdown : undefined}
           onBlur={isDesktop ? closeDropdown : undefined}
-          onClick={
-            isDesktop ? undefined : () => setLearnOpen((prev) => !prev)
-          }
-          className={buttonClass}
+          onClick={isDesktop ? undefined : () => setLearnOpen((prev) => !prev)}
+          className={`${buttonClass} ${
+            learnActive
+              ? 'bg-linear-to-r from-primary to-secondary text-base'
+              : ''
+          }`}
         >
           <BookOpen size={isDesktop ? 16 : 18} />
           <span className="font-medium">Learn</span>
@@ -128,11 +162,14 @@ export default function Header() {
             <Link
               key={item.to}
               to={item.to}
-              className={
-                isDesktop
-                  ? 'flex items-center gap-2 px-3 py-2 text-sm hover:bg-highlight-low rounded transition'
-                  : 'flex items-center gap-3 px-3 py-2 text-sm hover:bg-highlight-low rounded transition'
-              }
+              search={item.search}
+              className={`flex items-center gap-2 px-3 py-2 text-sm rounded transition ${
+                isDesktop ? '' : 'gap-3'
+              } ${
+                isPathActive(item.to)
+                  ? 'bg-linear-to-r from-primary to-secondary text-base'
+                  : 'hover:bg-highlight-low'
+              }`}
               onClick={() => {
                 setLearnOpen(false)
                 if (!isDesktop) {
@@ -151,12 +188,11 @@ export default function Header() {
 
   const renderNavLink = (item: NavItem, variant: 'desktop' | 'mobile') => {
     const Icon = item.icon
+    const isActive = isPathActive(item.to)
     const baseClass =
       variant === 'desktop'
-        ? 'flex items-center gap-2 hover:bg-highlight-low p-2 rounded-lg text-sm transition-colors duration-200'
-        : 'flex items-center gap-3 hover:bg-highlight-low mb-2 p-3 rounded-lg transition-colors duration-200'
-    const activeClass =
-      'flex items-center gap-2 p-2 rounded-lg bg-linear-to-r from-primary to-secondary text-base'
+        ? 'flex items-center gap-2 p-2 rounded text-sm transition-colors duration-200'
+        : 'flex items-center gap-3 mb-2 p-3 rounded transition-colors duration-200'
     const iconSize = variant === 'desktop' ? 18 : 20
     const handleClick =
       variant === 'mobile' ? () => setIsOpen(false) : undefined
@@ -166,8 +202,11 @@ export default function Header() {
         key={item.to}
         to={item.to}
         search={item.search}
-        className={baseClass}
-        activeProps={{ className: activeClass }}
+        className={`${baseClass} ${
+          isActive
+            ? 'bg-linear-to-r from-primary to-secondary text-base text-base-0'
+            : 'hover:bg-highlight-low'
+        }`}
         onClick={handleClick}
       >
         <Icon size={iconSize} />
@@ -188,8 +227,9 @@ export default function Header() {
 
         {/* Inline navbar for lg+ */}
         <nav className="hidden lg:flex items-center gap-3">
-          {navItems.map((item) => renderNavLink(item, 'desktop'))}
+          {baseNavItems.map((item) => renderNavLink(item, 'desktop'))}
           {renderLearnMenu('desktop')}
+          {renderNavLink(accountNavItem, 'desktop')}
         </nav>
 
         {/* Menu button for small screens */}
@@ -220,29 +260,17 @@ export default function Header() {
           <h2 className="font-bold text-xl">Navigation</h2>
           <button
             onClick={() => setIsOpen(false)}
-            className="hover:bg-highlight-low p-2 rounded-lg transition-colors cursor-pointer"
+            className="hover:bg-highlight-low p-2 rounded transition-colors cursor-pointer"
             aria-label="Close menu"
           >
             <X size={24} />
           </button>
         </div>
         <nav className="flex-1 p-4 overflow-y-auto">
-          {navItems.map((item) => renderNavLink(item, 'mobile'))}
+          {baseNavItems.map((item) => renderNavLink(item, 'mobile'))}
+          {renderLearnMenu('mobile')}
           <div className="mt-4 border-t border-border pt-4">
-            <p className="text-xs uppercase tracking-[0.35em] text-muted mb-2">
-              Learn
-            </p>
-            {LEARN_ITEMS.map((item) => (
-              <Link
-                key={item.to}
-                to={item.to}
-                className="flex items-center gap-3 hover:bg-highlight-low mb-2 p-3 rounded transition-colors duration-200"
-                onClick={() => setIsOpen(false)}
-              >
-                <item.icon size={20} />
-                <span className="font-medium">{item.label}</span>
-              </Link>
-            ))}
+            {renderNavLink(accountNavItem, 'mobile')}
           </div>
         </nav>
       </aside>
