@@ -60,6 +60,11 @@ export default function AccountPage() {
   const [passwordError, setPasswordError] = useState<string | null>(null)
   const [passwordMessage, setPasswordMessage] = useState<string | null>(null)
   const [profileDisplayName, setProfileDisplayName] = useState('')
+  const [profileBio, setProfileBio] = useState('')
+  const [profileAvatar, setProfileAvatar] = useState('')
+  const [profileSaveStatus, setProfileSaveStatus] = useState<AsyncStatus>('idle')
+  const [profileSaveError, setProfileSaveError] = useState<string | null>(null)
+  const [profileSaveMessage, setProfileSaveMessage] = useState<string | null>(null)
 
   const displayNameMeta =
     typeof user?.user_metadata?.display_name === 'string'
@@ -101,7 +106,7 @@ export default function AccountPage() {
     async function ensureProfileRecord() {
       const { data, error } = await client
         .from('profiles')
-        .select('display_name')
+        .select('display_name, bio, avatar_url')
         .eq('user_id', currentUser.id)
         .maybeSingle()
 
@@ -128,6 +133,8 @@ export default function AccountPage() {
 
       if (!isCancelled) {
         setProfileDisplayName(profileName)
+        setProfileBio((data?.bio as string | null) ?? '')
+        setProfileAvatar((data?.avatar_url as string | null) ?? '')
       }
 
       if (profileName && profileName !== metadataDisplayName) {
@@ -149,6 +156,27 @@ export default function AccountPage() {
       isCancelled = true
     }
   }, [supabaseClient, user])
+
+  const handleProfileSave = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    setProfileSaveError(null)
+    setProfileSaveMessage(null)
+    if (!supabaseClient || !user) return
+    setProfileSaveStatus('submitting')
+    try {
+      const { error } = await supabaseClient
+        .from('profiles')
+        .update({ bio: profileBio || null, avatar_url: profileAvatar || null })
+        .eq('user_id', user.id)
+      if (error) throw error
+      setProfileSaveMessage('Profile updated.')
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Unable to update profile.'
+      setProfileSaveError(message)
+    } finally {
+      setProfileSaveStatus('idle')
+    }
+  }
 
   if (!supabaseClient) {
     return (
@@ -403,6 +431,57 @@ export default function AccountPage() {
                 Need a new display name? Ping the coop lead and we will update it for you.
               </p>
             </div>
+
+            <form onSubmit={handleProfileSave} className="space-y-4">
+              <div className="flex items-center justify-between">
+                <p className="text-sm font-semibold text-text">Public profile</p>
+                <span className="text-xs text-muted">Visible at <span className="font-mono">/u/{profileDisplayName || 'your-name'}</span></span>
+              </div>
+              <div className="relative">
+                <textarea
+                  id="bio"
+                  rows={4}
+                  value={profileBio}
+                  onChange={(e) => setProfileBio(e.target.value)}
+                  onFocus={(e) => (e.currentTarget.placeholder = 'Short introduction, goals, or playstyle notes')}
+                  onBlur={(e) => { if (!e.currentTarget.value) e.currentTarget.placeholder = '' }}
+                  className="peer w-full bg-base placeholder:text-subtle text-text text-sm border border-highlight-med rounded px-3 py-2 transition duration-300 ease focus:outline-none focus:border-accent hover:border-highlight-high shadow-sm focus:shadow"
+                  placeholder=""
+                />
+                <label htmlFor="bio" className="absolute cursor-text bg-base px-1 left-2.5 -top-2 scale-90 text-subtle text-sm transition-all transform origin-left peer-placeholder-shown:top-2.5 peer-placeholder-shown:left-2.5 peer-placeholder-shown:scale-100 peer-focus:-top-2 peer-focus:left-2.5 peer-focus:scale-90">Bio</label>
+              </div>
+
+              <div className="relative">
+                <input
+                  id="avatar-url"
+                  type="url"
+                  value={profileAvatar}
+                  onChange={(e) => setProfileAvatar(e.target.value)}
+                  onFocus={(e) => (e.currentTarget.placeholder = 'https://...')}
+                  onBlur={(e) => { if (!e.currentTarget.value) e.currentTarget.placeholder = '' }}
+                  className="peer w-full bg-base placeholder:text-subtle text-text text-sm border border-highlight-med rounded px-3 py-2 transition duration-300 ease focus:outline-none focus:border-accent hover:border-highlight-high shadow-sm focus:shadow"
+                  placeholder=""
+                />
+                <label htmlFor="avatar-url" className="absolute cursor-text bg-base px-1 left-2.5 -top-2 scale-90 text-subtle text-sm transition-all transform origin-left peer-placeholder-shown:top-2.5 peer-placeholder-shown:left-2.5 peer-placeholder-shown:scale-100 peer-focus:-top-2 peer-focus:left-2.5 peer-focus:scale-90">Avatar URL</label>
+              </div>
+
+              {profileSaveError ? (
+                <p className="rounded-xl bg-red-500/10 px-4 py-2 text-sm text-red-200">{profileSaveError}</p>
+              ) : null}
+              {profileSaveMessage ? (
+                <p className="rounded-xl bg-primary/10 px-4 py-2 text-sm text-primary">{profileSaveMessage}</p>
+              ) : null}
+
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                type="submit"
+                disabled={profileSaveStatus === 'submitting'}
+                className="inline-flex w-full cursor-pointer items-center justify-center gap-2 rounded bg-linear-to-r from-primary to-secondary px-5 py-3 text-sm font-semibold text-base disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {profileSaveStatus === 'submitting' ? 'Saving…' : 'Save profile'}
+              </motion.button>
+            </form>
 
             <form onSubmit={handlePasswordUpdate} className="space-y-4">
               <div className="flex items-center justify-between">

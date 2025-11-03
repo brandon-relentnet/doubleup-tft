@@ -38,11 +38,11 @@ function UserProfilePage() {
         // Try profiles table first
         const { data: prof } = await supabase
           .from('profiles')
-          .select('id, display_name, created_at, bio, avatar_url')
+          .select('user_id, display_name, created_at, bio, avatar_url')
           .eq('display_name', name)
           .maybeSingle()
 
-        let authorId: string | null = prof?.id ?? null
+        let authorId: string | null = (prof as any)?.user_id ?? null
         let display = prof?.display_name ?? name
         let createdAt: string | null = (prof?.created_at as string | null) ?? null
         let bio: string | null = (prof?.bio as string | null) ?? null
@@ -186,4 +186,3 @@ function UserProfilePage() {
     </DiscussionsLayout>
   )
 }
-
