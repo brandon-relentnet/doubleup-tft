@@ -1,6 +1,6 @@
 import { Link } from '@tanstack/react-router'
-import { Home, Menu, MessageSquare, Package, Target, UserRound, Users, X } from 'lucide-react'
-import { useMemo, useState } from 'react'
+import { BookOpen, ChevronDown, Home, Menu, MessageSquare, Package, Target, UserRound, Users, X } from 'lucide-react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import type { ComponentType } from 'react'
 import { useAuth } from './AuthProvider'
 
@@ -21,15 +21,28 @@ const BASE_ITEMS: Array<BaseItem> = [
     label: 'Discussions',
     search: { tag: undefined },
   },
+  { to: '/account', icon: UserRound },
+]
+
+const LEARN_ITEMS = [
   { to: '/items', icon: Package, label: 'Items' },
   { to: '/strategies', icon: Target, label: 'Strategies' },
   { to: '/units', icon: Users, label: 'Units' },
-  { to: '/account', icon: UserRound },
 ]
 
 export default function Header() {
   const [isOpen, setIsOpen] = useState(false)
+  const [learnOpen, setLearnOpen] = useState(false)
+  const hoverTimeout = useRef<number | null>(null)
   const { user } = useAuth()
+
+  useEffect(() => {
+    return () => {
+      if (hoverTimeout.current) {
+        window.clearTimeout(hoverTimeout.current)
+      }
+    }
+  }, [])
 
   const navItems = useMemo<Array<NavItem>>(() => {
     const displayName =
@@ -49,6 +62,92 @@ export default function Header() {
       } as NavItem
     })
   }, [user])
+
+  const renderLearnMenu = (variant: 'desktop' | 'mobile') => {
+    const isDesktop = variant === 'desktop'
+    const containerClass = isDesktop
+      ? 'relative'
+      : 'border-t border-border pt-4 mt-4'
+
+    const buttonClass =
+      isDesktop
+        ? 'flex items-center gap-2 hover:bg-highlight-low p-2 rounded text-sm transition-colors duration-200 cursor-pointer'
+        : 'flex items-center gap-3 hover:bg-highlight-low p-3 rounded transition-colors duration-200 cursor-pointer'
+
+    const listClass =
+      isDesktop
+        ? `absolute right-0 mt-2 w-48 rounded border border-border bg-surface shadow-lg shadow-black/10 transition ${
+            learnOpen ? 'opacity-100 translate-y-0' : 'pointer-events-none opacity-0 -translate-y-2'
+          }`
+        : `mt-2 flex flex-col gap-1 ${learnOpen ? '' : 'hidden'}`
+
+    const openDropdown = () => {
+      if (hoverTimeout.current) {
+        window.clearTimeout(hoverTimeout.current)
+        hoverTimeout.current = null
+      }
+      setLearnOpen(true)
+    }
+
+    const closeDropdown = () => {
+      if (hoverTimeout.current) {
+        window.clearTimeout(hoverTimeout.current)
+      }
+      hoverTimeout.current = window.setTimeout(() => {
+        setLearnOpen(false)
+        hoverTimeout.current = null
+      }, 120)
+    }
+
+    return (
+      <div className={containerClass}>
+        <button
+          type="button"
+          onMouseEnter={isDesktop ? openDropdown : undefined}
+          onMouseLeave={isDesktop ? closeDropdown : undefined}
+          onFocus={isDesktop ? openDropdown : undefined}
+          onBlur={isDesktop ? closeDropdown : undefined}
+          onClick={
+            isDesktop ? undefined : () => setLearnOpen((prev) => !prev)
+          }
+          className={buttonClass}
+        >
+          <BookOpen size={isDesktop ? 16 : 18} />
+          <span className="font-medium">Learn</span>
+          <ChevronDown
+            size={14}
+            className={`transition ${learnOpen ? 'rotate-180' : ''}`}
+          />
+        </button>
+        <div
+          className={listClass}
+          onMouseEnter={isDesktop ? openDropdown : undefined}
+          onMouseLeave={isDesktop ? closeDropdown : undefined}
+        >
+          {LEARN_ITEMS.map((item) => (
+            <Link
+              key={item.to}
+              to={item.to}
+              className={
+                isDesktop
+                  ? 'flex items-center gap-2 px-3 py-2 text-sm hover:bg-highlight-low rounded transition'
+                  : 'flex items-center gap-3 px-3 py-2 text-sm hover:bg-highlight-low rounded transition'
+              }
+              onClick={() => {
+                setLearnOpen(false)
+                if (!isDesktop) {
+                  setIsOpen(false)
+                }
+              }}
+            >
+              <item.icon size={isDesktop ? 16 : 18} />
+              <span>{item.label}</span>
+            </Link>
+          ))}
+        </div>
+      </div>
+    )
+  }
 
   const renderNavLink = (item: NavItem, variant: 'desktop' | 'mobile') => {
     const Icon = item.icon
@@ -90,6 +189,7 @@ export default function Header() {
         {/* Inline navbar for lg+ */}
         <nav className="hidden lg:flex items-center gap-3">
           {navItems.map((item) => renderNavLink(item, 'desktop'))}
+          {renderLearnMenu('desktop')}
         </nav>
 
         {/* Menu button for small screens */}
@@ -128,6 +228,22 @@ export default function Header() {
         </div>
         <nav className="flex-1 p-4 overflow-y-auto">
           {navItems.map((item) => renderNavLink(item, 'mobile'))}
+          <div className="mt-4 border-t border-border pt-4">
+            <p className="text-xs uppercase tracking-[0.35em] text-muted mb-2">
+              Learn
+            </p>
+            {LEARN_ITEMS.map((item) => (
+              <Link
+                key={item.to}
+                to={item.to}
+                className="flex items-center gap-3 hover:bg-highlight-low mb-2 p-3 rounded transition-colors duration-200"
+                onClick={() => setIsOpen(false)}
+              >
+                <item.icon size={20} />
+                <span className="font-medium">{item.label}</span>
+              </Link>
+            ))}
+          </div>
         </nav>
       </aside>
     </>

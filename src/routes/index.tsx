@@ -39,6 +39,13 @@ const quickLinks = [
     description:
       'Profile headline carries, frontline workhorses, and trait pairings that keep boards hearty.',
   },
+  {
+    to: '/discussions/forum',
+    label: 'Forum',
+    tidbit: 'Community Coop',
+    description:
+      'Swap Free-Range lessons with other tacticians. Share your field notes, duo triumphs, and patch scrambles.',
+  },
 ]
 
 function App() {

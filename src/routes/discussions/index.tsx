@@ -1,8 +1,10 @@
 import { Link, createFileRoute } from '@tanstack/react-router'
+import { PenSquare } from 'lucide-react'
 import { useMemo } from 'react'
 
 import DiscussionsLayout from '../../components/DiscussionsLayout'
 import { listPosts } from '../../content/posts'
+import { useAuth } from '@/components/AuthProvider'
 
 export const Route = createFileRoute('/discussions/')({
   component: DiscussionsIndexPage,
@@ -18,6 +20,7 @@ function DiscussionsIndexPage() {
   const posts = listPosts()
   const { tag: activeTag } = Route.useSearch() as { tag?: string }
   const navigate = Route.useNavigate()
+  const { user, loading } = useAuth()
   const allTags = useMemo(() => {
     const unique = new Set<string>()
     posts.forEach((post) => post.tags?.forEach((t) => unique.add(t)))
@@ -28,27 +31,38 @@ function DiscussionsIndexPage() {
     ? posts.filter((post) => post.tags?.includes(activeTag))
     : posts
 
+  const actionButtons = (
+    <div className="flex flex-wrap gap-2">
+      {activeTag ? (
+        <button
+          type="button"
+          onClick={() =>
+            navigate({
+              to: '/discussions',
+              search: () => ({ tag: undefined }),
+              replace: true,
+            })
+          }
+          className="rounded-full border border-border px-4 py-2 text-sm font-semibold text-muted-foreground transition hover:bg-muted/40"
+        >
+          Clear filter
+        </button>
+      ) : null}
+      <Link
+        to="/discussions/forum"
+        search={{ tag: undefined }}
+        className="rounded-full border border-border px-4 py-2 text-sm font-semibold text-primary transition hover:bg-muted/40"
+      >
+        Open forum
+      </Link>
+    </div>
+  )
+
   return (
     <DiscussionsLayout
       title="Discussions"
       description="Field-tested essays, patch dispatches, and duo coordination drills—all written in composable React blocks so we can season them with live data and interactivity whenever the meta shifts."
-      actions={
-        activeTag ? (
-          <button
-            type="button"
-            onClick={() =>
-              navigate({
-                to: '/discussions',
-                search: () => ({ tag: undefined }),
-                replace: true,
-              })
-            }
-            className="rounded-full border border-border px-4 py-2 text-sm font-semibold text-muted-foreground transition hover:bg-muted/40"
-          >
-            Clear filter
-          </button>
-        ) : null
-      }
+      actions={actionButtons}
     >
       {allTags.length ? (
         <div className="flex flex-wrap gap-2">
@@ -119,6 +133,16 @@ function DiscussionsIndexPage() {
           </div>
         ) : null}
       </section>
+      {user && !loading ? (
+        <Link
+          to="/discussions/forum/create-post"
+          search={{ tag: undefined }}
+          className="fixed bottom-6 right-6 z-50 inline-flex h-14 w-14 items-center justify-center rounded-full bg-linear-to-r from-primary to-secondary text-base font-semibold text-base shadow-lg shadow-black/20 transition hover:-translate-y-1"
+          aria-label="Write a community post"
+        >
+          <PenSquare className="size-6" />
+        </Link>
+      ) : null}
     </DiscussionsLayout>
   )
 }
