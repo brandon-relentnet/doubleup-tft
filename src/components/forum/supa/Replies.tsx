@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { supabase } from '@/lib/supabaseClient'
 import { useAuth } from '@/components/AuthProvider'
 
@@ -34,14 +34,16 @@ export function Replies({ postId }: { postId: string }) {
   const pageCount = Math.max(1, Math.ceil(total / PAGE_SIZE))
   const offset = (page - 1) * PAGE_SIZE
 
-  const fetchTotal = async () => {
-    if (!supabase) return
+  const fetchTotal = async (): Promise<number> => {
+    if (!supabase) return 0
     const { count, error: err } = await supabase
       .from('forum_comments')
       .select('id', { count: 'exact', head: true })
       .eq('post_id', postId)
     if (err) throw err
-    setTotal(count ?? 0)
+    const next = count ?? 0
+    setTotal(next)
+    return next
   }
 
   const fetchPage = async (nextPage: number) => {
@@ -79,6 +81,14 @@ export function Replies({ postId }: { postId: string }) {
     fetchPage(page).catch(() => {})
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page])
+
+  const handleRealtimeChange = useCallback(() => {
+    // Refetch counts and current page to reflect live updates
+    fetchTotal().catch(() => {})
+    fetchPage(page).catch(() => {})
+  }, [page])
+
+  useRepliesRealtime(postId, handleRealtimeChange)
 
   useEffect(() => {
     if (pendingAnchor.current != null) {
@@ -118,9 +128,9 @@ export function Replies({ postId }: { postId: string }) {
     }
     setReplyText('')
     setReplyToId(null)
-    await fetchTotal()
-    const nextPage = Math.max(1, Math.ceil((total + 1) / PAGE_SIZE))
-    pendingAnchor.current = total + 1
+    const counted = await fetchTotal()
+    const nextPage = Math.max(1, Math.ceil(counted / PAGE_SIZE))
+    pendingAnchor.current = counted
     setPage(nextPage)
   }
 
@@ -308,4 +318,22 @@ function QuotedBlock({ commentId, onViewOriginal }: { commentId: string; onViewO
       </div>
     </details>
   )
+}
+
+// Live updates for replies (subscribe to inserts/updates/deletes)
+// Hook this into the component lifecycle
+// We embed it here for clarity instead of a separate hook file
+export function useRepliesRealtime(postId: string, onChange: () => void) {
+  useEffect(() => {
+    if (!supabase) return
+    const channel = supabase
+      .channel(`forum_comments:post:${postId}`)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'forum_comments', filter: `post_id=eq.${postId}` }, () => {
+        onChange()
+      })
+      .subscribe()
+    return () => {
+      supabase?.removeChannel(channel)
+    }
+  }, [postId, onChange])
 }

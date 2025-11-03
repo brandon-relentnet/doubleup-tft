@@ -80,8 +80,26 @@ function ForumListingPage() {
       setLoadingPosts(false)
     })
 
+    // Realtime: keep list fresh on inserts/updates/deletes
+    const channel = supabaseClient
+      .channel('forum_posts:list')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'forum_posts' },
+        () => {
+          fetchPosts().catch(() => {})
+        },
+      )
+      .subscribe()
+
+    // Refresh on window focus
+    const onFocus = () => fetchPosts().catch(() => {})
+    window.addEventListener('focus', onFocus)
+
     return () => {
       isCancelled = true
+      window.removeEventListener('focus', onFocus)
+      supabaseClient.removeChannel(channel)
     }
   }, [supabaseClient])
 

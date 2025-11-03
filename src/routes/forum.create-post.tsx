@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from '@tanstack/react-router'
+import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import { useMemo, useState } from 'react'
 import DiscussionsLayout from '@/components/DiscussionsLayout'
 import { useAuth } from '@/components/AuthProvider'
@@ -12,6 +12,7 @@ export const Route = createFileRoute('/forum/create-post')({
 })
 
 function CreatePostPage() {
+  const navigate = useNavigate()
   const { user } = useAuth()
   const [title, setTitle] = useState('')
   const [body, setBody] = useState('')
@@ -48,7 +49,7 @@ function CreatePostPage() {
       return
     }
     setSubmitting(false)
-    window.location.href = `/forum/${data!.id}`
+    navigate({ to: '/forum/$postId', params: { postId: data!.id } })
   }
 
   return (
