@@ -8,6 +8,20 @@ import { routeTree } from './routeTree.gen'
 import './styles.css'
 import reportWebVitals from './reportWebVitals.ts'
 
+const spaRedirectKey = '__doubleup_spa_redirect__'
+
+if (typeof window !== 'undefined') {
+  const pendingRedirect = sessionStorage.getItem(spaRedirectKey)
+  if (pendingRedirect) {
+    sessionStorage.removeItem(spaRedirectKey)
+    const target =
+      pendingRedirect.startsWith('/') || pendingRedirect.startsWith('#')
+        ? pendingRedirect
+        : `/${pendingRedirect}`
+    window.history.replaceState(null, '', target)
+  }
+}
+
 // Create a new router instance
 const router = createRouter({
   routeTree,
