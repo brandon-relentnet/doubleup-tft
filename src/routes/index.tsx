@@ -97,24 +97,34 @@ function App() {
             </h1>
 
             <p className="mt-6 max-w-3xl text-lg">
+              <span className="text-xl font-bold">Free-Range TFT</span> means
+              playing the game{' '}
               <span className="font-semibold gradient-text">
-                Out here, we play Free-Range TFT.
-              </span>{' '}
-              Raised on the fundamentals and seasoned with heartbreak, we{' '}
-              <span className="font-semibold">do not chase</span> what is
-              trending or <span className="italic">blindly</span> follow someone
-              else’s guide. We build the strongest board we can with what we
-              have. We play tempo when we must, greed when we can, and we learn
-              to feel the rhythm of the game instead of memorizing it.
+                the way it was meant to be played
+              </span>
+              : <span className="font-semibold">not</span>{' '}
+              <span className="italic">chasing</span> trends or{' '}
+              <span className="italic">copying</span> guides, but building the
+              strongest board you can with what you’re given. It’s about feeling
+              the rhythm of the game, not memorizing it. Every loss adds flavor,
+              and every win feels earned.
               <br className="mb-2" />
+              <span className="text-xl font-bold">This playstyle</span> thrives
+              on flexibility{' '}
               <span className="font-semibold gradient-text">
-                Every loss adds flavor.
+                guaranteeing growth
               </span>{' '}
-              Every win feels <span className="italic">earned.</span> You cannot
-              mass-produce skill; you have to grow it one game at a time. That
-              is what Free-Range TFT means to us. No shortcuts. No excuses. Just
-              solid boards, steady hearts, and players who cook their own
-              success. We play for the flavor.
+              in <span className="italic">any</span> set. Free-Range TFT is
+              set-agnostic, teaching you to adapt, play strong, and find the
+              flavor of every game.
+              <br className="mb-2" />
+              <span className="text-xl font-bold">At the</span> end of the day,
+              players don’t mass-produce skill. They grow it, one game at a
+              time.{' '}
+              <span className="font-semibold gradient-text">
+                No shortcuts. No excuses.
+              </span>{' '}
+              Just solid boards, steady hearts, and home-grown successes.
             </p>
 
             <div className="flex flex-wrap gap-3 mt-6 justify-center lg:justify-start">

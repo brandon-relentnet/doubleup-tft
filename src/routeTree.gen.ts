@@ -18,7 +18,7 @@ import { Route as AccountRouteImport } from './routes/account'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as DiscussionsIndexRouteImport } from './routes/discussions/index'
 import { Route as DiscussionsSlugRouteImport } from './routes/discussions.$slug'
-import { Route as AccountVerifyRouteImport } from './routes/account.verify'
+import { Route as AccountConfirmationRouteImport } from './routes/account.confirmation'
 
 const UnitsRoute = UnitsRouteImport.update({
   id: '/units',
@@ -65,9 +65,9 @@ const DiscussionsSlugRoute = DiscussionsSlugRouteImport.update({
   path: '/$slug',
   getParentRoute: () => DiscussionsRoute,
 } as any)
-const AccountVerifyRoute = AccountVerifyRouteImport.update({
-  id: '/verify',
-  path: '/verify',
+const AccountConfirmationRoute = AccountConfirmationRouteImport.update({
+  id: '/confirmation',
+  path: '/confirmation',
   getParentRoute: () => AccountRoute,
 } as any)
 
@@ -79,7 +79,7 @@ export interface FileRoutesByFullPath {
   '/items': typeof ItemsRoute
   '/strategies': typeof StrategiesRoute
   '/units': typeof UnitsRoute
-  '/account/verify': typeof AccountVerifyRoute
+  '/account/confirmation': typeof AccountConfirmationRoute
   '/discussions/$slug': typeof DiscussionsSlugRoute
   '/discussions/': typeof DiscussionsIndexRoute
 }
@@ -90,7 +90,7 @@ export interface FileRoutesByTo {
   '/items': typeof ItemsRoute
   '/strategies': typeof StrategiesRoute
   '/units': typeof UnitsRoute
-  '/account/verify': typeof AccountVerifyRoute
+  '/account/confirmation': typeof AccountConfirmationRoute
   '/discussions/$slug': typeof DiscussionsSlugRoute
   '/discussions': typeof DiscussionsIndexRoute
 }
@@ -103,7 +103,7 @@ export interface FileRoutesById {
   '/items': typeof ItemsRoute
   '/strategies': typeof StrategiesRoute
   '/units': typeof UnitsRoute
-  '/account/verify': typeof AccountVerifyRoute
+  '/account/confirmation': typeof AccountConfirmationRoute
   '/discussions/$slug': typeof DiscussionsSlugRoute
   '/discussions/': typeof DiscussionsIndexRoute
 }
@@ -117,7 +117,7 @@ export interface FileRouteTypes {
     | '/items'
     | '/strategies'
     | '/units'
-    | '/account/verify'
+    | '/account/confirmation'
     | '/discussions/$slug'
     | '/discussions/'
   fileRoutesByTo: FileRoutesByTo
@@ -128,7 +128,7 @@ export interface FileRouteTypes {
     | '/items'
     | '/strategies'
     | '/units'
-    | '/account/verify'
+    | '/account/confirmation'
     | '/discussions/$slug'
     | '/discussions'
   id:
@@ -140,7 +140,7 @@ export interface FileRouteTypes {
     | '/items'
     | '/strategies'
     | '/units'
-    | '/account/verify'
+    | '/account/confirmation'
     | '/discussions/$slug'
     | '/discussions/'
   fileRoutesById: FileRoutesById
@@ -220,22 +220,22 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DiscussionsSlugRouteImport
       parentRoute: typeof DiscussionsRoute
     }
-    '/account/verify': {
-      id: '/account/verify'
-      path: '/verify'
-      fullPath: '/account/verify'
-      preLoaderRoute: typeof AccountVerifyRouteImport
+    '/account/confirmation': {
+      id: '/account/confirmation'
+      path: '/confirmation'
+      fullPath: '/account/confirmation'
+      preLoaderRoute: typeof AccountConfirmationRouteImport
       parentRoute: typeof AccountRoute
     }
   }
 }
 
 interface AccountRouteChildren {
-  AccountVerifyRoute: typeof AccountVerifyRoute
+  AccountConfirmationRoute: typeof AccountConfirmationRoute
 }
 
 const AccountRouteChildren: AccountRouteChildren = {
-  AccountVerifyRoute: AccountVerifyRoute,
+  AccountConfirmationRoute: AccountConfirmationRoute,
 }
 
 const AccountRouteWithChildren =
