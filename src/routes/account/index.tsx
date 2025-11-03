@@ -8,6 +8,28 @@ import { useAuth } from '@/components/AuthProvider'
 type Mode = 'signIn' | 'signUp'
 type AsyncStatus = 'idle' | 'submitting' | 'success'
 
+const PASSWORD_HELP_TEXT =
+  'Use at least 8 characters with uppercase, lowercase, number, and symbol.'
+
+function validatePasswordStrength(password: string) {
+  if (password.length < 8) {
+    return 'Password must be at least 8 characters long.'
+  }
+  if (!/[a-z]/.test(password)) {
+    return 'Password needs at least one lowercase letter.'
+  }
+  if (!/[A-Z]/.test(password)) {
+    return 'Password needs at least one uppercase letter.'
+  }
+  if (!/\d/.test(password)) {
+    return 'Password needs at least one number.'
+  }
+  if (!/[^A-Za-z0-9]/.test(password)) {
+    return 'Password needs at least one symbol.'
+  }
+  return null
+}
+
 export const Route = createFileRoute('/account/')({
   component: AccountPage,
 })
@@ -39,12 +61,80 @@ export default function AccountPage() {
   const [profileDisplayName, setProfileDisplayName] = useState('')
 
   useEffect(() => {
+    if (!user) {
+      setProfileDisplayName('')
+      return
+    }
+
     const metadataDisplayName =
-      typeof user?.user_metadata?.display_name === 'string'
+      typeof user.user_metadata?.display_name === 'string'
         ? user.user_metadata.display_name.trim()
         : ''
+
     setProfileDisplayName(metadataDisplayName)
-  }, [user])
+
+    if (!supabaseClient) {
+      return
+    }
+
+    const client = supabaseClient as NonNullable<typeof supabaseClient>
+    const currentUser = user
+
+    let isCancelled = false
+
+    const displayNameKey = metadataDisplayName.toLocaleLowerCase()
+
+    async function ensureProfileRecord() {
+      const { data, error } = await client
+        .from('profiles')
+        .select('display_name')
+        .eq('user_id', currentUser.id)
+        .maybeSingle()
+
+      if (error) {
+        console.warn('[profiles] lookup failed', error)
+        return
+      }
+
+      const profileName = data?.display_name?.trim() ?? ''
+
+      if (!profileName && metadataDisplayName) {
+        const { error: upsertError } = await client
+          .from('profiles')
+          .upsert({
+            user_id: currentUser.id,
+            display_name: metadataDisplayName,
+            display_name_key: displayNameKey,
+          })
+        if (upsertError) {
+          console.warn('[profiles] ensure failed', upsertError)
+        }
+        return
+      }
+
+      if (!isCancelled) {
+        setProfileDisplayName(profileName)
+      }
+
+      if (profileName && profileName !== metadataDisplayName) {
+        await client.auth.updateUser({
+          data: {
+            display_name: profileName,
+            display_name_key: profileName.toLocaleLowerCase(),
+          },
+        })
+      }
+      if (!profileName && !metadataDisplayName && !isCancelled) {
+        setProfileDisplayName('')
+      }
+    }
+
+    void ensureProfileRecord()
+
+    return () => {
+      isCancelled = true
+    }
+  }, [supabaseClient, user])
 
   if (!supabaseClient) {
     return (
@@ -90,16 +180,60 @@ export default function AccountPage() {
       } else {
         const targetEmail = email
         const trimmedDisplayName = displayName.trim()
-        const { error } = await supabaseClient.auth.signUp({
+        if (trimmedDisplayName.length < 4 || trimmedDisplayName.length > 16) {
+          setAuthError('Display name must be between 4 and 16 characters long.')
+          return
+        }
+
+        const passwordStrengthError = validatePasswordStrength(password)
+        if (passwordStrengthError) {
+          setAuthError(passwordStrengthError)
+          return
+        }
+
+        const displayNameKey = trimmedDisplayName.toLocaleLowerCase()
+
+        const { count: nameCount, error: nameCheckError } = await supabaseClient
+          .from('profiles')
+          .select('user_id', { head: true, count: 'exact' })
+          .eq('display_name_key', displayNameKey)
+
+        if (nameCheckError) {
+          setAuthError('Unable to reserve that display name right now. Please try again.')
+          return
+        }
+
+        if ((nameCount ?? 0) > 0) {
+          setAuthError('Display name is already taken. Pick another one.')
+          return
+        }
+
+        const { data: signUpData, error } = await supabaseClient.auth.signUp({
           email,
           password,
           options: {
             data: {
               display_name: trimmedDisplayName,
+              display_name_key: displayNameKey,
             },
           },
         })
         if (error) throw error
+
+        const userId = signUpData.user?.id
+        if (userId) {
+          const { error: profileError } = await supabaseClient
+            .from('profiles')
+            .upsert({
+              user_id: userId,
+              display_name: trimmedDisplayName,
+              display_name_key: displayNameKey,
+            })
+          if (profileError) {
+            console.warn('[profiles] upsert after sign-up failed', profileError)
+          }
+        }
+
         setEmail('')
         setPassword('')
         setDisplayName('')
@@ -158,8 +292,9 @@ export default function AccountPage() {
       return
     }
 
-    if (!newPassword || newPassword.length < 6) {
-      setPasswordError('Password must be at least 6 characters long.')
+    const newPasswordStrengthError = validatePasswordStrength(newPassword)
+    if (newPasswordStrengthError) {
+      setPasswordError(newPasswordStrengthError)
       return
     }
 
@@ -296,11 +431,11 @@ export default function AccountPage() {
                   id="new-password"
                   type="password"
                   required
-                  minLength={6}
+                  minLength={8}
                   value={newPassword}
                   onChange={(event) => setNewPassword(event.target.value)}
                   onFocus={(e) =>
-                    (e.currentTarget.placeholder = 'Minimum 6 characters')
+                    (e.currentTarget.placeholder = 'Minimum 8 characters')
                   }
                   onBlur={(e) => {
                     if (!e.currentTarget.value) e.currentTarget.placeholder = ''
@@ -321,13 +456,13 @@ export default function AccountPage() {
                   id="confirm-password"
                   type="password"
                   required
-                  minLength={6}
+                  minLength={8}
                   value={confirmNewPassword}
                   onChange={(event) =>
                     setConfirmNewPassword(event.target.value)
                   }
                   onFocus={(e) =>
-                    (e.currentTarget.placeholder = 'Minimum 6 characters')
+                    (e.currentTarget.placeholder = 'Minimum 8 characters')
                   }
                   onBlur={(e) => {
                     if (!e.currentTarget.value) e.currentTarget.placeholder = ''
@@ -342,6 +477,8 @@ export default function AccountPage() {
                   Confirm
                 </label>
               </div>
+
+              <p className="text-xs text-left text-muted">{PASSWORD_HELP_TEXT}</p>
 
               {passwordError ? (
                 <p className="rounded-xl bg-red-500/10 px-4 py-2 text-sm text-red-200">
@@ -451,32 +588,35 @@ export default function AccountPage() {
 
             {mode === 'signUp' ? (
               <>
-                <div className="relative">
-                  <input
-                    id="display-name"
-                    type="text"
-                    required
-                    value={displayName}
-                    onChange={(event) => setDisplayName(event.target.value)}
-                    onFocus={(e) => {
-                      if (!e.currentTarget.placeholder) {
-                        e.currentTarget.placeholder = 'Farm fresh tactician'
-                      }
-                    }}
-                    onBlur={(e) => {
-                      if (!e.currentTarget.value)
-                        e.currentTarget.placeholder = ''
-                    }}
-                    className="peer w-full bg-base placeholder:text-subtle text-text text-sm border border-highlight-med rounded px-3 py-2 transition duration-300 ease focus:outline-none focus:border-accent hover:border-highlight-high shadow-sm focus:shadow"
-                    placeholder=""
-                  />
-                  <label
-                    htmlFor="display-name"
-                    className="absolute cursor-text bg-base px-1 left-2.5 -top-2 scale-90 text-subtle text-sm transition-all transform origin-left peer-placeholder-shown:top-2.5 peer-placeholder-shown:left-2.5 peer-placeholder-shown:scale-100 peer-focus:-top-2 peer-focus:left-2.5 peer-focus:scale-90"
-                  >
-                    Display name
-                  </label>
-                </div>
+              <div className="relative">
+                <input
+                  id="display-name"
+                  type="text"
+                  required
+                  value={displayName}
+                  onChange={(event) => setDisplayName(event.target.value)}
+                  onFocus={(e) => {
+                    if (!e.currentTarget.placeholder) {
+                      e.currentTarget.placeholder = 'Farm fresh tactician'
+                    }
+                  }}
+                  onBlur={(e) => {
+                    if (!e.currentTarget.value)
+                      e.currentTarget.placeholder = ''
+                  }}
+                  className="peer w-full bg-base placeholder:text-subtle text-text text-sm border border-highlight-med rounded px-3 py-2 transition duration-300 ease focus:outline-none focus:border-accent hover:border-highlight-high shadow-sm focus:shadow"
+                  placeholder=""
+                />
+                <label
+                  htmlFor="display-name"
+                  className="absolute cursor-text bg-base px-1 left-2.5 -top-2 scale-90 text-subtle text-sm transition-all transform origin-left peer-placeholder-shown:top-2.5 peer-placeholder-shown:left-2.5 peer-placeholder-shown:scale-100 peer-focus:-top-2 peer-focus:left-2.5 peer-focus:scale-90"
+                >
+                  Display name
+                </label>
+              </div>
+              <p className="text-xs text-left text-muted">
+                4-16 characters. Names keep their casing, but each spelling is unique no matter the capital letters.
+              </p>
 
               </>
             ) : null}
@@ -486,11 +626,14 @@ export default function AccountPage() {
                 id="password"
                 type="password"
                 required
-                minLength={6}
+                minLength={mode === 'signUp' ? 8 : undefined}
                 value={password}
                 onChange={(event) => setPassword(event.target.value)}
                 onFocus={(e) =>
-                  (e.currentTarget.placeholder = 'Minimum 6 characters')
+                  (e.currentTarget.placeholder =
+                    mode === 'signUp'
+                      ? 'Minimum 8 characters'
+                      : 'Enter password')
                 }
                 onBlur={(e) => {
                   if (!e.currentTarget.value) e.currentTarget.placeholder = ''
@@ -505,6 +648,9 @@ export default function AccountPage() {
                 Password
               </label>
             </div>
+            {mode === 'signUp' ? (
+              <p className="text-xs text-left text-muted">{PASSWORD_HELP_TEXT}</p>
+            ) : null}
 
             {authError ? (
               <p className="rounded-xl bg-red-500/10 px-4 py-2 text-sm text-red-200">
