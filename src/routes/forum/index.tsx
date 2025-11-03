@@ -2,6 +2,7 @@ import { createFileRoute, Link } from '@tanstack/react-router'
 import { PenSquare } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import DiscussionsLayout from '@/components/DiscussionsLayout'
+import { Skeleton } from '@/components/Skeleton'
 import { supabase } from '@/lib/supabaseClient'
 import { useAuth } from '@/components/AuthProvider'
 
@@ -124,7 +125,17 @@ function ForumListingPage() {
           <code>VITE_SUPABASE_ANON_KEY</code> to enable community posts.
         </section>
       ) : loadingPosts ? (
-        <p className="text-sm text-muted">Loading posts…</p>
+        <section className="flex flex-col gap-4">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <article key={i} className="rounded bg-surface px-6 py-5">
+              <Skeleton className="h-6 w-1/2" />
+              <Skeleton className="mt-2 h-3 w-1/3" />
+              <Skeleton className="mt-4 h-4 w-full" />
+              <Skeleton className="mt-2 h-4 w-11/12" />
+              <Skeleton className="mt-2 h-4 w-10/12" />
+            </article>
+          ))}
+        </section>
       ) : error ? (
         <p className="rounded bg-surface px-6 py-6 text-sm text-red-200">
           {error}

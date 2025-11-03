@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import DiscussionsLayout from '@/components/DiscussionsLayout'
 import { supabase } from '@/lib/supabaseClient'
 import { Replies } from './Replies'
+import { Skeleton } from '@/components/Skeleton'
 
 type PostRow = {
   id: string
@@ -53,8 +54,26 @@ export default function PostDetail({ postId, initialCommentId }: { postId: strin
 
   if (loading && !post) {
     return (
-      <div className="mx-auto w-full max-w-3xl px-6 py-12">
-        <p className="text-sm text-muted">Loading…</p>
+      <div className="mx-auto w-full max-w-3xl px-6 py-12 flex flex-col gap-6">
+        <article className="rounded bg-surface px-6 py-5">
+          <Skeleton className="h-7 w-2/3" />
+          <Skeleton className="mt-2 h-3 w-1/3" />
+          <Skeleton className="mt-4 h-4 w-full" />
+          <Skeleton className="mt-2 h-4 w-11/12" />
+          <Skeleton className="mt-2 h-4 w-10/12" />
+        </article>
+        <section className="rounded bg-surface px-6 py-5">
+          <Skeleton className="h-5 w-24" />
+          <div className="mt-4 flex flex-col gap-3">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <div key={i} className="rounded bg-surface">
+                <Skeleton className="h-3 w-1/3" />
+                <Skeleton className="mt-3 h-4 w-full" />
+                <Skeleton className="mt-2 h-4 w-5/6" />
+              </div>
+            ))}
+          </div>
+        </section>
       </div>
     )
   }
