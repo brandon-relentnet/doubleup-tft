@@ -71,8 +71,8 @@ export default function AccountConfirmationPage() {
               We just want to make sure you're real, that's all.
             </h1>
             <p className="text-sm text-subtle">
-              We sent a confirmation email to {email ?? 'your address'}. Tap
-              the big button inside and you&apos;ll unlock publishing access for
+              We sent a confirmation email to {email ?? 'your address'}. Tap the
+              big button inside and you&apos;ll unlock publishing access for
               every farm-fresh TFT post you draft.
             </p>
           </div>
