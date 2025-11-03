@@ -472,6 +472,13 @@ export default function AccountPage() {
                 <label htmlFor="avatar-url" className="absolute cursor-text bg-base px-1 left-2.5 -top-2 scale-90 text-subtle text-sm transition-all transform origin-left peer-placeholder-shown:top-2.5 peer-placeholder-shown:left-2.5 peer-placeholder-shown:scale-100 peer-focus:-top-2 peer-focus:left-2.5 peer-focus:scale-90">Avatar URL</label>
               </div>
 
+              {profileAvatar ? (
+                <div className="mt-2 flex items-center gap-3">
+                  <img src={profileAvatar} alt="Avatar preview" className="size-16 rounded-full object-cover" />
+                  <span className="text-xs text-muted">Preview</span>
+                </div>
+              ) : null}
+
               {profileSaveError ? (
                 <p className="rounded-xl bg-red-500/10 px-4 py-2 text-sm text-red-200">{profileSaveError}</p>
               ) : null}

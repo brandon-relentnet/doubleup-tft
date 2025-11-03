@@ -126,9 +126,23 @@ function UserProfilePage() {
         <div className="text-sm text-muted">Loading profile…</div>
       ) : (
         <div className="flex flex-col gap-10">
-          {/* Bio */}
+          {/* Profile: avatar + bio */}
           <section className="rounded bg-surface px-6 py-5">
-            <h2 className="text-lg font-semibold mb-2">About</h2>
+            <div className="flex items-center gap-4">
+              {profile?.avatar_url ? (
+                <img
+                  src={profile.avatar_url}
+                  alt={`${profile.display_name}'s avatar`}
+                  className="size-20 rounded-full object-cover"
+                />
+              ) : (
+                <div className="size-20 rounded-full bg-highlight-low flex items-center justify-center text-xl font-semibold text-text">
+                  {(profile?.display_name?.[0] ?? '?').toUpperCase()}
+                </div>
+              )}
+              <div className="text-sm text-muted">Joined: {joinedLabel}</div>
+            </div>
+            <h2 className="text-lg font-semibold mt-4 mb-2">About</h2>
             {profile?.bio ? (
               <p className="text-sm whitespace-pre-wrap">{profile.bio}</p>
             ) : (
