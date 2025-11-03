@@ -37,6 +37,29 @@ VITE_SUPABASE_ANON_KEY=<anon-key>
 
 Missing values trigger friendly copy and short-circuit all auth calls so local development keeps running cleanly.
 
+## Forum (Supabase)
+- Classic forum lives under `/forum` with:
+  - Listing, post detail, flat chronological replies with pagination
+  - Quoted replies (collapsed preview) and “View original” jump
+  - Live updates via Supabase Realtime (no manual refresh)
+
+Setup checklist
+- Provide env vars above and restart `npm run dev`.
+- Ensure tables exist (`forum_posts`, `forum_comments`) and RLS policies allow select/insert for authenticated users.
+- Enable Realtime for Postgres changes in your project.
+- Add the tables to the realtime publication (run once):
+
+```
+begin;
+  alter publication supabase_realtime add table public.forum_posts;
+  alter publication supabase_realtime add table public.forum_comments;
+commit;
+```
+
+Notes
+- The UI gracefully degrades if Supabase credentials are missing.
+- The demo-only, local-state forum lives at `/forum-demo` for quick iteration.
+
 ## Project Layout
 ```
 src/
