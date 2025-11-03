@@ -14,7 +14,8 @@ export const Route = createFileRoute('/account/')({
 
 export default function AccountPage() {
   const navigate = Route.useNavigate()
-  const { user, loading, isPasswordRecovery, resolvePasswordRecovery } = useAuth()
+  const { user, loading, isPasswordRecovery, resolvePasswordRecovery } =
+    useAuth()
   const supabaseClient = supabase
 
   const [mode, setMode] = useState<Mode>('signIn')
@@ -38,9 +39,12 @@ export default function AccountPage() {
     return (
       <main className="container flex min-h-[60vh] items-center justify-center px-4 py-20 sm:px-6 lg:px-8">
         <div className="w-full max-w-md space-y-6 rounded-3xl border border-border bg-surface px-8 py-10 text-center shadow-lg shadow-black/10">
-          <h1 className="text-2xl font-extrabold tracking-tight">Supabase not configured</h1>
+          <h1 className="text-2xl font-extrabold tracking-tight">
+            Supabase not configured
+          </h1>
           <p className="text-sm text-muted">
-            Set <code>VITE_SUPABASE_URL</code> and <code>VITE_SUPABASE_ANON_KEY</code> to enable account management.
+            Set <code>VITE_SUPABASE_URL</code> and{' '}
+            <code>VITE_SUPABASE_ANON_KEY</code> to enable account management.
           </p>
         </div>
       </main>
@@ -60,7 +64,10 @@ export default function AccountPage() {
     setAuthStatus('submitting')
     try {
       if (mode === 'signIn') {
-        const { error } = await supabaseClient.auth.signInWithPassword({ email, password })
+        const { error } = await supabaseClient.auth.signInWithPassword({
+          email,
+          password,
+        })
         if (error) throw error
         setAuthMessage('Signed in successfully.')
         setPassword('')
@@ -70,11 +77,17 @@ export default function AccountPage() {
         if (error) throw error
         setEmail('')
         setPassword('')
-        navigate({ to: '/account/confirmation', search: { email: targetEmail } })
+        navigate({
+          to: '/account/confirmation',
+          search: { email: targetEmail },
+        })
         return
       }
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'Unable to process request. Please try again.'
+      const message =
+        err instanceof Error
+          ? err.message
+          : 'Unable to process request. Please try again.'
       setAuthError(message)
     } finally {
       setAuthStatus('idle')
@@ -95,9 +108,14 @@ export default function AccountPage() {
         redirectTo: `${window.location.origin}/account`,
       })
       if (error) throw error
-      setResetMessage('Password reset email sent. Check your inbox for further instructions.')
+      setResetMessage(
+        'Password reset email sent. Check your inbox for further instructions.',
+      )
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'Unable to send reset email. Please try again.'
+      const message =
+        err instanceof Error
+          ? err.message
+          : 'Unable to send reset email. Please try again.'
       setResetError(message)
     } finally {
       setResetStatus('idle')
@@ -121,14 +139,19 @@ export default function AccountPage() {
 
     setPasswordStatus('submitting')
     try {
-      const { error } = await supabaseClient.auth.updateUser({ password: newPassword })
+      const { error } = await supabaseClient.auth.updateUser({
+        password: newPassword,
+      })
       if (error) throw error
       setPasswordMessage('Password updated successfully.')
       setNewPassword('')
       setConfirmNewPassword('')
       resolvePasswordRecovery()
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'Unable to update password. Please try again.'
+      const message =
+        err instanceof Error
+          ? err.message
+          : 'Unable to update password. Please try again.'
       setPasswordError(message)
     } finally {
       setPasswordStatus('idle')
@@ -141,36 +164,59 @@ export default function AccountPage() {
         <div className="grid gap-8 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
           <section className="space-y-8 rounded-3xl border border-border bg-surface px-8 py-10 shadow-lg shadow-black/10">
             <div className="space-y-3">
-              <p className="text-xs uppercase tracking-[0.35em] text-subtext-0">Account</p>
-              <h1 className="text-3xl font-extrabold tracking-tight">Your coop profile</h1>
+              <p className="text-xs uppercase tracking-[0.35em] text-subtext-0">
+                Account
+              </p>
+              <h1 className="text-3xl font-extrabold tracking-tight">
+                Your coop profile
+              </h1>
               <p className="text-sm text-muted">
-                Keep your credentials fresh and manage upcoming posting permissions. Stay tuned for author roles and scheduling tools.
+                Keep your credentials fresh and manage upcoming posting
+                permissions. Stay tuned for author roles and scheduling tools.
               </p>
             </div>
 
             <div className="space-y-4 rounded-2xl border border-border/70 bg-base/80 px-6 py-6">
               <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.35em] text-subtext-0">Email</p>
-                <p className="mt-1 text-lg font-semibold text-text">{user.email}</p>
+                <p className="text-xs font-semibold uppercase tracking-[0.35em] text-subtext-0">
+                  Email
+                </p>
+                <p className="mt-1 text-lg font-semibold text-text">
+                  {user.email}
+                </p>
               </div>
               <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.35em] text-subtext-0">Last sign-in</p>
+                <p className="text-xs font-semibold uppercase tracking-[0.35em] text-subtext-0">
+                  Last sign-in
+                </p>
                 <p className="mt-1 text-sm text-muted">
-                  {user.last_sign_in_at ? new Date(user.last_sign_in_at).toLocaleString() : 'Active session'}
+                  {user.last_sign_in_at
+                    ? new Date(user.last_sign_in_at).toLocaleString()
+                    : 'Active session'}
                 </p>
               </div>
             </div>
 
-            <form onSubmit={handlePasswordUpdate} className="space-y-4 rounded-2xl border border-border/70 bg-base/80 px-6 py-6">
+            <form
+              onSubmit={handlePasswordUpdate}
+              className="space-y-4 rounded-2xl border border-border/70 bg-base/80 px-6 py-6"
+            >
               <div className="flex items-center justify-between">
-                <p className="text-sm font-semibold text-text">Update password</p>
+                <p className="text-sm font-semibold text-text">
+                  Update password
+                </p>
                 {isPasswordRecovery ? (
-                  <span className="text-xs uppercase tracking-[0.2em] text-primary">Recovery mode</span>
+                  <span className="text-xs uppercase tracking-[0.2em] text-primary">
+                    Recovery mode
+                  </span>
                 ) : null}
               </div>
 
               <div className="space-y-2">
-                <label htmlFor="new-password" className="text-sm font-medium text-text">
+                <label
+                  htmlFor="new-password"
+                  className="text-sm font-medium text-text"
+                >
                   New password
                 </label>
                 <input
@@ -186,7 +232,10 @@ export default function AccountPage() {
               </div>
 
               <div className="space-y-2">
-                <label htmlFor="confirm-password" className="text-sm font-medium text-text">
+                <label
+                  htmlFor="confirm-password"
+                  className="text-sm font-medium text-text"
+                >
                   Confirm password
                 </label>
                 <input
@@ -195,17 +244,23 @@ export default function AccountPage() {
                   required
                   minLength={6}
                   value={confirmNewPassword}
-                  onChange={(event) => setConfirmNewPassword(event.target.value)}
+                  onChange={(event) =>
+                    setConfirmNewPassword(event.target.value)
+                  }
                   className="w-full rounded-xl border border-border bg-base px-4 py-3 text-text outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/40"
                   placeholder="Repeat new password"
                 />
               </div>
 
               {passwordError ? (
-                <p className="rounded-xl bg-red-500/10 px-4 py-2 text-sm text-red-200">{passwordError}</p>
+                <p className="rounded-xl bg-red-500/10 px-4 py-2 text-sm text-red-200">
+                  {passwordError}
+                </p>
               ) : null}
               {passwordMessage ? (
-                <p className="rounded-xl bg-primary/10 px-4 py-2 text-sm text-primary">{passwordMessage}</p>
+                <p className="rounded-xl bg-primary/10 px-4 py-2 text-sm text-primary">
+                  {passwordMessage}
+                </p>
               ) : null}
 
               <button
@@ -213,7 +268,9 @@ export default function AccountPage() {
                 disabled={passwordStatus === 'submitting'}
                 className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-linear-to-r from-primary to-secondary px-5 py-3 text-sm font-semibold text-text transition hover:-translate-y-0.5 duration-200 disabled:cursor-not-allowed disabled:opacity-60"
               >
-                {passwordStatus === 'submitting' ? 'Updating…' : 'Update password'}
+                {passwordStatus === 'submitting'
+                  ? 'Updating…'
+                  : 'Update password'}
               </button>
             </form>
 
@@ -239,7 +296,8 @@ export default function AccountPage() {
     )
   }
 
-  const illustration = mode === 'signIn' ? '/blt_pengu_key.png' : '/blt_pengu_egg.png'
+  const illustration =
+    mode === 'signIn' ? '/blt_pengu_key.png' : '/blt_pengu_egg.png'
   const illustrationAlt =
     mode === 'signIn'
       ? 'Pengu guarding the key to the coop'
@@ -280,7 +338,10 @@ export default function AccountPage() {
             </div>
 
             <div className="space-y-2 text-left">
-              <label htmlFor="password" className="text-sm font-medium text-text">
+              <label
+                htmlFor="password"
+                className="text-sm font-medium text-text"
+              >
                 Password
               </label>
               <input
@@ -296,10 +357,14 @@ export default function AccountPage() {
             </div>
 
             {authError ? (
-              <p className="rounded-xl bg-red-500/10 px-4 py-2 text-sm text-red-200">{authError}</p>
+              <p className="rounded-xl bg-red-500/10 px-4 py-2 text-sm text-red-200">
+                {authError}
+              </p>
             ) : null}
             {authMessage ? (
-              <p className="rounded-xl bg-primary/10 px-4 py-2 text-sm text-primary">{authMessage}</p>
+              <p className="rounded-xl bg-primary/10 px-4 py-2 text-sm text-primary">
+                {authMessage}
+              </p>
             ) : null}
 
             <button
@@ -346,12 +411,16 @@ export default function AccountPage() {
                 ? 'Sending reset email…'
                 : 'Forgot password? Send reset link.'}
             </motion.button>
-            {resetError ? <p className="text-xs text-red-300">{resetError}</p> : null}
-            {resetMessage ? <p className="text-xs text-primary">{resetMessage}</p> : null}
+            {resetError ? (
+              <p className="text-xs text-red-300">{resetError}</p>
+            ) : null}
+            {resetMessage ? (
+              <p className="text-xs text-primary">{resetMessage}</p>
+            ) : null}
           </div>
         </div>
 
-        <div className="order-1 flex justify-center lg:order-2 lg:justify-end">
+        <div className="order-1 flex items-center justify-center lg:order-2 lg:justify-end">
           <motion.img
             key={illustration}
             initial={{ opacity: 0, y: 10 }}
@@ -359,7 +428,7 @@ export default function AccountPage() {
             transition={{ duration: 0.35, ease: 'easeOut' }}
             src={illustration}
             alt={illustrationAlt}
-            className="w-full max-w-xs drop-shadow-2xl"
+            className="h-auto w-full max-w-xs drop-shadow-2xl"
             loading="lazy"
           />
         </div>

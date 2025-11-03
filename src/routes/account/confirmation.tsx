@@ -13,13 +13,17 @@ export const Route = createFileRoute('/account/confirmation')({
 export default function AccountConfirmationPage() {
   const { email } = Route.useSearch()
   const supabaseClient = supabase
-  const [status, setStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle')
+  const [status, setStatus] = useState<
+    'idle' | 'submitting' | 'success' | 'error'
+  >('idle')
   const [message, setMessage] = useState<string | null>(null)
 
   const handleResend = async () => {
     if (!email) {
       setStatus('error')
-      setMessage('Enter your email on the account page to resend the confirmation.')
+      setMessage(
+        'Enter your email on the account page to resend the confirmation.',
+      )
       return
     }
 
@@ -31,12 +35,18 @@ export default function AccountConfirmationPage() {
 
     setStatus('submitting')
     try {
-      const { error } = await supabaseClient.auth.resend({ type: 'signup', email })
+      const { error } = await supabaseClient.auth.resend({
+        type: 'signup',
+        email,
+      })
       if (error) throw error
       setStatus('success')
       setMessage('Confirmation email sent. Check your inbox.')
     } catch (err: unknown) {
-      const errorText = err instanceof Error ? err.message : 'Unable to resend confirmation email.'
+      const errorText =
+        err instanceof Error
+          ? err.message
+          : 'Unable to resend confirmation email.'
       setStatus('error')
       setMessage(errorText)
     }
@@ -47,11 +57,16 @@ export default function AccountConfirmationPage() {
       <div className="grid w-full max-w-4xl gap-10 rounded-3xl border border-border bg-surface px-10 py-12 shadow-xl shadow-black/15 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
         <div className="order-2 space-y-6 text-center lg:order-1 lg:text-left">
           <div className="space-y-3">
-            <p className="text-xs uppercase tracking-[0.35em] text-subtext-0">Finish signing in</p>
-            <h1 className="text-3xl font-extrabold tracking-tight">Confirm your coop access</h1>
-            <p className="text-sm text-muted">
-              We just sent a confirmation email to {email ?? 'your address'}. Open the message, tap the big button inside,
-              and you will unlock publishing access for farm-fresh TFT posts.
+            <p className="text-xs uppercase tracking-[0.35em] gradient-text w-fit">
+              Finish signing in
+            </p>
+            <h1 className="text-3xl font-extrabold tracking-tight">
+              We just want to make sure you're real, that's all.
+            </h1>
+            <p className="text-sm text-subtle">
+              We just sent a confirmation email to {email ?? 'your address'}.
+              Open the message, tap the big button inside, and you will unlock
+              publishing access for farm-fresh TFT posts.
             </p>
           </div>
 
@@ -72,7 +87,7 @@ export default function AccountConfirmationPage() {
               type="button"
               onClick={handleResend}
               disabled={status === 'submitting'}
-              className="inline-flex items-center justify-center gap-2 rounded-xl border border-border px-5 py-3 text-sm font-semibold text-subtle transition hover:-translate-y-0.5 duration-200 disabled:cursor-not-allowed disabled:opacity-60"
+              className="inline-flex items-center justify-center gap-2 rounded-xl border border-border px-5 py-3 text-sm font-semibold text-text transition hover:-translate-y-0.5 duration-200 disabled:cursor-not-allowed disabled:opacity-60"
             >
               {status === 'submitting' ? 'Resending…' : 'Resend email'}
             </button>
@@ -85,19 +100,20 @@ export default function AccountConfirmationPage() {
           </div>
 
           <p className="text-xs text-muted">
-            Tip: the email may hide in spam, promotions, or updates. Add us to your safe senders so future harvest reports
-            land right in your inbox.
+            Tip: the email may hide in spam, promotions, or updates. Add us to
+            your safe senders so future harvest reports land right in your
+            inbox.
           </p>
         </div>
 
-        <div className="order-1 flex justify-center lg:order-2 lg:justify-end">
+        <div className="order-1 flex items-center justify-center lg:order-2 lg:justify-end">
           <motion.img
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.35, ease: 'easeOut' }}
             src="/blt_pengu_mail.png"
             alt="Pengu courier delivering confirmation mail"
-            className="w-full max-w-xs drop-shadow-2xl"
+            className="h-auto w-full max-w-xs drop-shadow-2xl"
             loading="lazy"
           />
         </div>
