@@ -12,7 +12,7 @@ type PostRow = {
   author_display_name: string | null
 }
 
-export default function PostDetail({ postId }: { postId: string }) {
+export default function PostDetail({ postId, initialCommentId }: { postId: string; initialCommentId?: string | null }) {
   const [post, setPost] = useState<PostRow | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -76,7 +76,11 @@ export default function PostDetail({ postId }: { postId: string }) {
       title={post.title}
       description={
         <span className="text-sm uppercase tracking-[0.2em] text-muted">
-          {new Date(post.created_at).toLocaleString()} • {post.author_display_name ?? 'Anonymous'}
+          {new Date(post.created_at).toLocaleString()} • {post.author_display_name ? (
+            <Link to="/u/$name" params={{ name: post.author_display_name }} className="hover:underline">
+              {post.author_display_name}
+            </Link>
+          ) : 'Anonymous'}
         </span>
       }
     >
@@ -86,7 +90,7 @@ export default function PostDetail({ postId }: { postId: string }) {
 
       <section className="flex flex-col gap-4">
         <h2 className="text-lg font-semibold">Replies</h2>
-        <Replies postId={post.id} />
+        <Replies postId={post.id} initialFocusId={initialCommentId} />
       </section>
     </DiscussionsLayout>
   )

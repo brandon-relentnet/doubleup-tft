@@ -22,6 +22,7 @@ import { Route as ForumIndexRouteImport } from './routes/forum/index'
 import { Route as ForumDemoIndexRouteImport } from './routes/forum-demo.index'
 import { Route as DiscussionsIndexRouteImport } from './routes/discussions/index'
 import { Route as AccountIndexRouteImport } from './routes/account/index'
+import { Route as UNameRouteImport } from './routes/u.$name'
 import { Route as ForumCreatePostRouteImport } from './routes/forum.create-post'
 import { Route as ForumPostIdRouteImport } from './routes/forum.$postId'
 import { Route as ForumDemoPostIdRouteImport } from './routes/forum-demo.$postId'
@@ -93,6 +94,11 @@ const AccountIndexRoute = AccountIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AccountRoute,
 } as any)
+const UNameRoute = UNameRouteImport.update({
+  id: '/u/$name',
+  path: '/u/$name',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ForumCreatePostRoute = ForumCreatePostRouteImport.update({
   id: '/create-post',
   path: '/create-post',
@@ -134,6 +140,7 @@ export interface FileRoutesByFullPath {
   '/forum-demo/$postId': typeof ForumDemoPostIdRoute
   '/forum/$postId': typeof ForumPostIdRoute
   '/forum/create-post': typeof ForumCreatePostRoute
+  '/u/$name': typeof UNameRoute
   '/account/': typeof AccountIndexRoute
   '/discussions/': typeof DiscussionsIndexRoute
   '/forum-demo/': typeof ForumDemoIndexRoute
@@ -150,6 +157,7 @@ export interface FileRoutesByTo {
   '/forum-demo/$postId': typeof ForumDemoPostIdRoute
   '/forum/$postId': typeof ForumPostIdRoute
   '/forum/create-post': typeof ForumCreatePostRoute
+  '/u/$name': typeof UNameRoute
   '/account': typeof AccountIndexRoute
   '/discussions': typeof DiscussionsIndexRoute
   '/forum-demo': typeof ForumDemoIndexRoute
@@ -171,6 +179,7 @@ export interface FileRoutesById {
   '/forum-demo/$postId': typeof ForumDemoPostIdRoute
   '/forum/$postId': typeof ForumPostIdRoute
   '/forum/create-post': typeof ForumCreatePostRoute
+  '/u/$name': typeof UNameRoute
   '/account/': typeof AccountIndexRoute
   '/discussions/': typeof DiscussionsIndexRoute
   '/forum-demo/': typeof ForumDemoIndexRoute
@@ -193,6 +202,7 @@ export interface FileRouteTypes {
     | '/forum-demo/$postId'
     | '/forum/$postId'
     | '/forum/create-post'
+    | '/u/$name'
     | '/account/'
     | '/discussions/'
     | '/forum-demo/'
@@ -209,6 +219,7 @@ export interface FileRouteTypes {
     | '/forum-demo/$postId'
     | '/forum/$postId'
     | '/forum/create-post'
+    | '/u/$name'
     | '/account'
     | '/discussions'
     | '/forum-demo'
@@ -229,6 +240,7 @@ export interface FileRouteTypes {
     | '/forum-demo/$postId'
     | '/forum/$postId'
     | '/forum/create-post'
+    | '/u/$name'
     | '/account/'
     | '/discussions/'
     | '/forum-demo/'
@@ -245,6 +257,7 @@ export interface RootRouteChildren {
   ItemsRoute: typeof ItemsRoute
   StrategiesRoute: typeof StrategiesRoute
   UnitsRoute: typeof UnitsRoute
+  UNameRoute: typeof UNameRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -339,6 +352,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/account/'
       preLoaderRoute: typeof AccountIndexRouteImport
       parentRoute: typeof AccountRoute
+    }
+    '/u/$name': {
+      id: '/u/$name'
+      path: '/u/$name'
+      fullPath: '/u/$name'
+      preLoaderRoute: typeof UNameRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/forum/create-post': {
       id: '/forum/create-post'
@@ -443,6 +463,7 @@ const rootRouteChildren: RootRouteChildren = {
   ItemsRoute: ItemsRoute,
   StrategiesRoute: StrategiesRoute,
   UnitsRoute: UnitsRoute,
+  UNameRoute: UNameRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

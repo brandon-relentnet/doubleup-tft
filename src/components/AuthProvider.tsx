@@ -1,5 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
 import { supabase } from '../lib/supabaseClient'
+import { ensureProfile } from '@/lib/profiles'
 import type { ReactNode } from 'react'
 import type { Session, User } from '@supabase/supabase-js'
 
@@ -36,12 +37,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     supabase.auth
       .getSession()
-      .then(({ data }) => {
+      .then(async ({ data }) => {
         if (!isMounted) return
         setSession(data.session)
         setUser(data.session?.user ?? null)
         setLoading(false)
         setIsPasswordRecovery(false)
+        if (data.session?.user) {
+          await ensureProfile(data.session.user)
+        }
       })
       .catch(() => {
         if (isMounted) {
@@ -52,12 +56,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((event, nextSession) => {
+    } = supabase.auth.onAuthStateChange(async (event, nextSession) => {
       if (!isMounted) return
       setSession(nextSession)
       setUser(nextSession?.user ?? null)
       setLoading(false)
       setIsPasswordRecovery(event === 'PASSWORD_RECOVERY')
+      if (nextSession?.user) {
+        await ensureProfile(nextSession.user)
+      }
     })
 
     return () => {

@@ -148,7 +148,11 @@ function ForumListingPage() {
                 </h3>
                 <span className="text-xs uppercase tracking-[0.2em] text-muted">
                   {new Date(post.created_at).toLocaleString()} •{' '}
-                  {post.author_display_name ?? 'Anonymous tactician'}
+                  {post.author_display_name ? (
+                    <Link to="/u/$name" params={{ name: post.author_display_name }} className="hover:underline">
+                      {post.author_display_name}
+                    </Link>
+                  ) : 'Anonymous tactician'}
                 </span>
               </header>
               <p className="mt-3 whitespace-pre-wrap text-sm leading-6 text-text">

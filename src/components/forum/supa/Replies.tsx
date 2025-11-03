@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { Link } from '@tanstack/react-router'
 import { supabase } from '@/lib/supabaseClient'
 import { useAuth } from '@/components/AuthProvider'
 
@@ -19,7 +20,7 @@ function snippet(text: string, n = 120) {
   return s.length > n ? s.slice(0, n - 1) + '…' : s
 }
 
-export function Replies({ postId }: { postId: string }) {
+export function Replies({ postId, initialFocusId }: { postId: string; initialFocusId?: string | null }) {
   const { user } = useAuth()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -89,6 +90,14 @@ export function Replies({ postId }: { postId: string }) {
   }, [page])
 
   useRepliesRealtime(postId, handleRealtimeChange)
+
+  // If an initial comment id is provided (e.g., deep link), jump to it once data is available
+  useEffect(() => {
+    if (!initialFocusId) return
+    // attempt to jump once rows are loaded
+    gotoOriginal(initialFocusId).catch(() => {})
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialFocusId, rows.length])
 
   useEffect(() => {
     if (pendingAnchor.current != null) {
@@ -199,7 +208,11 @@ export function Replies({ postId }: { postId: string }) {
               <li key={r.id} id={`reply-${index}`} className="rounded bg-surface px-4 py-3 transition-colors duration-300">
                 <div className="flex items-center justify-between">
                   <div className="text-xs uppercase tracking-[0.2em] text-muted">
-                    #{index} • {new Date(r.created_at).toLocaleString()} • {r.author_display_name ?? 'Anonymous'}
+                    #{index} • {new Date(r.created_at).toLocaleString()} • {r.author_display_name ? (
+                      <Link to="/u/$name" params={{ name: r.author_display_name }} className="hover:underline">
+                        {r.author_display_name}
+                      </Link>
+                    ) : 'Anonymous'}
                   </div>
                   {user ? (
                     <button className="text-xs text-primary hover:underline" onClick={() => onReplyTo(r.id)}>
