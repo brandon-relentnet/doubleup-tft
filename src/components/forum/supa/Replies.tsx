@@ -194,19 +194,13 @@ export function Replies({ postId, initialFocusId }: { postId: string; initialFoc
   return (
     <div className="flex flex-col gap-4">
       {loading && !rows.length ? (
-        <ol className="flex flex-col gap-3">
-          {Array.from({ length: 4 }).map((_, i) => (
-            <li key={i} className="rounded bg-surface px-4 py-3">
-              <div className="flex items-center justify-between">
-                <div className="animate-pulse rounded bg-highlight-low h-3 w-40" />
-              </div>
-              <div className="mt-3 space-y-2">
-                <div className="animate-pulse rounded bg-highlight-low h-4 w-full" />
-                <div className="animate-pulse rounded bg-highlight-low h-4 w-11/12" />
-              </div>
-            </li>
-          ))}
-        </ol>
+        <div className="rounded bg-surface px-4 py-4">
+          <div className="animate-pulse rounded bg-highlight-low h-4 w-40" />
+          <div className="mt-3 space-y-2">
+            <div className="animate-pulse rounded bg-highlight-low h-4 w-2/3" />
+            <div className="animate-pulse rounded bg-highlight-low h-4 w-1/2" />
+          </div>
+        </div>
       ) : error ? (
         <p className="text-sm text-red-200">{error}</p>
       ) : !total ? (
