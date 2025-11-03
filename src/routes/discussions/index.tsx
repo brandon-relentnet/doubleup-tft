@@ -82,7 +82,7 @@ function DiscussionsIndexPage() {
         {filteredPosts.map((post) => (
           <article
             key={post.slug}
-            className="rounded-xl border border-border bg-card px-6 py-5 shadow-sm transition hover:-translate-y-0.5 hover:bg-card/80"
+            className="rounded-xl bg-surface px-6 py-5 shadow-sm transition hover:-translate-y-0.5 hover:bg-highlight-low"
           >
             <div className="flex flex-wrap items-center gap-3 text-xs uppercase tracking-[0.16em] text-muted-foreground">
               <span>{dateFormatter.format(new Date(post.date))}</span>
@@ -119,7 +119,7 @@ function DiscussionsIndexPage() {
           </article>
         ))}
         {!filteredPosts.length ? (
-          <div className="rounded-xl border border-border bg-card px-6 py-10 text-muted-foreground">
+          <div className="rounded-xl bg-surface px-6 py-10 text-muted-foreground">
             No posts match that tag yet. Clear the filter or stop by after the
             next harvest—we log every patch once the fields settle.
           </div>

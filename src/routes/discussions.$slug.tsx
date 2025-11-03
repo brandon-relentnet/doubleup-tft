@@ -29,7 +29,7 @@ function BlogPostPage() {
         title="Post not found"
         description="That write-up either moved coops or hasn't been harvested yet."
       >
-        <div className="rounded-xl border border-border bg-card px-6 py-8 text-muted-foreground">
+        <div className="rounded-xl bg-surface px-6 py-8 text-muted-foreground">
           Double-check the URL or head back to the discussions page to browse
           our latest field notes and patch dispatches.
         </div>
