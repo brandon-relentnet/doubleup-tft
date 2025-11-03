@@ -71,3 +71,8 @@ body {
 .container {
   @apply mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-24;
 }
+
+/* Temporary utility to accent-highlight borders on scroll-to */
+.highlight-accent-border {
+  border-color: var(--color-accent) !important;
+}

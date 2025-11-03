@@ -124,7 +124,9 @@ function ForumListingPage() {
             >
               <header className="flex flex-col gap-1">
                 <h3 className="text-xl font-semibold text-text">
-                  {post.title}
+                  <Link to="/forum/$postId" params={{ postId: post.id }} className="hover:underline">
+                    {post.title}
+                  </Link>
                 </h3>
                 <span className="text-xs uppercase tracking-[0.2em] text-muted">
                   {new Date(post.created_at).toLocaleString()} •{' '}
@@ -134,6 +136,11 @@ function ForumListingPage() {
               <p className="mt-3 whitespace-pre-wrap text-sm leading-6 text-text">
                 {post.body}
               </p>
+              <div className="mt-3">
+                <Link to="/forum/$postId" params={{ postId: post.id }} className="text-sm font-medium text-primary hover:underline">
+                  Open discussion →
+                </Link>
+              </div>
             </article>
           ))}
         </section>
