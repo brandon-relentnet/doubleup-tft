@@ -57,7 +57,7 @@ function CommentNode({ comment, byParent, depth }: { comment: Comment; byParent:
 
   return (
     <div className="flex flex-col gap-2">
-      <div className="rounded border border-border bg-surface px-4 py-3">
+      <div className="rounded bg-surface px-4 py-3">
         <div className="flex items-center justify-between">
           <span className="text-xs uppercase tracking-[0.2em] text-muted">
             {new Date(comment.createdAt).toLocaleString()} • {author}
@@ -87,7 +87,7 @@ function CommentNode({ comment, byParent, depth }: { comment: Comment; byParent:
               onChange={(e) => setText(e.target.value)}
               placeholder="Write a reply..."
               rows={3}
-              className="rounded border border-border bg-card px-3 py-2 text-sm"
+              className="rounded border border-border bg-surface px-3 py-2 text-sm"
             />
             <div className="flex items-center gap-2">
               <button
@@ -118,4 +118,3 @@ function CommentNode({ comment, byParent, depth }: { comment: Comment; byParent:
     </div>
   )
 }
-

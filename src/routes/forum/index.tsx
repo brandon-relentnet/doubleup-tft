@@ -119,14 +119,14 @@ function ForumListingPage() {
       }
     >
       {!supabaseClient ? (
-        <section className="rounded border border-border bg-card px-6 py-6 text-sm text-muted-foreground">
+        <section className="rounded bg-surface px-6 py-6 text-sm text-muted-foreground">
           Set <code>VITE_SUPABASE_URL</code> and{' '}
           <code>VITE_SUPABASE_ANON_KEY</code> to enable community posts.
         </section>
       ) : loadingPosts ? (
         <p className="text-sm text-muted">Loading posts…</p>
       ) : error ? (
-        <p className="rounded border border-border bg-card px-6 py-6 text-sm text-red-200">
+        <p className="rounded bg-surface px-6 py-6 text-sm text-red-200">
           {error}
         </p>
       ) : !posts.length ? (
@@ -138,7 +138,7 @@ function ForumListingPage() {
           {posts.map((post) => (
             <article
               key={post.id}
-              className="rounded border border-border bg-card px-6 py-5 shadow-sm"
+              className="rounded bg-surface px-6 py-5 shadow-sm"
             >
               <header className="flex flex-col gap-1">
                 <h3 className="text-xl font-semibold text-text">

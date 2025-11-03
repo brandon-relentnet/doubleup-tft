@@ -74,5 +74,6 @@ body {
 
 /* Temporary utility to accent-highlight borders on scroll-to */
 .highlight-accent-border {
-  border-color: var(--color-accent) !important;
+  outline: 2px solid var(--color-accent);
+  outline-offset: 0px;
 }

@@ -88,7 +88,7 @@ export default function ForumList() {
       {showComposer ? (
         <form
           onSubmit={submitPost}
-          className="rounded border border-border bg-card p-4 flex flex-col gap-3"
+          className="rounded bg-surface p-4 flex flex-col gap-3"
         >
           <input
             value={title}
@@ -161,7 +161,7 @@ function PostCard({ post }: { post: Post }) {
   const author = authorName(state.users, post.authorId)
   const replies = getReplyCount(post.id)
   return (
-    <article className="rounded border border-border bg-card px-6 py-5 shadow-sm">
+    <article className="rounded bg-surface px-6 py-5 shadow-sm">
       <header className="flex flex-col gap-1">
         <h3 className="text-xl font-semibold text-text">
           <Link to="/forum-demo/$postId" params={{ postId: post.id }} className="hover:underline">

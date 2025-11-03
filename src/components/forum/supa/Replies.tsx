@@ -196,7 +196,7 @@ export function Replies({ postId }: { postId: string }) {
             const index = offset + i + 1
             const hasQuote = Boolean(r.parent_id)
             return (
-              <li key={r.id} id={`reply-${index}`} className="rounded border border-border bg-surface px-4 py-3 transition-colors duration-300">
+              <li key={r.id} id={`reply-${index}`} className="rounded bg-surface px-4 py-3 transition-colors duration-300">
                 <div className="flex items-center justify-between">
                   <div className="text-xs uppercase tracking-[0.2em] text-muted">
                     #{index} • {new Date(r.created_at).toLocaleString()} • {r.author_display_name ?? 'Anonymous'}
@@ -231,7 +231,7 @@ export function Replies({ postId }: { postId: string }) {
         </div>
       </footer>
 
-      <form onSubmit={onSubmit} className="rounded border border-border bg-card p-4 flex flex-col gap-2">
+      <form onSubmit={onSubmit} className="rounded bg-surface p-4 flex flex-col gap-2">
         {replyToId ? <ReplyingToChip postId={postId} commentId={replyToId} onClear={() => setReplyToId(null)} /> : null}
         {user ? (
           <>
@@ -278,7 +278,7 @@ function ReplyingToChip({ postId, commentId, onClear }: { postId: string; commen
 
   if (!meta) return null
   return (
-    <div className="rounded border border-border bg-card p-2 text-xs flex items-center justify-between">
+    <div className="rounded bg-surface p-2 text-xs flex items-center justify-between">
       <div className="truncate">Replying to • {new Date(meta.created_at).toLocaleString()} • {meta.author_display_name ?? 'Anonymous'}</div>
       <button type="button" className="ml-3 text-primary hover:underline" onClick={onClear}>Cancel</button>
     </div>
@@ -308,7 +308,7 @@ function QuotedBlock({ commentId, onViewOriginal }: { commentId: string; onViewO
   const summary = `Quoted from • ${new Date(row.created_at).toLocaleString()} • ${row.author_display_name ?? 'Anonymous'} — “${snippet(row.body)}”`
 
   return (
-    <details className="mt-2 rounded border border-border bg-card">
+    <details className="mt-2 rounded bg-surface">
       <summary className="cursor-pointer select-none list-none px-3 py-2 text-xs text-muted">{summary}</summary>
       <div className="px-3 pb-3 space-y-2">
         <blockquote className="text-sm text-subtle whitespace-pre-wrap">{row.body}</blockquote>

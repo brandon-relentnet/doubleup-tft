@@ -80,7 +80,7 @@ export default function PostDetail({ postId }: { postId: string }) {
         </span>
       }
     >
-      <article className="rounded border border-border bg-card px-6 py-5 shadow-sm">
+      <article className="rounded bg-surface px-6 py-5 shadow-sm">
         <p className="whitespace-pre-wrap text-sm leading-6 text-text">{post.body}</p>
       </article>
 

@@ -59,15 +59,15 @@ function CreatePostPage() {
       description="Share a topic or question to start a discussion."
     >
       {!supabase ? (
-        <section className="rounded border border-border bg-card px-6 py-6 text-sm text-muted-foreground">
+        <section className="rounded bg-surface px-6 py-6 text-sm text-muted-foreground">
           Set <code>VITE_SUPABASE_URL</code> and <code>VITE_SUPABASE_ANON_KEY</code> to enable posting.
         </section>
       ) : !user ? (
-        <section className="rounded border border-border bg-card px-6 py-6 text-sm text-muted-foreground">
+        <section className="rounded bg-surface px-6 py-6 text-sm text-muted-foreground">
           Please sign in to create a post.
         </section>
       ) : (
-        <form onSubmit={onSubmit} className="rounded border border-border bg-card p-4 flex flex-col gap-3">
+        <form onSubmit={onSubmit} className="rounded bg-surface p-4 flex flex-col gap-3">
           {error ? (
             <p className="text-sm text-red-200">{error}</p>
           ) : null}

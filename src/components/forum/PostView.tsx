@@ -52,7 +52,7 @@ export default function PostView({ postId }: { postId: string }) {
         <Link to="/forum-demo" className="text-primary hover:underline">← Back to forum</Link>
       </nav>
 
-      <article className="rounded border border-border bg-card px-6 py-5 shadow-sm">
+      <article className="rounded bg-surface px-6 py-5 shadow-sm">
         <header className="flex flex-col gap-1">
           <h1 className="text-2xl font-semibold text-text">{post.title}</h1>
           <span className="text-xs uppercase tracking-[0.2em] text-muted">
@@ -65,7 +65,7 @@ export default function PostView({ postId }: { postId: string }) {
       <section className="flex flex-col gap-4">
         <h2 className="text-lg font-semibold">Replies</h2>
         <ReplyList postId={post.id} onReplyTo={handleReplyTo} />
-        <form ref={formRef} onSubmit={onSubmit} className="rounded border border-border bg-card p-4 flex flex-col gap-2">
+        <form ref={formRef} onSubmit={onSubmit} className="rounded bg-surface p-4 flex flex-col gap-2">
           {replyToId ? (
             <ReplyingToBanner commentId={replyToId} replies={repliesChrono} onClear={() => setReplyToId(null)} />
           ) : null}
@@ -98,7 +98,7 @@ function ReplyingToBanner({ commentId, replies, onClear }: { commentId: string; 
   const author = comment ? (state.users.find((u) => u.id === comment.authorId)?.displayName ?? 'Anonymous') : ''
   if (!comment) return null
   return (
-    <div className="rounded border border-border bg-card p-2 text-xs flex items-center justify-between">
+    <div className="rounded bg-surface p-2 text-xs flex items-center justify-between">
       <div className="truncate">
         Replying to #{idx + 1} • {new Date(comment.createdAt).toLocaleString()} • {author}
       </div>

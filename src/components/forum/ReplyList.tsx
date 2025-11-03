@@ -82,7 +82,7 @@ export default function ReplyList({ postId, onReplyTo }: { postId: string; onRep
               <li
                 key={r.id}
                 id={`reply-${start + idx + 1}`}
-                className="rounded border border-border bg-surface px-4 py-3 transition-colors duration-300"
+                className="rounded bg-surface px-4 py-3 transition-colors duration-300"
               >
                 <div className="flex items-center justify-between">
                   <div className="text-xs uppercase tracking-[0.2em] text-muted">
@@ -99,7 +99,7 @@ export default function ReplyList({ postId, onReplyTo }: { postId: string; onRep
                 </div>
 
                 {quoted ? (
-                  <details className="mt-2 rounded border border-border bg-card">
+                  <details className="mt-2 rounded bg-surface">
                     <summary className="cursor-pointer select-none list-none px-3 py-2 text-xs text-muted">
                       Quoted from #{qIndex} • {new Date(quoted.createdAt).toLocaleString()} • {quotedAuthor} — “{snippet(quoted.body)}”
                     </summary>
