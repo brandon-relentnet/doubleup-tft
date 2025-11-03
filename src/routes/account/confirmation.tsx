@@ -54,10 +54,10 @@ export default function AccountConfirmationPage() {
 
   return (
     <main className="container flex min-h-[60vh] items-center justify-center px-4 py-20 sm:px-6 lg:px-8">
-      <div className="grid w-full max-w-4xl gap-10 rounded-3xl border border-border bg-surface px-10 py-12 shadow-xl shadow-black/15 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+      <div className="grid w-full max-w-4xl gap-10 rounded bg-surface px-10 py-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
         <div className="order-2 space-y-6 text-center lg:order-1 lg:text-left">
           <div className="space-y-3">
-            <p className="text-xs uppercase tracking-[0.35em] gradient-text w-fit">
+            <p className="text-xs uppercase tracking-[0.35em] font-bold gradient-text w-fit">
               Finish signing in
             </p>
             <h1 className="text-3xl font-extrabold tracking-tight">
@@ -83,20 +83,25 @@ export default function AccountConfirmationPage() {
           ) : null}
 
           <div className="flex flex-col gap-3 sm:flex-row sm:justify-start">
-            <button
+            <Link to="/account">
+              <motion.span
+                whileHover={{ x: -10 }}
+                whileTap={{ x: -20 }}
+                className="inline-flex items-center justify-center gap-2 rounded bg-linear-to-r from-primary to-secondary px-5 py-3 text-sm font-semibold text-base"
+              >
+                Return to account
+              </motion.span>
+            </Link>
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
               type="button"
               onClick={handleResend}
               disabled={status === 'submitting'}
-              className="inline-flex items-center justify-center gap-2 rounded-xl border border-border px-5 py-3 text-sm font-semibold text-text transition hover:-translate-y-0.5 duration-200 disabled:cursor-not-allowed disabled:opacity-60"
+              className="inline-flex items-center cursor-pointer justify-center gap-2 rounded border border-border px-5 py-3 text-sm font-semibold text-text disabled:cursor-not-allowed disabled:opacity-60"
             >
               {status === 'submitting' ? 'Resending…' : 'Resend email'}
-            </button>
-            <Link
-              to="/account"
-              className="inline-flex items-center justify-center gap-2 rounded-xl bg-linear-to-r from-primary to-secondary px-5 py-3 text-sm font-semibold text-text transition hover:-translate-y-0.5 duration-200"
-            >
-              Return to account
-            </Link>
+            </motion.button>
           </div>
 
           <p className="text-xs text-muted">

@@ -162,13 +162,13 @@ export default function AccountPage() {
     return (
       <main className="container px-4 py-16 sm:px-6 lg:px-8">
         <div className="grid gap-8 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
-          <section className="space-y-8 rounded-3xl border border-border bg-surface px-8 py-10 shadow-lg shadow-black/10">
+          <section className="space-y-8 rounded bg-surface px-8 py-10">
             <div className="space-y-3">
-              <p className="text-xs uppercase tracking-[0.35em] text-subtext-0">
+              <p className="text-xs uppercase tracking-[0.35em] gradient-text w-fit font-bold">
                 Account
               </p>
               <h1 className="text-3xl font-extrabold tracking-tight">
-                Your coop profile
+                Your BLT
               </h1>
               <p className="text-sm text-muted">
                 Keep your credentials fresh and manage upcoming posting
@@ -176,9 +176,9 @@ export default function AccountPage() {
               </p>
             </div>
 
-            <div className="space-y-4 rounded-2xl border border-border/70 bg-base/80 px-6 py-6">
+            <div className="space-y-4 rounded bg-overlay px-6 py-6">
               <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.35em] text-subtext-0">
+                <p className="text-xs font-semibold uppercase tracking-[0.35em] text-subtle">
                   Email
                 </p>
                 <p className="mt-1 text-lg font-semibold text-text">
@@ -186,7 +186,7 @@ export default function AccountPage() {
                 </p>
               </div>
               <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.35em] text-subtext-0">
+                <p className="text-xs font-semibold uppercase tracking-[0.35em] text-subtle">
                   Last sign-in
                 </p>
                 <p className="mt-1 text-sm text-muted">
@@ -197,10 +197,7 @@ export default function AccountPage() {
               </div>
             </div>
 
-            <form
-              onSubmit={handlePasswordUpdate}
-              className="space-y-4 rounded-2xl border border-border/70 bg-base/80 px-6 py-6"
-            >
+            <form onSubmit={handlePasswordUpdate} className="space-y-4">
               <div className="flex items-center justify-between">
                 <p className="text-sm font-semibold text-text">
                   Update password
@@ -211,14 +208,7 @@ export default function AccountPage() {
                   </span>
                 ) : null}
               </div>
-
-              <div className="space-y-2">
-                <label
-                  htmlFor="new-password"
-                  className="text-sm font-medium text-text"
-                >
-                  New password
-                </label>
+              <div className="relative">
                 <input
                   id="new-password"
                   type="password"
@@ -226,18 +216,24 @@ export default function AccountPage() {
                   minLength={6}
                   value={newPassword}
                   onChange={(event) => setNewPassword(event.target.value)}
-                  className="w-full rounded-xl border border-border bg-base px-4 py-3 text-text outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/40"
-                  placeholder="Minimum 6 characters"
+                  onFocus={(e) =>
+                    (e.currentTarget.placeholder = 'Minimum 6 characters')
+                  }
+                  onBlur={(e) => {
+                    if (!e.currentTarget.value) e.currentTarget.placeholder = ''
+                  }}
+                  className="peer w-full bg-base placeholder:text-subtle text-text text-sm border border-highlight-med rounded px-3 py-2 transition duration-300 ease focus:outline-none focus:border-accent hover:border-highlight-high shadow-sm focus:shadow"
+                  placeholder=""
                 />
-              </div>
-
-              <div className="space-y-2">
                 <label
                   htmlFor="confirm-password"
-                  className="text-sm font-medium text-text"
+                  className="absolute cursor-text bg-base px-1 left-2.5 -top-2 scale-90 text-subtle text-sm transition-all transform origin-left peer-placeholder-shown:top-2.5 peer-placeholder-shown:left-2.5 peer-placeholder-shown:scale-100 peer-focus:-top-2 peer-focus:left-2.5 peer-focus:scale-90"
                 >
-                  Confirm password
+                  New
                 </label>
+              </div>
+
+              <div className="relative">
                 <input
                   id="confirm-password"
                   type="password"
@@ -247,9 +243,21 @@ export default function AccountPage() {
                   onChange={(event) =>
                     setConfirmNewPassword(event.target.value)
                   }
-                  className="w-full rounded-xl border border-border bg-base px-4 py-3 text-text outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/40"
-                  placeholder="Repeat new password"
+                  onFocus={(e) =>
+                    (e.currentTarget.placeholder = 'Minimum 6 characters')
+                  }
+                  onBlur={(e) => {
+                    if (!e.currentTarget.value) e.currentTarget.placeholder = ''
+                  }}
+                  className="peer w-full bg-base placeholder:text-subtle text-text text-sm border border-highlight-med rounded px-3 py-2 transition duration-300 ease focus:outline-none focus:border-accent hover:border-highlight-high shadow-sm focus:shadow"
+                  placeholder=""
                 />
+                <label
+                  htmlFor="confirm-password"
+                  className="absolute cursor-text bg-base px-1 left-2.5 -top-2 scale-90 text-subtle text-sm transition-all transform origin-left peer-placeholder-shown:top-2.5 peer-placeholder-shown:left-2.5 peer-placeholder-shown:scale-100 peer-focus:-top-2 peer-focus:left-2.5 peer-focus:scale-90"
+                >
+                  Confirm
+                </label>
               </div>
 
               {passwordError ? (
@@ -263,27 +271,39 @@ export default function AccountPage() {
                 </p>
               ) : null}
 
-              <button
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
                 type="submit"
                 disabled={passwordStatus === 'submitting'}
-                className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-linear-to-r from-primary to-secondary px-5 py-3 text-sm font-semibold text-text transition hover:-translate-y-0.5 duration-200 disabled:cursor-not-allowed disabled:opacity-60"
+                className="inline-flex w-full cursor-pointer items-center justify-center gap-2 rounded bg-linear-to-r from-primary to-secondary px-5 py-3 text-sm font-semibold text-base disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {passwordStatus === 'submitting'
                   ? 'Updating…'
                   : 'Update password'}
-              </button>
+              </motion.button>
             </form>
 
-            <button
+            <motion.button
+              initial={{
+                backgroundColor: 'var(--color-base)',
+                color: 'var(--color-text)',
+              }}
+              whileHover={{
+                scale: 1.05,
+                backgroundColor: 'var(--color-love)',
+                color: 'var(--color-base)',
+              }}
+              whileTap={{ scale: 0.95 }}
               type="button"
               onClick={() => supabaseClient.auth.signOut()}
-              className="inline-flex items-center justify-center gap-2 rounded-xl border border-border px-5 py-3 text-sm font-semibold text-subtle transition hover:-translate-y-0.5 duration-200"
+              className="inline-flex cursor-pointer items-center justify-center gap-2 rounded px-5 py-3 text-sm font-semibold text-text"
             >
               Sign out
-            </button>
+            </motion.button>
           </section>
 
-          <aside className="space-y-4 rounded-3xl border border-border/60 bg-base/70 px-6 py-6 shadow-lg shadow-black/10">
+          <aside className="space-y-4 rounded bg-surface px-6 py-6">
             <h2 className="text-lg font-semibold text-text">Coming soon</h2>
             <ul className="mt-4 space-y-3 text-sm text-muted">
               <li>Invite writers and assign roles.</li>
@@ -305,7 +325,7 @@ export default function AccountPage() {
 
   return (
     <main className="container flex min-h-[60vh] items-center justify-center px-4 py-20 sm:px-6 lg:px-8">
-      <div className="grid w-full max-w-4xl gap-10 rounded-3xl border border-border bg-surface px-10 py-12 shadow-xl shadow-black/15 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)]">
+      <div className="grid w-full max-w-4xl gap-10 rounded bg-surface px-10 py-12 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)]">
         <div className="order-2 space-y-8 lg:order-1">
           <div className="space-y-3 text-center lg:text-left">
             <p className="mx-auto w-fit text-xs font-bold uppercase tracking-[0.35em] gradient-text lg:mx-0">
@@ -317,33 +337,36 @@ export default function AccountPage() {
             <p className="text-sm text-muted">
               {mode === 'signIn'
                 ? 'Log in to publish farm-fresh guides, manage drafts, and share harvest reports.'
-                : 'Set up an account so you can publish posts and keep your notes organized.'}
+                : 'Set up an account so you can publish posts and interact with other farmers.'}
             </p>
           </div>
 
           <form onSubmit={handleSignInOrUp} className="space-y-4">
-            <div className="space-y-2 text-left">
-              <label htmlFor="email" className="text-sm font-medium text-text">
-                Email
-              </label>
+            <div className="relative">
               <input
                 id="email"
                 type="email"
                 required
                 value={email}
                 onChange={(event) => setEmail(event.target.value)}
-                className="w-full rounded-xl border border-border bg-base px-4 py-3 text-text outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/40"
-                placeholder="you@freshtft.com"
+                onFocus={(e) =>
+                  (e.currentTarget.placeholder = 'you@domain.com')
+                }
+                onBlur={(e) => {
+                  if (!e.currentTarget.value) e.currentTarget.placeholder = ''
+                }}
+                className="peer w-full bg-base placeholder:text-subtle text-text text-sm border border-highlight-med rounded px-3 py-2 transition duration-300 ease focus:outline-none focus:border-accent hover:border-highlight-high shadow-sm focus:shadow"
+                placeholder=""
               />
+              <label
+                htmlFor="email"
+                className="absolute cursor-text bg-base px-1 left-2.5 -top-2 scale-90 text-subtle text-sm transition-all transform origin-left peer-placeholder-shown:top-2.5 peer-placeholder-shown:left-2.5 peer-placeholder-shown:scale-100 peer-focus:-top-2 peer-focus:left-2.5 peer-focus:scale-90"
+              >
+                Email
+              </label>
             </div>
 
-            <div className="space-y-2 text-left">
-              <label
-                htmlFor="password"
-                className="text-sm font-medium text-text"
-              >
-                Password
-              </label>
+            <div className="relative">
               <input
                 id="password"
                 type="password"
@@ -351,9 +374,21 @@ export default function AccountPage() {
                 minLength={6}
                 value={password}
                 onChange={(event) => setPassword(event.target.value)}
-                className="w-full rounded-xl border border-border bg-base px-4 py-3 text-text outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/40"
-                placeholder="Minimum 6 characters"
+                onFocus={(e) =>
+                  (e.currentTarget.placeholder = 'Minimum 6 characters')
+                }
+                onBlur={(e) => {
+                  if (!e.currentTarget.value) e.currentTarget.placeholder = ''
+                }}
+                className="peer w-full bg-base placeholder:text-subtle text-text text-sm border border-highlight-med rounded px-3 py-2 transition duration-300 ease focus:outline-none focus:border-accent hover:border-highlight-high shadow-sm focus:shadow"
+                placeholder=""
               />
+              <label
+                htmlFor="password"
+                className="absolute cursor-text bg-base px-1 left-2.5 -top-2 scale-90 text-subtle text-sm transition-all transform origin-left peer-placeholder-shown:top-2.5 peer-placeholder-shown:left-2.5 peer-placeholder-shown:scale-100 peer-focus:-top-2 peer-focus:left-2.5 peer-focus:scale-90"
+              >
+                Password
+              </label>
             </div>
 
             {authError ? (
@@ -367,10 +402,12 @@ export default function AccountPage() {
               </p>
             ) : null}
 
-            <button
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
               type="submit"
               disabled={authStatus === 'submitting'}
-              className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-linear-to-r from-primary to-secondary px-5 py-3 font-semibold text-base transition hover:-translate-y-0.5 duration-200 disabled:cursor-not-allowed disabled:opacity-60"
+              className="inline-flex w-full cursor-pointer items-center justify-center gap-2 rounded bg-linear-to-r from-primary to-secondary px-5 py-3 font-semibold text-base disabled:cursor-not-allowed disabled:opacity-60"
             >
               {authStatus === 'submitting'
                 ? mode === 'signIn'
@@ -379,7 +416,7 @@ export default function AccountPage() {
                 : mode === 'signIn'
                   ? 'Sign In'
                   : 'Create Account'}
-            </button>
+            </motion.button>
           </form>
 
           <div className="flex flex-col gap-2 text-center text-sm">
