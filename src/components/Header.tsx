@@ -1,7 +1,8 @@
 import { Link } from '@tanstack/react-router'
 import { Home, Menu, MessageSquare, Package, Target, UserRound, Users, X } from 'lucide-react'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import type { ComponentType } from 'react'
+import { useAuth } from './AuthProvider'
 
 type NavItem = {
   to: string
@@ -10,7 +11,9 @@ type NavItem = {
   search?: Record<string, unknown> | undefined
 }
 
-const NAV_ITEMS: Array<NavItem> = [
+type BaseItem = Omit<NavItem, 'label'> & { label?: string }
+
+const BASE_ITEMS: Array<BaseItem> = [
   { to: '/', icon: Home, label: 'Home' },
   {
     to: '/discussions',
@@ -21,11 +24,31 @@ const NAV_ITEMS: Array<NavItem> = [
   { to: '/items', icon: Package, label: 'Items' },
   { to: '/strategies', icon: Target, label: 'Strategies' },
   { to: '/units', icon: Users, label: 'Units' },
-  { to: '/account', icon: UserRound, label: 'Account' },
+  { to: '/account', icon: UserRound },
 ]
 
 export default function Header() {
   const [isOpen, setIsOpen] = useState(false)
+  const { user } = useAuth()
+
+  const navItems = useMemo<Array<NavItem>>(() => {
+    const displayName =
+      typeof user?.user_metadata?.display_name === 'string'
+        ? user.user_metadata.display_name.trim()
+        : undefined
+    return BASE_ITEMS.map((item) => {
+      if (item.to === '/account') {
+        return {
+          ...item,
+          label: displayName ? displayName : 'Account',
+        } as NavItem
+      }
+      return {
+        ...item,
+        label: item.label ?? '',
+      } as NavItem
+    })
+  }, [user])
 
   const renderNavLink = (item: NavItem, variant: 'desktop' | 'mobile') => {
     const Icon = item.icon
@@ -66,7 +89,7 @@ export default function Header() {
 
         {/* Inline navbar for lg+ */}
         <nav className="hidden lg:flex items-center gap-3">
-          {NAV_ITEMS.map((item) => renderNavLink(item, 'desktop'))}
+          {navItems.map((item) => renderNavLink(item, 'desktop'))}
         </nav>
 
         {/* Menu button for small screens */}
@@ -104,7 +127,7 @@ export default function Header() {
           </button>
         </div>
         <nav className="flex-1 p-4 overflow-y-auto">
-          {NAV_ITEMS.map((item) => renderNavLink(item, 'mobile'))}
+          {navItems.map((item) => renderNavLink(item, 'mobile'))}
         </nav>
       </aside>
     </>

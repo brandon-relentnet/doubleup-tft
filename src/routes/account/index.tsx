@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { motion } from 'motion/react'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import type { FormEvent } from 'react'
 import { supabase } from '@/lib/supabaseClient'
 import { useAuth } from '@/components/AuthProvider'
@@ -21,6 +21,7 @@ export default function AccountPage() {
   const [mode, setMode] = useState<Mode>('signIn')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [displayName, setDisplayName] = useState('')
   const [authError, setAuthError] = useState<string | null>(null)
   const [authStatus, setAuthStatus] = useState<AsyncStatus>('idle')
   const [authMessage, setAuthMessage] = useState<string | null>(null)
@@ -29,11 +30,21 @@ export default function AccountPage() {
   const [resetError, setResetError] = useState<string | null>(null)
   const [resetMessage, setResetMessage] = useState<string | null>(null)
 
+  const [currentPassword, setCurrentPassword] = useState('')
   const [newPassword, setNewPassword] = useState('')
   const [confirmNewPassword, setConfirmNewPassword] = useState('')
   const [passwordStatus, setPasswordStatus] = useState<AsyncStatus>('idle')
   const [passwordError, setPasswordError] = useState<string | null>(null)
   const [passwordMessage, setPasswordMessage] = useState<string | null>(null)
+  const [profileDisplayName, setProfileDisplayName] = useState('')
+
+  useEffect(() => {
+    const metadataDisplayName =
+      typeof user?.user_metadata?.display_name === 'string'
+        ? user.user_metadata.display_name.trim()
+        : ''
+    setProfileDisplayName(metadataDisplayName)
+  }, [user])
 
   if (!supabaseClient) {
     return (
@@ -61,6 +72,11 @@ export default function AccountPage() {
       return
     }
 
+    if (mode === 'signUp' && !displayName.trim()) {
+      setAuthError('Please provide a display name.')
+      return
+    }
+
     setAuthStatus('submitting')
     try {
       if (mode === 'signIn') {
@@ -73,10 +89,20 @@ export default function AccountPage() {
         setPassword('')
       } else {
         const targetEmail = email
-        const { error } = await supabaseClient.auth.signUp({ email, password })
+        const trimmedDisplayName = displayName.trim()
+        const { error } = await supabaseClient.auth.signUp({
+          email,
+          password,
+          options: {
+            data: {
+              display_name: trimmedDisplayName,
+            },
+          },
+        })
         if (error) throw error
         setEmail('')
         setPassword('')
+        setDisplayName('')
         navigate({
           to: '/account/confirmation',
           search: { email: targetEmail },
@@ -127,6 +153,11 @@ export default function AccountPage() {
     setPasswordError(null)
     setPasswordMessage(null)
 
+    if (!currentPassword || currentPassword.length < 6) {
+      setPasswordError('Enter your current password to continue.')
+      return
+    }
+
     if (!newPassword || newPassword.length < 6) {
       setPasswordError('Password must be at least 6 characters long.')
       return
@@ -137,13 +168,29 @@ export default function AccountPage() {
       return
     }
 
+    if (!user?.email) {
+      setPasswordError('Unable to verify account email. Please sign out and back in.')
+      return
+    }
+
     setPasswordStatus('submitting')
     try {
+      const { error: verifyError } = await supabaseClient.auth.signInWithPassword({
+        email: user.email,
+        password: currentPassword,
+      })
+      if (verifyError) {
+        setPasswordError('Current password is incorrect.')
+        setPasswordStatus('idle')
+        return
+      }
+
       const { error } = await supabaseClient.auth.updateUser({
         password: newPassword,
       })
       if (error) throw error
       setPasswordMessage('Password updated successfully.')
+      setCurrentPassword('')
       setNewPassword('')
       setConfirmNewPassword('')
       resolvePasswordRecovery()
@@ -165,10 +212,10 @@ export default function AccountPage() {
           <section className="space-y-8 rounded bg-surface px-8 py-10">
             <div className="space-y-3">
               <p className="text-xs uppercase tracking-[0.35em] gradient-text w-fit font-bold">
-                Account
+                Your Coop
               </p>
               <h1 className="text-3xl font-extrabold tracking-tight">
-                Your BLT
+                {profileDisplayName ? `${profileDisplayName}'s BLT` : 'Your BLT'}
               </h1>
               <p className="text-sm text-muted">
                 Keep your credentials fresh and manage upcoming posting
@@ -177,6 +224,14 @@ export default function AccountPage() {
             </div>
 
             <div className="space-y-4 rounded bg-overlay px-6 py-6">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.35em] text-subtle">
+                  Display name
+                </p>
+                <p className="mt-1 text-lg font-semibold text-text">
+                  {profileDisplayName || 'Not set'}
+                </p>
+              </div>
               <div>
                 <p className="text-xs font-semibold uppercase tracking-[0.35em] text-subtle">
                   Email
@@ -195,6 +250,9 @@ export default function AccountPage() {
                     : 'Active session'}
                 </p>
               </div>
+              <p className="text-xs text-muted">
+                Need a new display name? Ping the coop lead and we will update it for you.
+              </p>
             </div>
 
             <form onSubmit={handlePasswordUpdate} className="space-y-4">
@@ -208,6 +266,31 @@ export default function AccountPage() {
                   </span>
                 ) : null}
               </div>
+              <div className="relative">
+                <input
+                  id="current-password"
+                  type="password"
+                  required
+                  minLength={6}
+                  value={currentPassword}
+                  onChange={(event) => setCurrentPassword(event.target.value)}
+                  onFocus={(e) =>
+                    (e.currentTarget.placeholder = 'Enter current password')
+                  }
+                  onBlur={(e) => {
+                    if (!e.currentTarget.value) e.currentTarget.placeholder = ''
+                  }}
+                  className="peer w-full bg-base placeholder:text-subtle text-text text-sm border border-highlight-med rounded px-3 py-2 transition duration-300 ease focus:outline-none focus:border-accent hover:border-highlight-high shadow-sm focus:shadow"
+                  placeholder=""
+                />
+                <label
+                  htmlFor="current-password"
+                  className="absolute cursor-text bg-base px-1 left-2.5 -top-2 scale-90 text-subtle text-sm transition-all transform origin-left peer-placeholder-shown:top-2.5 peer-placeholder-shown:left-2.5 peer-placeholder-shown:scale-100 peer-focus:-top-2 peer-focus:left-2.5 peer-focus:scale-90"
+                >
+                  Current
+                </label>
+              </div>
+
               <div className="relative">
                 <input
                   id="new-password"
@@ -226,7 +309,7 @@ export default function AccountPage() {
                   placeholder=""
                 />
                 <label
-                  htmlFor="confirm-password"
+                  htmlFor="new-password"
                   className="absolute cursor-text bg-base px-1 left-2.5 -top-2 scale-90 text-subtle text-sm transition-all transform origin-left peer-placeholder-shown:top-2.5 peer-placeholder-shown:left-2.5 peer-placeholder-shown:scale-100 peer-focus:-top-2 peer-focus:left-2.5 peer-focus:scale-90"
                 >
                   New
@@ -366,6 +449,38 @@ export default function AccountPage() {
               </label>
             </div>
 
+            {mode === 'signUp' ? (
+              <>
+                <div className="relative">
+                  <input
+                    id="display-name"
+                    type="text"
+                    required
+                    value={displayName}
+                    onChange={(event) => setDisplayName(event.target.value)}
+                    onFocus={(e) => {
+                      if (!e.currentTarget.placeholder) {
+                        e.currentTarget.placeholder = 'Farm fresh tactician'
+                      }
+                    }}
+                    onBlur={(e) => {
+                      if (!e.currentTarget.value)
+                        e.currentTarget.placeholder = ''
+                    }}
+                    className="peer w-full bg-base placeholder:text-subtle text-text text-sm border border-highlight-med rounded px-3 py-2 transition duration-300 ease focus:outline-none focus:border-accent hover:border-highlight-high shadow-sm focus:shadow"
+                    placeholder=""
+                  />
+                  <label
+                    htmlFor="display-name"
+                    className="absolute cursor-text bg-base px-1 left-2.5 -top-2 scale-90 text-subtle text-sm transition-all transform origin-left peer-placeholder-shown:top-2.5 peer-placeholder-shown:left-2.5 peer-placeholder-shown:scale-100 peer-focus:-top-2 peer-focus:left-2.5 peer-focus:scale-90"
+                  >
+                    Display name
+                  </label>
+                </div>
+
+              </>
+            ) : null}
+
             <div className="relative">
               <input
                 id="password"
@@ -429,6 +544,7 @@ export default function AccountPage() {
                 setMode(mode === 'signIn' ? 'signUp' : 'signIn')
                 setAuthError(null)
                 setAuthMessage(null)
+                setDisplayName('')
               }}
             >
               {mode === 'signIn'
