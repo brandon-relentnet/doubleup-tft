@@ -77,7 +77,6 @@ export default function AccountPage() {
         if (error) throw error
         setEmail('')
         setPassword('')
-        setAuthMessage('Check your inbox to confirm your account.')
         navigate({ to: '/account/confirmation', search: { email: targetEmail } })
         return
       }
