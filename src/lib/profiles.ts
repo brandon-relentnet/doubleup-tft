@@ -13,13 +13,13 @@ export type Profile = {
 export async function ensureProfile(user: User) {
   if (!supabase) return
   try {
-    const display = typeof user.user_metadata?.display_name === 'string' ? user.user_metadata.display_name : null
+    const display =
+      typeof user.user_metadata?.display_name === 'string'
+        ? user.user_metadata.display_name
+        : null
     const displayKey = display ? display.toLocaleLowerCase() : null
-    const avatar = typeof user.user_metadata?.avatar_url === 'string' ? user.user_metadata.avatar_url : null
-    const bio = typeof user.user_metadata?.bio === 'string' ? user.user_metadata.bio : null
-    const createdAt = user.created_at
 
-    // Upsert by id; prefer not to overwrite non-null values
+    // Ensure a row exists for this user without overwriting custom fields (bio/avatar)
     const { error } = await supabase
       .from('profiles')
       .upsert(
@@ -27,11 +27,8 @@ export async function ensureProfile(user: User) {
           user_id: user.id,
           display_name: display,
           display_name_key: displayKey,
-          avatar_url: avatar,
-          bio,
-          created_at: createdAt,
         },
-        { onConflict: 'user_id', ignoreDuplicates: false },
+        { onConflict: 'user_id', ignoreDuplicates: true },
       )
     if (error) {
       // Table may not exist; ignore silently
