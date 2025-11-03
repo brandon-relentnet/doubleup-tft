@@ -164,12 +164,19 @@ export default function AccountPage() {
     if (!supabaseClient || !user) return
     setProfileSaveStatus('submitting')
     try {
+      const safeName = profileDisplayName?.trim() || null
+      const safeKey = safeName ? safeName.toLocaleLowerCase() : null
       const { error } = await supabaseClient
         .from('profiles')
-        .update({ bio: profileBio || null, avatar_url: profileAvatar || null })
-        .eq('user_id', user.id)
-      if (error) throw error
-      setProfileSaveMessage('Profile updated.')
+        .upsert({
+          user_id: user.id,
+          display_name: safeName,
+          display_name_key: safeKey,
+          bio: profileBio || null,
+          avatar_url: profileAvatar || null,
+        }, { onConflict: 'user_id' })
+    if (error) throw error
+    setProfileSaveMessage('Profile updated.')
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Unable to update profile.'
       setProfileSaveError(message)
