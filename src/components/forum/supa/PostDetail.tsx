@@ -84,7 +84,7 @@ export default function PostDetail({ postId, initialCommentId }: { postId: strin
         </span>
       }
     >
-      <article className="rounded bg-surface px-6 py-5 shadow-sm">
+      <article className="rounded bg-surface px-6 py-5">
         <p className="whitespace-pre-wrap text-sm leading-6 text-text">{post.body}</p>
       </article>
 

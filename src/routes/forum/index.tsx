@@ -149,7 +149,7 @@ function ForumListingPage() {
           {posts.map((post) => (
             <article
               key={post.id}
-              className="rounded bg-surface px-6 py-5 shadow-sm"
+              className="rounded bg-surface px-6 py-5"
             >
               <header className="flex flex-col gap-1">
                 <h3 className="text-xl font-semibold text-text">

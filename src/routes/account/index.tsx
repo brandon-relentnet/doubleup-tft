@@ -188,7 +188,7 @@ export default function AccountPage() {
   if (!supabaseClient) {
     return (
       <main className="container flex min-h-[60vh] items-center justify-center px-4 py-20 sm:px-6 lg:px-8">
-        <div className="w-full max-w-md space-y-6 rounded-3xl border border-border bg-surface px-8 py-10 text-center shadow-lg shadow-black/10">
+        <div className="w-full max-w-md space-y-6 rounded-3xl border border-border bg-surface px-8 py-10 text-center">
           <h1 className="text-2xl font-extrabold tracking-tight">
             Supabase not configured
           </h1>

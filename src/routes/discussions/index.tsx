@@ -82,7 +82,7 @@ function DiscussionsIndexPage() {
         {filteredPosts.map((post) => (
           <article
             key={post.slug}
-            className="rounded-xl bg-surface px-6 py-5 shadow-sm transition hover:-translate-y-0.5 hover:bg-highlight-low"
+            className="rounded-xl bg-surface px-6 py-5 transition hover:-translate-y-0.5 hover:bg-highlight-low"
           >
             <div className="flex flex-wrap items-center gap-3 text-xs uppercase tracking-[0.16em] text-muted-foreground">
               <span>{dateFormatter.format(new Date(post.date))}</span>

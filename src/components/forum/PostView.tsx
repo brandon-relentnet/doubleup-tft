@@ -52,7 +52,7 @@ export default function PostView({ postId }: { postId: string }) {
         <Link to="/forum-demo" className="text-primary hover:underline">← Back to forum</Link>
       </nav>
 
-      <article className="rounded bg-surface px-6 py-5 shadow-sm">
+      <article className="rounded bg-surface px-6 py-5">
         <header className="flex flex-col gap-1">
           <h1 className="text-2xl font-semibold text-text">{post.title}</h1>
           <span className="text-xs uppercase tracking-[0.2em] text-muted">

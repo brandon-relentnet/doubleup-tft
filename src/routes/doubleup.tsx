@@ -14,7 +14,7 @@ function DoubleUpPage() {
 
   return (
     <main className="container px-4 py-16 sm:px-6 lg:px-8">
-      <div className="rounded-3xl border border-border bg-surface px-8 py-12 shadow-lg shadow-black/10 space-y-5">
+      <div className="rounded-3xl border border-border bg-surface px-8 py-12 space-y-5">
         <h1 className="text-3xl font-extrabold tracking-tight">
           Duo playbook loading
         </h1>
