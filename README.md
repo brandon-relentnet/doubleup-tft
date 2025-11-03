@@ -58,7 +58,7 @@ commit;
 
 Notes
 - The UI gracefully degrades if Supabase credentials are missing.
-- The demo-only, local-state forum lives at `/forum-demo` for quick iteration.
+ 
 
 ## Project Layout
 ```
