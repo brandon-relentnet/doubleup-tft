@@ -3,6 +3,7 @@ import { ArrowRight, User, Users } from 'lucide-react'
 import { Link, createFileRoute } from '@tanstack/react-router'
 import ScrollHighlight from '@/components/ScrollHighlight'
 import TypewriterChangeContentExample from '@/components/Typewriter'
+import { usePageMeta } from '@/lib/usePageMeta'
 
 export const Route = createFileRoute('/')({
   component: App,
@@ -12,35 +13,41 @@ const quickLinks = [
   {
     to: '/discussions',
     label: 'Discussions',
-    tidbit: 'Farm-Fresh Thoughts',
+    tidbit: 'Patchside Field Notes',
     description:
-      'Get insights into our thoughts and feel free to participate in the conversation.',
+      'Harvest long-form reports, patch reflections, and duo troubleshooting direct from the coop.',
     search: { tag: undefined },
   },
   {
     to: '/items',
     label: 'Items',
-    tidbit: 'Gourmet Gear',
+    tidbit: 'Pantry Staples',
     description:
-      'Learn about each items potential and how to utilize it to the best of your abilities.',
+      'Stock up on slam priorities, augment pairings, and flex lines that keep your pantry versatile.',
   },
   {
     to: '/strategies',
     label: 'Strategies',
-    tidbit: 'Free-Range Tactics',
+    tidbit: 'Crop Rotation Plans',
     description:
-      'Explore the depth of TFT as we discuss various strategies you can employ in your own games.',
+      'Map stage-by-stage pivots, reroll angles, and duo coordination that survive meta swings.',
   },
   {
     to: '/units',
     label: 'Units',
-    tidbit: 'USDA Certified',
+    tidbit: 'Livestock Ledger',
     description:
-      'Discover the strengths and synergies of different units to build powerful team compositions.',
+      'Profile headline carries, frontline workhorses, and trait pairings that keep boards hearty.',
   },
 ]
 
 function App() {
+  usePageMeta({
+    title: 'Free-Range TFT Field Notes | DoubleUp TFT',
+    description:
+      'Grow confident Double Up instincts with farm-fresh TFT strategy notes, duo drills, and adaptable game plans rooted in Free-Range philosophy.',
+  })
+
   return (
     <main className="hero-gradient">
       <section className="container">
@@ -167,11 +174,11 @@ function App() {
               <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-balance">
                 Get Free-Range TFT field notes and farm tips in your inbox.
               </h2>
-              <p className="text-lg text-subtle">
-                Subscribe and receive weekly harvest reports, reroll recipes,
-                and mindset resets made for players who grow their own
-                victories. No recycled meta, only honest produce.
-              </p>
+            <p className="text-lg text-subtle">
+              Subscribe for Sunday field notes packed with stage plans, duo
+              drills, and mindset resets. No copy-paste meta, only honest
+              produce you can apply the moment the carousel spins.
+            </p>
             </div>
 
             <div className="w-full max-w-md mx-auto lg:mx-0">
@@ -201,13 +208,13 @@ function App() {
                       whileTap={{ x: 10 }}
                       className="rounded-xl border border-border px-5 py-3 font-semibold text-muted"
                     >
-                      Browse Discussions
+                      Tour the latest dispatches
                     </motion.div>
                   </Link>
                 </div>
                 <p className="text-xs text-muted">
-                  Coming soon: tailor your harvest log, sync duo progress, and
-                  share your own pasture reports.
+                  Coming soon: custom harvest logs, duo progress sync, and
+                  shared scouting reports for the whole coop.
                 </p>
               </form>
             </div>

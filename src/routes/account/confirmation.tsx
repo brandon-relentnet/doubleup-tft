@@ -2,6 +2,7 @@ import { Link, createFileRoute } from '@tanstack/react-router'
 import { motion } from 'motion/react'
 import { useState } from 'react'
 import { supabase } from '@/lib/supabaseClient'
+import { usePageMeta } from '@/lib/usePageMeta'
 
 export const Route = createFileRoute('/account/confirmation')({
   component: AccountConfirmationPage,
@@ -11,12 +12,18 @@ export const Route = createFileRoute('/account/confirmation')({
 })
 
 export default function AccountConfirmationPage() {
-  const { email } = Route.useSearch()
+  const { email } = Route.useSearch() as { email?: string }
   const supabaseClient = supabase
   const [status, setStatus] = useState<
     'idle' | 'submitting' | 'success' | 'error'
   >('idle')
   const [message, setMessage] = useState<string | null>(null)
+
+  usePageMeta({
+    title: 'Confirm Your Coop Access | DoubleUp TFT',
+    description:
+      'Check your inbox to finish securing your DoubleUp TFT account and unlock farm-fresh publishing tools.',
+  })
 
   const handleResend = async () => {
     if (!email) {
@@ -64,9 +71,9 @@ export default function AccountConfirmationPage() {
               We just want to make sure you're real, that's all.
             </h1>
             <p className="text-sm text-subtle">
-              We just sent a confirmation email to {email ?? 'your address'}.
-              Open the message, tap the big button inside, and you will unlock
-              publishing access for farm-fresh TFT posts.
+              We sent a confirmation email to {email ?? 'your address'}. Tap
+              the big button inside and you&apos;ll unlock publishing access for
+              every farm-fresh TFT post you draft.
             </p>
           </div>
 

@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import type { FormEvent } from 'react'
 import { supabase } from '@/lib/supabaseClient'
 import { useAuth } from '@/components/AuthProvider'
+import { usePageMeta } from '@/lib/usePageMeta'
 
 type Mode = 'signIn' | 'signUp'
 type AsyncStatus = 'idle' | 'submitting' | 'success'
@@ -59,6 +60,19 @@ export default function AccountPage() {
   const [passwordError, setPasswordError] = useState<string | null>(null)
   const [passwordMessage, setPasswordMessage] = useState<string | null>(null)
   const [profileDisplayName, setProfileDisplayName] = useState('')
+
+  const displayNameMeta =
+    typeof user?.user_metadata?.display_name === 'string'
+      ? user.user_metadata.display_name.trim()
+      : ''
+
+  usePageMeta({
+    title: displayNameMeta
+      ? `${displayNameMeta}'s Coop Profile | DoubleUp TFT`
+      : 'Your Coop Profile | DoubleUp TFT',
+    description:
+      'Access Free-Range TFT account tools, update secure passwords, and review upcoming duo publishing features.',
+  })
 
   useEffect(() => {
     if (!user) {

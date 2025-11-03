@@ -15,7 +15,7 @@ const dateFormatter = new Intl.DateTimeFormat('en', {
 
 function BlogPostPage() {
   const { slug } = Route.useParams()
-  const { tag: activeTag } = Route.useSearch()
+  const { tag: activeTag } = Route.useSearch() as { tag?: string }
   const post = findPostBySlug(slug)
 
   if (!post) {
@@ -27,11 +27,11 @@ function BlogPostPage() {
           search: { tag: activeTag },
         }}
         title="Post not found"
-        description="The blog entry you are looking for does not exist or has been moved."
+        description="That write-up either moved coops or hasn't been harvested yet."
       >
         <div className="rounded-xl border border-border bg-card px-6 py-8 text-muted-foreground">
           Double-check the URL or head back to the discussions page to browse
-          the latest strategy notes.
+          our latest field notes and patch dispatches.
         </div>
       </DiscussionsLayout>
     )

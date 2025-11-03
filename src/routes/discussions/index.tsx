@@ -16,7 +16,7 @@ const dateFormatter = new Intl.DateTimeFormat('en', {
 
 function DiscussionsIndexPage() {
   const posts = listPosts()
-  const { tag: activeTag } = Route.useSearch()
+  const { tag: activeTag } = Route.useSearch() as { tag?: string }
   const navigate = Route.useNavigate()
   const allTags = useMemo(() => {
     const unique = new Set<string>()
@@ -31,7 +31,7 @@ function DiscussionsIndexPage() {
   return (
     <DiscussionsLayout
       title="Discussions"
-      description="Long-form breakdowns, patch reflections, and cheat sheets. Everything here is written in React components so it stays easy to restyle or swap in interactive bits later."
+      description="Field-tested essays, patch dispatches, and duo coordination drills—all written in composable React blocks so we can season them with live data and interactivity whenever the meta shifts."
       actions={
         activeTag ? (
           <button
@@ -114,8 +114,8 @@ function DiscussionsIndexPage() {
         ))}
         {!filteredPosts.length ? (
           <div className="rounded-xl border border-border bg-card px-6 py-10 text-muted-foreground">
-            No posts match this tag yet. Clear the filter or check back after
-            the next patch notes drop.
+            No posts match that tag yet. Clear the filter or stop by after the
+            next harvest—we log every patch once the fields settle.
           </div>
         ) : null}
       </section>
