@@ -32,32 +32,36 @@ function ForumListingPage() {
     const fetchPosts = async () => {
       setLoadingPosts(true)
       setError(null)
+      const supaUrl = (import.meta as any).env.VITE_SUPABASE_URL as string | undefined
+      const supaKey = (import.meta as any).env.VITE_SUPABASE_ANON_KEY as string | undefined
+      if (!supaUrl || !supaKey) {
+        setError('Supabase credentials missing. Set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY.')
+        setLoadingPosts(false)
+        return
+      }
 
+      const controller = new AbortController()
+      const timer = window.setTimeout(() => controller.abort(), 12000)
       try {
-        const { data, error: fetchError } = await supabaseClient
-          .from('forum_posts')
-          .select(
-            `
-              id,
-              title,
-              body,
-              created_at,
-              author_display_name
-            `,
-          )
-          .order('created_at', { ascending: false })
+        const rest = `${supaUrl}/rest/v1/forum_posts?select=id,title,body,created_at,author_display_name&order=created_at.desc`
+        const res = await fetch(rest, {
+          headers: {
+            apikey: supaKey,
+            authorization: `Bearer ${supaKey}`,
+          },
+          signal: controller.signal,
+        })
 
-        if (isCancelled) return
-
-        if (fetchError) {
-          setError(
-            'Unable to load community posts right now. Please try again later.',
-          )
+        if (!res.ok) {
+          const text = await res.text().catch(() => '')
+          setError(`Failed to load posts (${res.status}). ${text || ''}`)
           return
         }
 
+        const rows = (await res.json()) as Array<any>
+        if (isCancelled) return
         setPosts(
-          (data ?? []).map((row) => ({
+          (rows ?? []).map((row) => ({
             id: row.id,
             title: row.title,
             body: row.body,
@@ -65,7 +69,12 @@ function ForumListingPage() {
             author_display_name: row.author_display_name ?? null,
           })),
         )
+      } catch (e) {
+        if (!isCancelled) {
+          setError(e instanceof Error ? e.message : 'Network error loading posts.')
+        }
       } finally {
+        window.clearTimeout(timer)
         if (!isCancelled) setLoadingPosts(false)
       }
     }
@@ -81,16 +90,8 @@ function ForumListingPage() {
     })
 
     // Realtime: keep list fresh on inserts/updates/deletes
-    const channel = supabaseClient
-      .channel('forum_posts:list')
-      .on(
-        'postgres_changes',
-        { event: '*', schema: 'public', table: 'forum_posts' },
-        () => {
-          fetchPosts().catch(() => {})
-        },
-      )
-      .subscribe()
+    // Optional realtime refresh (skip if it causes issues). We can re-add later.
+    const channel = null as any
 
     // Refresh on window focus
     const onFocus = () => fetchPosts().catch(() => {})
@@ -99,7 +100,7 @@ function ForumListingPage() {
     return () => {
       isCancelled = true
       window.removeEventListener('focus', onFocus)
-      supabaseClient.removeChannel(channel)
+      if (channel) supabaseClient.removeChannel(channel)
     }
   }, [supabaseClient])
 
@@ -126,9 +127,21 @@ function ForumListingPage() {
       ) : loadingPosts ? (
         <p className="text-sm text-muted">Loading posts…</p>
       ) : error ? (
-        <p className="rounded bg-surface px-6 py-6 text-sm text-red-200">
-          {error}
-        </p>
+        <div className="rounded bg-surface px-6 py-6 text-sm text-red-200 space-y-3">
+          <p>{error}</p>
+          <button
+            type="button"
+            className="rounded bg-highlight-low px-3 py-2 text-text hover:bg-highlight-med"
+            onClick={() => {
+              setError(null)
+              // trigger a re-fetch via focus handler
+              const e = new Event('focus')
+              window.dispatchEvent(e)
+            }}
+          >
+            Try again
+          </button>
+        </div>
       ) : !posts.length ? (
         <p className="text-sm text-muted">
           No community posts yet. Be the first to log a Free-Range lesson.
