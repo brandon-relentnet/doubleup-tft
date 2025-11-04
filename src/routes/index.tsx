@@ -1,5 +1,5 @@
 import * as motion from 'motion/react-client'
-import { ArrowRight, Package, Target, Users } from 'lucide-react'
+import { ArrowRight } from 'lucide-react'
 import { Link, createFileRoute } from '@tanstack/react-router'
 import ScrollHighlight from '@/components/ScrollHighlight'
 import TypewriterChangeContentExample from '@/components/Typewriter'
@@ -8,8 +8,6 @@ import { usePageMeta } from '@/lib/usePageMeta'
 export const Route = createFileRoute('/')({
   component: App,
 })
-
-// Quick links grid removed for a calmer hero. See Explore band below.
 
 function App() {
   usePageMeta({
@@ -31,56 +29,26 @@ function App() {
             decoding="async"
           />
 
-          <div className="flex-1">
+          <div className=" w-fit">
             <TypewriterChangeContentExample />
             <div className="mt-6 flex flex-wrap gap-3">
-              <Link
-                to="/forum"
-                className="inline-flex items-center justify-center gap-2 rounded bg-linear-to-r from-primary to-secondary px-5 py-3 font-semibold text-base"
-              >
-                Open Community Forum
+              <Link to="/forum">
+                <motion.span
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="inline-flex items-center justify-center gap-2 rounded bg-linear-to-r from-primary to-secondary px-5 py-3 font-semibold text-base"
+                >
+                  Open Community Forum
+                </motion.span>
               </Link>
               <Link
                 to="/discussions"
                 search={{ tag: undefined }}
-                className="inline-flex items-center justify-center gap-2 rounded bg-highlight-low px-5 py-3 font-semibold text-base text-text hover:bg-highlight-med transition"
+                className="inline-flex items-center justify-center gap-2 rounded bg-highlight-low px-5 py-3 font-semibold text-text hover:bg-highlight-med transition"
               >
                 Browse Discussions
               </Link>
             </div>
-          </div>
-        </div>
-      </section>
-      {/* Explore band: compact tiles for learn pages */}
-      <section className="container">
-        <div className="rounded bg-surface px-6 py-6">
-          <div className="mb-4 text-center lg:text-left">
-            <span className="text-xs font-semibold uppercase tracking-[0.35em] gradient-text">
-              Explore
-            </span>
-          </div>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-            <Link to="/items" className="rounded bg-highlight-low px-5 py-4 hover:bg-highlight-med transition">
-              <div className="flex items-center gap-3">
-                <Package className="size-5" />
-                <span className="font-semibold">Items</span>
-              </div>
-              <p className="mt-2 text-sm text-muted">Slam priorities and flexible pairings.</p>
-            </Link>
-            <Link to="/strategies" className="rounded bg-highlight-low px-5 py-4 hover:bg-highlight-med transition">
-              <div className="flex items-center gap-3">
-                <Target className="size-5" />
-                <span className="font-semibold">Strategies</span>
-              </div>
-              <p className="mt-2 text-sm text-muted">Stage plans and resilient pivots.</p>
-            </Link>
-            <Link to="/units" className="rounded bg-highlight-low px-5 py-4 hover:bg-highlight-med transition">
-              <div className="flex items-center gap-3">
-                <Users className="size-5" />
-                <span className="font-semibold">Units</span>
-              </div>
-              <p className="mt-2 text-sm text-muted">Carries, frontlines, and synergies.</p>
-            </Link>
           </div>
         </div>
       </section>
@@ -162,11 +130,11 @@ function App() {
               <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-balance">
                 Get Free-Range TFT field notes and farm tips in your inbox.
               </h2>
-            <p className="text-lg text-subtle">
-              Subscribe for Sunday field notes packed with stage plans, duo
-              drills, and mindset resets. No copy-paste meta, only honest
-              produce you can apply the moment the carousel spins.
-            </p>
+              <p className="text-lg text-subtle">
+                Subscribe for Sunday field notes packed with stage plans, duo
+                drills, and mindset resets. No copy-paste meta, only honest
+                produce you can apply the moment the carousel spins.
+              </p>
             </div>
 
             <div className="w-full max-w-md mx-auto lg:mx-0">
