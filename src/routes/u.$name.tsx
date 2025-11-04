@@ -1,6 +1,5 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import DiscussionsLayout from '@/components/DiscussionsLayout'
-import { supabase } from '@/lib/supabaseClient'
 import { useEffect, useMemo, useState } from 'react'
 
 type PostRow = { id: string; title: string; created_at: string }
@@ -27,48 +26,92 @@ function UserProfilePage() {
   useEffect(() => {
     let alive = true
     async function load() {
-      if (!supabase) {
+      setLoading(true)
+      setError(null)
+      const supaUrl = (import.meta as any).env.VITE_SUPABASE_URL as string | undefined
+      const supaKey = (import.meta as any).env.VITE_SUPABASE_ANON_KEY as string | undefined
+      if (!supaUrl || !supaKey) {
         setError('Profiles require Supabase credentials.')
         setLoading(false)
         return
       }
-      setLoading(true)
-      setError(null)
+      const headers: HeadersInit = { apikey: supaKey, authorization: `Bearer ${supaKey}` }
+      const withTimeout = async (p: Promise<Response>): Promise<Response> => {
+        const controller = new AbortController()
+        const timer = window.setTimeout(() => controller.abort(), 12000)
+        try {
+          const r = await p
+          return r
+        } finally {
+          window.clearTimeout(timer)
+        }
+      }
       try {
-        // Try profiles table first
-        const { data: prof } = await supabase
-          .from('profiles')
-          .select('user_id, display_name, created_at, bio, avatar_url')
-          .eq('display_name', name)
-          .maybeSingle()
+        // Try profiles match by display_name
+        let authorId: string | null = null
+        let display = name
+        let createdAt: string | null = null
+        let bio: string | null = null
+        let avatar: string | null = null
 
-        let authorId: string | null = (prof as any)?.user_id ?? null
-        let display = prof?.display_name ?? name
-        let createdAt: string | null = (prof?.created_at as string | null) ?? null
-        let bio: string | null = (prof?.bio as string | null) ?? null
-        let avatar: string | null = (prof?.avatar_url as string | null) ?? null
+        const profRes = await withTimeout(
+          fetch(
+            `${supaUrl}/rest/v1/profiles?display_name=eq.${encodeURIComponent(
+              name,
+            )}&select=user_id,display_name,created_at,bio,avatar_url&limit=1`,
+            { headers },
+          ),
+        )
+        if (profRes.ok) {
+          const arr = (await profRes.json()) as Array<{
+            user_id: string
+            display_name: string
+            created_at: string | null
+            bio: string | null
+            avatar_url: string | null
+          }>
+          const prof = arr?.[0]
+          if (prof) {
+            authorId = prof.user_id
+            display = prof.display_name ?? name
+            createdAt = prof.created_at ?? null
+            bio = prof.bio ?? null
+            avatar = prof.avatar_url ?? null
+          }
+        }
 
+        // Fallback to infer from forum posts/comments by display_name
         if (!authorId) {
-          // Fallback: infer from latest post/comment by display name
-          const { data: postAuthor } = await supabase
-            .from('forum_posts')
-            .select('author_id')
-            .eq('author_display_name', name)
-            .order('created_at', { ascending: false })
-            .limit(1)
-          authorId = postAuthor?.[0]?.author_id ?? null
+          const pRes = await withTimeout(
+            fetch(
+              `${supaUrl}/rest/v1/forum_posts?author_display_name=eq.${encodeURIComponent(
+                name,
+              )}&select=author_id&order=created_at.desc&limit=1`,
+              { headers },
+            ),
+          )
+          if (pRes.ok) {
+            const pArr = (await pRes.json()) as Array<{ author_id: string }>
+            authorId = pArr?.[0]?.author_id ?? null
+          }
           if (!authorId) {
-            const { data: commentAuthor } = await supabase
-              .from('forum_comments')
-              .select('author_id')
-              .eq('author_display_name', name)
-              .order('created_at', { ascending: false })
-              .limit(1)
-            authorId = commentAuthor?.[0]?.author_id ?? null
+            const cRes = await withTimeout(
+              fetch(
+                `${supaUrl}/rest/v1/forum_comments?author_display_name=eq.${encodeURIComponent(
+                  name,
+                )}&select=author_id&order=created_at.desc&limit=1`,
+                { headers },
+              ),
+            )
+            if (cRes.ok) {
+              const cArr = (await cRes.json()) as Array<{ author_id: string }>
+              authorId = cArr?.[0]?.author_id ?? null
+            }
           }
         }
 
         if (!authorId) {
+          if (!alive) return
           setProfile({ id: null, display_name: display, created_at: createdAt, bio, avatar_url: avatar })
           setPosts([])
           setComments([])
@@ -76,24 +119,28 @@ function UserProfilePage() {
           return
         }
 
-        // Fetch authored posts/comments
-        const [{ data: postRows }, { data: commentRows }] = await Promise.all([
-          supabase
-            .from('forum_posts')
-            .select('id, title, created_at')
-            .eq('author_id', authorId)
-            .order('created_at', { ascending: false }),
-          supabase
-            .from('forum_comments')
-            .select('id, post_id, created_at, body')
-            .eq('author_id', authorId)
-            .order('created_at', { ascending: false }),
+        const [postRes, commentRes] = await Promise.all([
+          withTimeout(
+            fetch(
+              `${supaUrl}/rest/v1/forum_posts?author_id=eq.${authorId}&select=id,title,created_at&order=created_at.desc`,
+              { headers },
+            ),
+          ),
+          withTimeout(
+            fetch(
+              `${supaUrl}/rest/v1/forum_comments?author_id=eq.${authorId}&select=id,post_id,created_at,body&order=created_at.desc`,
+              { headers },
+            ),
+          ),
         ])
+
+        const postRows = postRes.ok ? ((await postRes.json()) as PostRow[]) : []
+        const commentRows = commentRes.ok ? ((await commentRes.json()) as CommentRow[]) : []
 
         if (!alive) return
         setProfile({ id: authorId, display_name: display, created_at: createdAt, bio, avatar_url: avatar })
-        setPosts((postRows as PostRow[]) ?? [])
-        setComments((commentRows as CommentRow[]) ?? [])
+        setPosts(postRows)
+        setComments(commentRows)
         setLoading(false)
       } catch (e) {
         if (!alive) return
