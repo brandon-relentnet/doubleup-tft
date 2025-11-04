@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { PenSquare } from 'lucide-react'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import DiscussionsLayout from '@/components/DiscussionsLayout'
 import { supabase } from '@/lib/supabaseClient'
 import { useAuth } from '@/components/AuthProvider'
@@ -23,60 +23,82 @@ function ForumListingPage() {
   const [posts, setPosts] = useState<Array<ForumPost>>([])
   const [loadingPosts, setLoadingPosts] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const reqIdRef = useRef(0)
 
   useEffect(() => {
     if (!supabaseClient) return
 
     let isCancelled = false
 
-    const fetchOnce = async () => {
-      const myId = ++reqIdRef.current
+    const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms))
+    const withTimeout = async <T,>(p: Promise<T>, ms: number) => {
+      return await Promise.race<Promise<T>>([
+        p,
+        new Promise<T>((_, reject) =>
+          setTimeout(() => reject(new Error('timeout')), ms),
+        ),
+      ])
+    }
+
+    const fetchPostsReliable = async () => {
       setLoadingPosts(true)
       setError(null)
-      let timeoutHandle: number | null = null
-      try {
-        await new Promise<void>((resolve, reject) => {
-          timeoutHandle = window.setTimeout(() => {
-            if (myId === reqIdRef.current) {
-              reject(new Error('timeout'))
-            }
-          }, 8000)
-          ;(async () => {
-            const { data, error: fetchError } = await supabaseClient
-              .from('forum_posts')
-              .select(
-                `id, title, body, created_at, author_display_name`,
-              )
-              .order('created_at', { ascending: false })
-            if (fetchError) {
-              reject(fetchError)
-              return
-            }
-            if (isCancelled || myId !== reqIdRef.current) return
-            setPosts(
-              (data ?? []).map((row) => ({
-                id: row.id,
-                title: row.title,
-                body: row.body,
-                created_at: row.created_at,
-                author_display_name: row.author_display_name ?? null,
-              })),
+      const delays = [600, 1200, 2500]
+      for (let attempt = 0; attempt < delays.length; attempt++) {
+        try {
+          const fetchPromise = supabaseClient
+            .from('forum_posts')
+            .select(
+              `
+              id,
+              title,
+              body,
+              created_at,
+              author_display_name
+            `,
             )
-            resolve()
-          })().catch(reject)
-        })
-      } catch (e) {
-        if (!isCancelled && myId === reqIdRef.current) {
-          setError('Unable to load community posts. Check your connection and try again.')
+            .order('created_at', { ascending: false }) as unknown as Promise<{
+              data: any[] | null
+              error: any
+            }>
+
+          const { data, error: fetchError } = (await withTimeout(
+            fetchPromise,
+            8000,
+          )) as {
+            data: any[] | null
+            error: any
+          }
+
+          if (isCancelled) return
+          if (fetchError) throw fetchError
+
+          setPosts(
+            (data ?? []).map((row) => ({
+              id: row.id,
+              title: row.title,
+              body: row.body,
+              created_at: row.created_at,
+              author_display_name: row.author_display_name ?? null,
+            })),
+          )
+          setLoadingPosts(false)
+          return
+        } catch (e) {
+          if (attempt < delays.length - 1) {
+            await sleep(delays[attempt])
+            continue
+          }
+          if (!isCancelled) {
+            setError(
+              'Unable to load community posts. Check your connection and try again.',
+            )
+            setLoadingPosts(false)
+          }
         }
-      } finally {
-        if (timeoutHandle) window.clearTimeout(timeoutHandle)
-        if (!isCancelled && myId === reqIdRef.current) setLoadingPosts(false)
       }
     }
 
-    fetchOnce().catch(() => {
+    fetchPostsReliable().catch(() => {
       if (isCancelled) return
       setError('Unable to load community posts. Check your connection and try again.')
       setLoadingPosts(false)
@@ -89,22 +111,17 @@ function ForumListingPage() {
         'postgres_changes',
         { event: '*', schema: 'public', table: 'forum_posts' },
         () => {
-          // only refresh if not currently loading
-          if (!loadingPosts) fetchOnce().catch(() => {})
+          fetchPostsReliable().catch(() => {})
         },
       )
       .subscribe()
 
     // Refresh on window focus
-    const onFocus = () => {
-      if (!loadingPosts) fetchOnce().catch(() => {})
-    }
-    const onOnline = () => {
-      if (!loadingPosts) fetchOnce().catch(() => {})
-    }
+    const onFocus = () => fetchPostsReliable().catch(() => {})
+    const onOnline = () => fetchPostsReliable().catch(() => {})
     const onVisible = () => {
       if (document.visibilityState === 'visible') {
-        if (!loadingPosts) fetchOnce().catch(() => {})
+        fetchPostsReliable().catch(() => {})
       }
     }
     window.addEventListener('focus', onFocus)
