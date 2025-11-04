@@ -194,7 +194,13 @@ export function Replies({ postId, initialFocusId }: { postId: string; initialFoc
   return (
     <div className="flex flex-col gap-4">
       {loading && !rows.length ? (
-        <p className="text-sm text-muted">Loading replies…</p>
+        <div className="rounded bg-surface px-4 py-4">
+          <div className="animate-pulse rounded bg-highlight-low h-4 w-40" />
+          <div className="mt-3 space-y-2">
+            <div className="animate-pulse rounded bg-highlight-low h-4 w-2/3" />
+            <div className="animate-pulse rounded bg-highlight-low h-4 w-1/2" />
+          </div>
+        </div>
       ) : error ? (
         <p className="text-sm text-red-200">{error}</p>
       ) : !total ? (
