@@ -7,6 +7,7 @@ import { fetchJson } from '@/lib/supaRest'
 import { supabase } from '@/lib/supabaseClient'
 import { useAuth } from '@/components/AuthProvider'
 import * as motion from 'motion/react-client'
+import { useRouter } from '@tanstack/react-router'
 
 type ForumPost = {
   id: string
@@ -21,6 +22,8 @@ export const Route = createFileRoute('/forum/')({
 })
 
 function ForumListingPage() {
+  const router = useRouter()
+
   const supabaseClient = supabase
   const { user, loading } = useAuth()
   const [posts, setPosts] = useState<Array<ForumPost>>([])
@@ -122,52 +125,56 @@ function ForumListingPage() {
         </p>
       ) : (
         <section className="flex flex-col gap-4">
-          {posts.map((post) => (
-            <Link to="/forum/$postId" params={{ postId: post.id }}>
-              <motion.article
-                animate={{ opacity: 1, y: 0 }}
-                initial={{ opacity: 0, y: 10 }}
-                whileHover={{ x: 5 }}
-                whileTap={{ x: 10 }}
-                key={post.id}
-                transition={{
-                  delay: posts.findIndex((p) => p.id === post.id) * 0.1,
-                }}
-                className="rounded bg-surface px-6 py-5 group"
-              >
-                <header className="flex flex-col gap-1">
-                  <h3 className="text-xl font-semibold text-text">
-                    {post.title}
-                  </h3>
-                  <span className="text-xs uppercase tracking-[0.2em] text-muted">
-                    {new Date(post.created_at).toLocaleString()} •{' '}
-                    {post.author_display_name ? (
-                      <Link
-                        to="/u/$name"
-                        params={{ name: post.author_display_name }}
-                        className="gradient-text"
-                      >
-                        {post.author_display_name}
-                      </Link>
-                    ) : (
-                      'Anonymous tactician'
-                    )}
-                  </span>
-                </header>
-                <p className="mt-3 whitespace-pre-wrap text-sm leading-6 text-text">
-                  {post.body}
-                </p>
-                <div className="mt-3">
-                  <Link
-                    to="/forum/$postId"
-                    params={{ postId: post.id }}
-                    className="text-sm font-medium text-subtle group-hover:text-accent hover:underline transition duration-200"
-                  >
-                    Open discussion →
-                  </Link>
-                </div>
-              </motion.article>
-            </Link>
+          {posts.map((post, index) => (
+            <motion.article
+              key={post.id}
+              animate={{ opacity: 1, y: 0 }}
+              initial={{ opacity: 0, y: 10 }}
+              whileHover={{ x: 5 }}
+              whileTap={{ x: 10 }}
+              transition={{ delay: index * 0.1 }}
+              className="rounded bg-surface px-6 py-5 group cursor-pointer"
+              onClick={() =>
+                router.navigate({
+                  to: '/forum/$postId',
+                  params: { postId: post.id },
+                })
+              }
+            >
+              <header className="flex flex-col gap-1">
+                <h3 className="text-xl font-semibold text-text">
+                  {post.title}
+                </h3>
+                <span className="text-xs uppercase tracking-[0.2em] text-muted">
+                  {new Date(post.created_at).toLocaleString()} •{' '}
+                  {post.author_display_name ? (
+                    <Link
+                      to="/u/$name"
+                      params={{ name: post.author_display_name }}
+                      className="gradient-text"
+                      onClick={(e) => e.stopPropagation()} // prevent triggering article click
+                    >
+                      {post.author_display_name}
+                    </Link>
+                  ) : (
+                    'Anonymous tactician'
+                  )}
+                </span>
+              </header>
+              <p className="mt-3 whitespace-pre-wrap text-sm leading-6 text-text">
+                {post.body}
+              </p>
+              <div className="mt-3">
+                <Link
+                  to="/forum/$postId"
+                  params={{ postId: post.id }}
+                  className="text-sm font-medium text-subtle group-hover:text-accent hover:underline transition duration-200"
+                  onClick={(e) => e.stopPropagation()} // also prevent article click
+                >
+                  Open discussion →
+                </Link>
+              </div>
+            </motion.article>
           ))}
         </section>
       )}
