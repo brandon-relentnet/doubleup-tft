@@ -30,7 +30,7 @@ export default function DiscussionsLayout({
           <Link
             to={backTo.to}
             search={backTo.search}
-            className="hover:underline"
+            className="hover:text-accent text-subtle hover:underline"
           >
             ← {backTo.label ?? 'Back'}
           </Link>
@@ -49,7 +49,8 @@ export default function DiscussionsLayout({
             <motion.h1
               animate={{ opacity: 1, y: 0 }}
               initial={{ opacity: 0, y: 10 }}
-              className="text-4xl font-semibold leading-tight tracking-tight sm:text-5xl gradient-text w-fit"
+              transition={{ delay: 0.1 }}
+              className="text-4xl font-semibold leading-tight tracking-tight sm:text-5xl  w-fit"
             >
               {title}
             </motion.h1>
@@ -57,7 +58,7 @@ export default function DiscussionsLayout({
               <motion.div
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.1 }}
+                transition={{ delay: 0.2 }}
                 className="text-lg text-muted-foreground max-w-xl"
               >
                 {description}
@@ -68,7 +69,7 @@ export default function DiscussionsLayout({
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 }}
+              transition={{ delay: 0.2 }}
               className="shrink-0"
             >
               {actions}
@@ -77,7 +78,14 @@ export default function DiscussionsLayout({
         </div>
       </header>
 
-      <main className="flex flex-col gap-8 sm:gap-10">{children}</main>
+      <motion.main
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.3 }}
+        className="flex flex-col gap-8 sm:gap-10 min-h-screen"
+      >
+        {children}
+      </motion.main>
     </div>
   )
 }

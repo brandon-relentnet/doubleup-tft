@@ -8,10 +8,12 @@ import { AuthProvider } from '../components/AuthProvider'
 export const Route = createRootRoute({
   component: () => (
     <AuthProvider>
-      <SpeedInsights />
-      <Analytics />
-      <Header />
-      <Outlet />
+      <div className="min-h-screen">
+        <SpeedInsights />
+        <Analytics />
+        <Header />
+        <Outlet />
+      </div>
       <Footer />
     </AuthProvider>
   ),

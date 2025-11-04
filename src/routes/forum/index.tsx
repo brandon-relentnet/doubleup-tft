@@ -130,7 +130,10 @@ function ForumListingPage() {
               initial={{ opacity: 0, y: 10 }}
               whileHover={{ x: 5 }}
               whileTap={{ x: 10 }}
-              transition={{ delay: index * 0.1 }}
+              transition={{
+                y: { delay: index * 0.1 },
+                opacity: { delay: index * 0.1 },
+              }}
               className="rounded bg-surface px-6 py-5 group cursor-pointer"
               onClick={() =>
                 router.navigate({

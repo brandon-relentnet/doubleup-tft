@@ -14,7 +14,13 @@ type PostRow = {
   author_display_name: string | null
 }
 
-export default function PostDetail({ postId, initialCommentId }: { postId: string; initialCommentId?: string | null }) {
+export default function PostDetail({
+  postId,
+  initialCommentId,
+}: {
+  postId: string
+  initialCommentId?: string | null
+}) {
   const [post, setPost] = useState<PostRow | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -37,10 +43,13 @@ export default function PostDetail({ postId, initialCommentId }: { postId: strin
         setLoading(false)
       } catch (e) {
         if (alive) {
-          setError(e instanceof Error ? e.message : 'Network error loading post.')
+          setError(
+            e instanceof Error ? e.message : 'Network error loading post.',
+          )
           setLoading(false)
         }
-      } finally {}
+      } finally {
+      }
     }
     run().catch(() => {})
     return () => {
@@ -49,11 +58,7 @@ export default function PostDetail({ postId, initialCommentId }: { postId: strin
   }, [postId])
 
   if (loading && !post) {
-    return (
-      <div className="mx-auto w-full max-w-3xl px-6 py-12">
-        <p className="text-sm text-muted">Loading…</p>
-      </div>
-    )
+    return <div className="min-h-screen" />
   }
 
   if (error || !post) {
@@ -68,7 +73,12 @@ export default function PostDetail({ postId, initialCommentId }: { postId: strin
           }}
         />
         <div className="mt-4">
-          <Link to="/forum" className="text-primary hover:underline">← Back to forum</Link>
+          <Link
+            to="/forum"
+            className="hover:text-accent text-subtle hover:underline"
+          >
+            ← Back to forum
+          </Link>
         </div>
       </div>
     )
@@ -76,20 +86,33 @@ export default function PostDetail({ postId, initialCommentId }: { postId: strin
 
   return (
     <DiscussionsLayout
-      backTo={{ to: '/forum', label: 'Back to forum', search: { tag: undefined } }}
+      backTo={{
+        to: '/forum',
+        label: 'Back to forum',
+        search: { tag: undefined },
+      }}
       title={post.title}
       description={
         <span className="text-sm uppercase tracking-[0.2em] text-muted">
-          {new Date(post.created_at).toLocaleString()} • {post.author_display_name ? (
-            <Link to="/u/$name" params={{ name: post.author_display_name }} className="hover:underline">
+          {new Date(post.created_at).toLocaleString()} •{' '}
+          {post.author_display_name ? (
+            <Link
+              to="/u/$name"
+              params={{ name: post.author_display_name }}
+              className="gradient-text"
+            >
               {post.author_display_name}
             </Link>
-          ) : 'Anonymous'}
+          ) : (
+            'Anonymous'
+          )}
         </span>
       }
     >
       <article className="rounded bg-surface px-6 py-5">
-        <p className="whitespace-pre-wrap text-sm leading-6 text-text">{post.body}</p>
+        <p className="whitespace-pre-wrap text-sm leading-6 text-text">
+          {post.body}
+        </p>
       </article>
 
       <section className="flex flex-col gap-4">
