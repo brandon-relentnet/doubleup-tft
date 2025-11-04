@@ -24,9 +24,9 @@ function App() {
         <div className="flex lg:flex-row flex-col justify-center items-center gap-12">
           {/* Image */}
           <motion.img
-            initial={{ opacity: 0, y: 16, scale: 0.98 }}
-            animate={penguReady ? { opacity: 1, y: 0, scale: 1 } : {}}
-            transition={{ duration: 0.6, ease: 'easeOut' }}
+            initial={{ opacity: 0, y: 10 }}
+            animate={penguReady ? { opacity: 1, y: 0 } : {}}
+            transition={{ delay: 0.2 }}
             onLoad={() => setPenguReady(true)}
             src="/bltft_pengu.png"
             alt="Pengu eating a BLT for BLTFT"
@@ -37,31 +37,49 @@ function App() {
             decoding="async"
           />
 
-          <div className=" w-fit">
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className=" w-fit"
+          >
             <TypewriterChangeContentExample />
-            <div className="mt-6 flex flex-wrap gap-3">
+            <div className="flex flex-wrap gap-3">
               <Link to="/forum">
                 <motion.span
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ opacity: { delay: 2 }, y: { delay: 2 } }}
                   className="inline-flex items-center justify-center gap-2 rounded bg-linear-to-r from-primary to-secondary px-5 py-3 font-semibold text-base"
                 >
                   Open Community Forum
                 </motion.span>
               </Link>
-              <Link
-                to="/discussions"
-                search={{ tag: undefined }}
-                className="inline-flex items-center justify-center gap-2 rounded bg-highlight-low px-5 py-3 font-semibold text-text hover:bg-highlight-med transition"
-              >
-                Browse Discussions
+              <Link to="/discussions" search={{ tag: undefined }}>
+                <motion.span
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ opacity: { delay: 2 }, y: { delay: 2 } }}
+                  className="inline-flex items-center justify-center gap-2 rounded bg-highlight-low px-5 py-3 font-semibold text-text hover:bg-highlight-med"
+                >
+                  Browse Discussions
+                </motion.span>
               </Link>
             </div>
-          </div>
+          </motion.div>
         </div>
       </section>
       <section className="container">
-        <div className="flex lg:flex-row flex-col-reverse justify-center items-center gap-12 text-center lg:text-left">
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4 }}
+          className="flex lg:flex-row flex-col-reverse justify-center items-center gap-12 text-center lg:text-left"
+        >
           <div>
             <h1 className="font-extrabold text-4xl sm:text-5xl text-balance tracking-tight">
               Welcome to <span className="gradient-text">Free-Range TFT</span>
@@ -118,11 +136,7 @@ function App() {
             </div>
           </div>
 
-          <motion.img
-            initial={{ opacity: 0, y: 8 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, amount: 0.4 }}
-            transition={{ duration: 0.5, ease: 'easeOut' }}
+          <img
             src="/blt_cow.png"
             alt="BLT TFT Cow Mascot"
             width={1024}
@@ -130,7 +144,7 @@ function App() {
             className="w-full max-w-sm lg:max-w-md h-auto"
             decoding="async"
           />
-        </div>
+        </motion.div>
       </section>
       <section className="container">
         <ScrollHighlight />

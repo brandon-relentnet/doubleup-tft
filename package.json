@@ -22,7 +22,7 @@
     "@vercel/speed-insights": "^1.2.0",
     "lucide-react": "^0.545.0",
     "motion": "^12.23.24",
-    "motion-plus": "^1.5.1",
+    "motion-plus": "https://api.motion.dev/registry?package=motion-plus&version=1.5.4&token=8a40438180884d36350a5389457dab6af82ba7e49631bee8109451f8fbd323c5",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "tailwindcss": "^4.0.6"

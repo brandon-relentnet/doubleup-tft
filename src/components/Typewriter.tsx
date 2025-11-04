@@ -1,6 +1,7 @@
-import { delay, wrap } from 'motion'
 import { Typewriter } from 'motion-plus/react'
+import * as motion from 'motion/react-client'
 import { useState } from 'react'
+import { delay, wrap } from 'motion'
 
 export default function TypewriterChangeContentExample({
   text = ['Best in Slot', 'Economy', 'Luck', 'Meta', 'Elo Hell'],
@@ -10,8 +11,11 @@ export default function TypewriterChangeContentExample({
   const [index, setIndex] = useState(0)
 
   return (
-    <h2 className="flex flex-col items-center lg:items-start gap-1 w-full leading-none">
-      {/* Typed line with warm accent gradient */}
+    <motion.h2
+      initial={{ opacity: 0, scale: 0.7, y: -10 }}
+      animate={{ opacity: 1, scale: 1, y: 0 }}
+      className="flex flex-col items-center lg:items-start gap-1 w-full leading-none"
+    >
       <Typewriter
         as="div"
         cursorStyle={{
@@ -28,13 +32,17 @@ export default function TypewriterChangeContentExample({
         {text[index]}
       </Typewriter>
 
-      {/* Tagline */}
-      <span className="text-md sm:text-xl lg:text-2xl font-semibold text-muted">
+      <motion.span
+        initial={{ opacity: 0, scale: 0.7, y: -10, height: 0 }}
+        animate={{ opacity: 1, scale: 1, y: 0, height: '55px' }}
+        transition={{ delay: 1.3 }}
+        className="text-md sm:text-xl lg:text-2xl font-semibold text-muted"
+      >
         is{' '}
         <span className="italic text-2xl sm:text-3xl font-bold lg:text-4xl text-text">
           Fake.
         </span>
-      </span>
-    </h2>
+      </motion.span>
+    </motion.h2>
   )
 }

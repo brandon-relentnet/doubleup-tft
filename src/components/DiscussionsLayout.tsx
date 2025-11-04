@@ -1,5 +1,6 @@
 import { Link } from '@tanstack/react-router'
 import type { ReactNode } from 'react'
+import * as motion from 'motion/react-client'
 
 type DiscussionsLayoutProps = {
   title: string
@@ -45,16 +46,34 @@ export default function DiscussionsLayout({
 
         <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div className="space-y-3">
-            <h1 className="text-4xl font-semibold leading-tight tracking-tight sm:text-5xl gradient-text w-fit">
+            <motion.h1
+              animate={{ opacity: 1, y: 0 }}
+              initial={{ opacity: 0, y: 10 }}
+              className="text-4xl font-semibold leading-tight tracking-tight sm:text-5xl gradient-text w-fit"
+            >
               {title}
-            </h1>
+            </motion.h1>
             {description ? (
-              <div className="text-lg text-muted-foreground max-w-xl">
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1 }}
+                className="text-lg text-muted-foreground max-w-xl"
+              >
                 {description}
-              </div>
+              </motion.div>
             ) : null}
           </div>
-          {actions ? <div className="shrink-0">{actions}</div> : null}
+          {actions ? (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+              className="shrink-0"
+            >
+              {actions}
+            </motion.div>
+          ) : null}
         </div>
       </header>
 

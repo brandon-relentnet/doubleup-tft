@@ -120,9 +120,7 @@ function ForumListingPage() {
           }}
         />
       ) : !posts.length ? (
-        <p className="text-sm text-muted">
-          No community posts yet. Be the first to log a Free-Range lesson.
-        </p>
+        <div className="min-h-screen" />
       ) : (
         <section className="flex flex-col gap-4">
           {posts.map((post, index) => (
