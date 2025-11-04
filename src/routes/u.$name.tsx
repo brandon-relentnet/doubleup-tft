@@ -123,7 +123,41 @@ function UserProfilePage() {
       {error ? (
         <div className="rounded bg-surface px-6 py-6 text-sm text-red-200">{error}</div>
       ) : loading ? (
-        <p className="text-sm text-muted">Loading profile…</p>
+        <div className="flex flex-col gap-8">
+          <section className="rounded bg-surface px-6 py-5">
+            <div className="flex items-center gap-4">
+              <div className="animate-pulse rounded-full bg-highlight-low size-20" />
+              <div className="animate-pulse rounded bg-highlight-low h-4 w-40" />
+            </div>
+            <div className="mt-4 space-y-2">
+              <div className="animate-pulse rounded bg-highlight-low h-5 w-24" />
+              <div className="animate-pulse rounded bg-highlight-low h-4 w-full" />
+              <div className="animate-pulse rounded bg-highlight-low h-4 w-10/12" />
+            </div>
+          </section>
+          <section className="rounded bg-surface px-6 py-5">
+            <div className="animate-pulse rounded bg-highlight-low h-5 w-16" />
+            <div className="mt-4 space-y-3">
+              {Array.from({ length: 3 }).map((_, i) => (
+                <div key={i} className="space-y-2">
+                  <div className="animate-pulse rounded bg-highlight-low h-4 w-2/3" />
+                  <div className="animate-pulse rounded bg-highlight-low h-3 w-40" />
+                </div>
+              ))}
+            </div>
+          </section>
+          <section className="rounded bg-surface px-6 py-5">
+            <div className="animate-pulse rounded bg-highlight-low h-5 w-24" />
+            <div className="mt-4 space-y-3">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <div key={i} className="space-y-2">
+                  <div className="animate-pulse rounded bg-highlight-low h-4 w-full" />
+                  <div className="animate-pulse rounded bg-highlight-low h-3 w-40" />
+                </div>
+              ))}
+            </div>
+          </section>
+        </div>
       ) : (
         <div className="flex flex-col gap-10">
           {/* Profile: avatar + bio */}
