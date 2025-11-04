@@ -1,5 +1,6 @@
 import * as motion from 'motion/react-client'
 import { ArrowRight } from 'lucide-react'
+import { useState } from 'react'
 import { Link, createFileRoute } from '@tanstack/react-router'
 import ScrollHighlight from '@/components/ScrollHighlight'
 import TypewriterChangeContentExample from '@/components/Typewriter'
@@ -10,6 +11,7 @@ export const Route = createFileRoute('/')({
 })
 
 function App() {
+  const [penguReady, setPenguReady] = useState(false)
   usePageMeta({
     title: 'Free-Range TFT Field Notes | DoubleUp TFT',
     description:
@@ -21,10 +23,16 @@ function App() {
       <section className="container">
         <div className="flex lg:flex-row flex-col justify-center items-center gap-12">
           {/* Image */}
-          <img
+          <motion.img
+            initial={{ opacity: 0, y: 16, scale: 0.98 }}
+            animate={penguReady ? { opacity: 1, y: 0, scale: 1 } : {}}
+            transition={{ duration: 0.6, ease: 'easeOut' }}
+            onLoad={() => setPenguReady(true)}
             src="/bltft_pengu.png"
             alt="Pengu eating a BLT for BLTFT"
-            className="w-full max-w-sm lg:max-w-md h-auto"
+            width={3973}
+            height={4066}
+            className="block w-full max-w-sm lg:max-w-md h-auto"
             loading="eager"
             decoding="async"
           />
@@ -110,10 +118,17 @@ function App() {
             </div>
           </div>
 
-          <img
+          <motion.img
+            initial={{ opacity: 0, y: 8 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.4 }}
+            transition={{ duration: 0.5, ease: 'easeOut' }}
             src="/blt_cow.png"
             alt="BLT TFT Cow Mascot"
+            width={1024}
+            height={1024}
             className="w-full max-w-sm lg:max-w-md h-auto"
+            decoding="async"
           />
         </div>
       </section>
