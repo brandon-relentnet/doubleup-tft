@@ -2,6 +2,8 @@ import { createFileRoute, Link } from '@tanstack/react-router'
 import { PenSquare } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import DiscussionsLayout from '@/components/DiscussionsLayout'
+import FetchErrorCard from '@/components/FetchErrorCard'
+import { fetchJson } from '@/lib/supaRest'
 import { supabase } from '@/lib/supabaseClient'
 import { useAuth } from '@/components/AuthProvider'
 
@@ -32,33 +34,10 @@ function ForumListingPage() {
     const fetchPosts = async () => {
       setLoadingPosts(true)
       setError(null)
-      const supaUrl = (import.meta as any).env.VITE_SUPABASE_URL as string | undefined
-      const supaKey = (import.meta as any).env.VITE_SUPABASE_ANON_KEY as string | undefined
-      if (!supaUrl || !supaKey) {
-        setError('Supabase credentials missing. Set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY.')
-        setLoadingPosts(false)
-        return
-      }
-
-      const controller = new AbortController()
-      const timer = window.setTimeout(() => controller.abort(), 12000)
       try {
-        const rest = `${supaUrl}/rest/v1/forum_posts?select=id,title,body,created_at,author_display_name&order=created_at.desc`
-        const res = await fetch(rest, {
-          headers: {
-            apikey: supaKey,
-            authorization: `Bearer ${supaKey}`,
-          },
-          signal: controller.signal,
-        })
-
-        if (!res.ok) {
-          const text = await res.text().catch(() => '')
-          setError(`Failed to load posts (${res.status}). ${text || ''}`)
-          return
-        }
-
-        const rows = (await res.json()) as Array<any>
+        const { data: rows } = await fetchJson<Array<any>>(
+          '/rest/v1/forum_posts?select=id,title,body,created_at,author_display_name&order=created_at.desc',
+        )
         if (isCancelled) return
         setPosts(
           (rows ?? []).map((row) => ({
@@ -74,7 +53,6 @@ function ForumListingPage() {
           setError(e instanceof Error ? e.message : 'Network error loading posts.')
         }
       } finally {
-        window.clearTimeout(timer)
         if (!isCancelled) setLoadingPosts(false)
       }
     }
@@ -127,21 +105,14 @@ function ForumListingPage() {
       ) : loadingPosts ? (
         <p className="text-sm text-muted">Loading posts…</p>
       ) : error ? (
-        <div className="rounded bg-surface px-6 py-6 text-sm text-red-200 space-y-3">
-          <p>{error}</p>
-          <button
-            type="button"
-            className="rounded bg-highlight-low px-3 py-2 text-text hover:bg-highlight-med"
-            onClick={() => {
-              setError(null)
-              // trigger a re-fetch via focus handler
-              const e = new Event('focus')
-              window.dispatchEvent(e)
-            }}
-          >
-            Try again
-          </button>
-        </div>
+        <FetchErrorCard
+          message={error}
+          onRetry={() => {
+            setError(null)
+            const e = new Event('focus')
+            window.dispatchEvent(e)
+          }}
+        />
       ) : !posts.length ? (
         <p className="text-sm text-muted">
           No community posts yet. Be the first to log a Free-Range lesson.

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link } from '@tanstack/react-router'
 import { supabase } from '@/lib/supabaseClient'
+import { fetchJson, parseContentRange } from '@/lib/supaRest'
 import { useAuth } from '@/components/AuthProvider'
 
 type ReplyRow = {
@@ -36,41 +37,19 @@ export function Replies({ postId, initialFocusId }: { postId: string; initialFoc
   const offset = (page - 1) * PAGE_SIZE
 
   const supaUrl = (import.meta as any).env.VITE_SUPABASE_URL as string | undefined
-  const supaKey = (import.meta as any).env.VITE_SUPABASE_ANON_KEY as string | undefined
-  const restHeaders: HeadersInit = {
-    apikey: supaKey || '',
-    authorization: `Bearer ${supaKey || ''}`,
-    Prefer: 'count=exact',
-  }
-  const parseTotal = (res: Response, fallback: number) => {
-    const cr = res.headers.get('content-range') || res.headers.get('Content-Range')
-    if (!cr) return fallback
-    const m = cr.match(/\/(\d+)$/)
-    return m ? parseInt(m[1], 10) : fallback
-  }
 
   const fetchPage = async (nextPage: number) => {
-    if (!supaUrl || !supaKey) {
+    if (!supaUrl) {
       setError('Supabase credentials missing. Set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY.')
       return
     }
     setLoading(true)
     setError(null)
     const from = (nextPage - 1) * PAGE_SIZE
-    const rest = `${supaUrl}/rest/v1/forum_comments?post_id=eq.${postId}&select=id,post_id,author_id,author_display_name,body,created_at,parent_id&order=created_at.asc&limit=${PAGE_SIZE}&offset=${from}`
+    const rest = `/rest/v1/forum_comments?post_id=eq.${postId}&select=id,post_id,author_id,author_display_name,body,created_at,parent_id&order=created_at.asc&limit=${PAGE_SIZE}&offset=${from}`
     try {
-      const controller = new AbortController()
-      const timer = window.setTimeout(() => controller.abort(), 12000)
-      const res = await fetch(rest, { headers: restHeaders, signal: controller.signal })
-      window.clearTimeout(timer)
-      if (!res.ok) {
-        const text = await res.text().catch(() => '')
-        setError(`Unable to load replies (${res.status}). ${text || ''}`)
-        setLoading(false)
-        return
-      }
-      const data = (await res.json()) as ReplyRow[]
-      const tot = parseTotal(res, data.length)
+      const { data, response } = await fetchJson<ReplyRow[]>(rest, { prefer: 'count=exact' })
+      const tot = parseContentRange(response) ?? data.length
       setTotal(tot)
       setRows(data ?? [])
       setLoading(false)
@@ -81,11 +60,9 @@ export function Replies({ postId, initialFocusId }: { postId: string; initialFoc
   }
 
   const fetchTotal = async (): Promise<number> => {
-    if (!supaUrl || !supaKey) return total
-    const rest = `${supaUrl}/rest/v1/forum_comments?post_id=eq.${postId}&select=id&limit=1`
-    const res = await fetch(rest, { headers: restHeaders })
-    if (!res.ok) return total
-    const tot = parseTotal(res, total)
+    if (!supaUrl) return total
+    const { response } = await fetchJson(`/rest/v1/forum_comments?post_id=eq.${postId}&select=id&limit=1`, { prefer: 'count=exact' })
+    const tot = parseContentRange(response) ?? total
     setTotal(tot)
     return tot
   }
@@ -179,24 +156,18 @@ export function Replies({ postId, initialFocusId }: { postId: string; initialFoc
         return
       }
     }
-    if (!supaUrl || !supaKey) return
+    if (!supaUrl) return
     try {
-      const resRow = await fetch(
-        `${supaUrl}/rest/v1/forum_comments?id=eq.${commentId}&select=id,created_at`,
-        { headers: restHeaders },
+      const { data: arr } = await fetchJson<Array<{ id: string; created_at: string }>>(
+        `/rest/v1/forum_comments?id=eq.${commentId}&select=id,created_at`,
       )
-      if (!resRow.ok) return
-      const arr = (await resRow.json()) as Array<{ id: string; created_at: string }>
       const row = arr?.[0]
       if (!row) return
-      const resCnt = await fetch(
-        `${supaUrl}/rest/v1/forum_comments?post_id=eq.${postId}&created_at=lte.${encodeURIComponent(
-          row.created_at,
-        )}&select=id&limit=1`,
-        { headers: restHeaders },
+      const { response: resCnt } = await fetchJson(
+        `/rest/v1/forum_comments?post_id=eq.${postId}&created_at=lte.${encodeURIComponent(row.created_at)}&select=id&limit=1`,
+        { prefer: 'count=exact' },
       )
-      if (!resCnt.ok) return
-      const idx = parseTotal(resCnt, 1)
+      const idx = parseContentRange(resCnt) ?? 1
       const targetPage = Math.ceil(idx / PAGE_SIZE)
       pendingAnchor.current = idx
       setPage(targetPage)

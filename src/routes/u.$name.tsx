@@ -1,5 +1,7 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import DiscussionsLayout from '@/components/DiscussionsLayout'
+import FetchErrorCard from '@/components/FetchErrorCard'
+import { fetchJson } from '@/lib/supaRest'
 import { useEffect, useMemo, useState } from 'react'
 
 type PostRow = { id: string; title: string; created_at: string }
@@ -35,17 +37,6 @@ function UserProfilePage() {
         setLoading(false)
         return
       }
-      const headers: HeadersInit = { apikey: supaKey, authorization: `Bearer ${supaKey}` }
-      const withTimeout = async (p: Promise<Response>): Promise<Response> => {
-        const controller = new AbortController()
-        const timer = window.setTimeout(() => controller.abort(), 12000)
-        try {
-          const r = await p
-          return r
-        } finally {
-          window.clearTimeout(timer)
-        }
-      }
       try {
         // Try profiles match by display_name
         let authorId: string | null = null
@@ -54,22 +45,16 @@ function UserProfilePage() {
         let bio: string | null = null
         let avatar: string | null = null
 
-        const profRes = await withTimeout(
-          fetch(
-            `${supaUrl}/rest/v1/profiles?display_name=eq.${encodeURIComponent(
-              name,
-            )}&select=user_id,display_name,created_at,bio,avatar_url&limit=1`,
-            { headers },
-          ),
-        )
-        if (profRes.ok) {
-          const arr = (await profRes.json()) as Array<{
+        try {
+          const { data: arr } = await fetchJson<Array<{
             user_id: string
             display_name: string
             created_at: string | null
             bio: string | null
             avatar_url: string | null
-          }>
+          }>>(
+            `/rest/v1/profiles?display_name=eq.${encodeURIComponent(name)}&select=user_id,display_name,created_at,bio,avatar_url&limit=1`,
+          )
           const prof = arr?.[0]
           if (prof) {
             authorId = prof.user_id
@@ -78,35 +63,23 @@ function UserProfilePage() {
             bio = prof.bio ?? null
             avatar = prof.avatar_url ?? null
           }
-        }
+        } catch {}
 
         // Fallback to infer from forum posts/comments by display_name
         if (!authorId) {
-          const pRes = await withTimeout(
-            fetch(
-              `${supaUrl}/rest/v1/forum_posts?author_display_name=eq.${encodeURIComponent(
-                name,
-              )}&select=author_id&order=created_at.desc&limit=1`,
-              { headers },
-            ),
-          )
-          if (pRes.ok) {
-            const pArr = (await pRes.json()) as Array<{ author_id: string }>
-            authorId = pArr?.[0]?.author_id ?? null
-          }
-          if (!authorId) {
-            const cRes = await withTimeout(
-              fetch(
-                `${supaUrl}/rest/v1/forum_comments?author_display_name=eq.${encodeURIComponent(
-                  name,
-                )}&select=author_id&order=created_at.desc&limit=1`,
-                { headers },
-              ),
+          try {
+            const { data: pArr } = await fetchJson<Array<{ author_id: string }>>(
+              `/rest/v1/forum_posts?author_display_name=eq.${encodeURIComponent(name)}&select=author_id&order=created_at.desc&limit=1`,
             )
-            if (cRes.ok) {
-              const cArr = (await cRes.json()) as Array<{ author_id: string }>
+            authorId = pArr?.[0]?.author_id ?? null
+          } catch {}
+          if (!authorId) {
+            try {
+              const { data: cArr } = await fetchJson<Array<{ author_id: string }>>(
+                `/rest/v1/forum_comments?author_display_name=eq.${encodeURIComponent(name)}&select=author_id&order=created_at.desc&limit=1`,
+              )
               authorId = cArr?.[0]?.author_id ?? null
-            }
+            } catch {}
           }
         }
 
@@ -119,23 +92,14 @@ function UserProfilePage() {
           return
         }
 
-        const [postRes, commentRes] = await Promise.all([
-          withTimeout(
-            fetch(
-              `${supaUrl}/rest/v1/forum_posts?author_id=eq.${authorId}&select=id,title,created_at&order=created_at.desc`,
-              { headers },
-            ),
+        const [{ data: postRows }, { data: commentRows }] = await Promise.all([
+          fetchJson<PostRow[]>(
+            `/rest/v1/forum_posts?author_id=eq.${authorId}&select=id,title,created_at&order=created_at.desc`,
           ),
-          withTimeout(
-            fetch(
-              `${supaUrl}/rest/v1/forum_comments?author_id=eq.${authorId}&select=id,post_id,created_at,body&order=created_at.desc`,
-              { headers },
-            ),
+          fetchJson<CommentRow[]>(
+            `/rest/v1/forum_comments?author_id=eq.${authorId}&select=id,post_id,created_at,body&order=created_at.desc`,
           ),
         ])
-
-        const postRows = postRes.ok ? ((await postRes.json()) as PostRow[]) : []
-        const commentRows = commentRes.ok ? ((await commentRes.json()) as CommentRow[]) : []
 
         if (!alive) return
         setProfile({ id: authorId, display_name: display, created_at: createdAt, bio, avatar_url: avatar })
@@ -168,7 +132,7 @@ function UserProfilePage() {
       actions={null}
     >
       {error ? (
-        <div className="rounded bg-surface px-6 py-6 text-sm text-red-200">{error}</div>
+        <FetchErrorCard message={error} />
       ) : loading ? (
         <div className="flex flex-col gap-8">
           <section className="rounded bg-surface px-6 py-5">
