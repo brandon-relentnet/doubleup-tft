@@ -3,6 +3,7 @@ import { Link } from '@tanstack/react-router'
 import { supabase } from '@/lib/supabaseClient'
 import { fetchJson, parseContentRange } from '@/lib/supaRest'
 import { useAuth } from '@/components/AuthProvider'
+import SupabaseConfigNotice from '@/components/SupabaseConfigNotice'
 
 type ReplyRow = {
   id: string
@@ -179,7 +180,7 @@ export function Replies({ postId, initialFocusId }: { postId: string; initialFoc
 
   if (!supabase) {
     return (
-      <div className="text-sm text-muted">Set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY to enable replies.</div>
+      <SupabaseConfigNotice variant="inline" feature="replies" />
     )
   }
 

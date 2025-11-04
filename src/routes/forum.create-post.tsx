@@ -2,6 +2,7 @@ import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import { useMemo, useState } from 'react'
 import DiscussionsLayout from '@/components/DiscussionsLayout'
 import { useAuth } from '@/components/AuthProvider'
+import SupabaseConfigNotice from '@/components/SupabaseConfigNotice'
 import { supabase } from '@/lib/supabaseClient'
 
 export const Route = createFileRoute('/forum/create-post')({
@@ -59,9 +60,7 @@ function CreatePostPage() {
       description="Share a topic or question to start a discussion."
     >
       {!supabase ? (
-        <section className="rounded bg-surface px-6 py-6 text-sm text-muted-foreground">
-          Set <code>VITE_SUPABASE_URL</code> and <code>VITE_SUPABASE_ANON_KEY</code> to enable posting.
-        </section>
+        <SupabaseConfigNotice feature="posting" />
       ) : !user ? (
         <section className="rounded bg-surface px-6 py-6 text-sm text-muted-foreground">
           Please sign in to create a post.

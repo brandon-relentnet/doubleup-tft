@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import type { FormEvent } from 'react'
 import { supabase } from '@/lib/supabaseClient'
 import { useAuth } from '@/components/AuthProvider'
+import SupabaseConfigNotice from '@/components/SupabaseConfigNotice'
 import { usePageMeta } from '@/lib/usePageMeta'
 
 type Mode = 'signIn' | 'signUp'
@@ -192,10 +193,11 @@ export default function AccountPage() {
           <h1 className="text-2xl font-extrabold tracking-tight">
             Supabase not configured
           </h1>
-          <p className="text-sm text-muted">
-            Set <code>VITE_SUPABASE_URL</code> and{' '}
-            <code>VITE_SUPABASE_ANON_KEY</code> to enable account management.
-          </p>
+          <SupabaseConfigNotice
+            variant="inline"
+            feature="account management"
+            className="text-center"
+          />
         </div>
       </main>
     )
