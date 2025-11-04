@@ -2,7 +2,6 @@ import { createFileRoute, Link } from '@tanstack/react-router'
 import { PenSquare } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import DiscussionsLayout from '@/components/DiscussionsLayout'
-import { Skeleton } from '@/components/Skeleton'
 import { supabase } from '@/lib/supabaseClient'
 import { useAuth } from '@/components/AuthProvider'
 
@@ -30,54 +29,78 @@ function ForumListingPage() {
 
     let isCancelled = false
 
-    const fetchPosts = async () => {
+    const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms))
+    const withTimeout = async <T,>(p: Promise<T>, ms: number) => {
+      return await Promise.race<Promise<T>>([
+        p,
+        new Promise<T>((_, reject) =>
+          setTimeout(() => reject(new Error('timeout')), ms),
+        ),
+      ])
+    }
+
+    const fetchPostsReliable = async () => {
       setLoadingPosts(true)
       setError(null)
-
-      try {
-        const { data, error: fetchError } = await supabaseClient
-          .from('forum_posts')
-          .select(
-            `
+      const delays = [600, 1200, 2500]
+      for (let attempt = 0; attempt < delays.length; attempt++) {
+        try {
+          const fetchPromise = supabaseClient
+            .from('forum_posts')
+            .select(
+              `
               id,
               title,
               body,
               created_at,
               author_display_name
             `,
-          )
-          .order('created_at', { ascending: false })
+            )
+            .order('created_at', { ascending: false }) as unknown as Promise<{
+              data: any[] | null
+              error: any
+            }>
 
-        if (isCancelled) return
+          const { data, error: fetchError } = (await withTimeout(
+            fetchPromise,
+            8000,
+          )) as {
+            data: any[] | null
+            error: any
+          }
 
-        if (fetchError) {
-          setError(
-            'Unable to load community posts right now. Please try again later.',
+          if (isCancelled) return
+          if (fetchError) throw fetchError
+
+          setPosts(
+            (data ?? []).map((row) => ({
+              id: row.id,
+              title: row.title,
+              body: row.body,
+              created_at: row.created_at,
+              author_display_name: row.author_display_name ?? null,
+            })),
           )
+          setLoadingPosts(false)
           return
+        } catch (e) {
+          if (attempt < delays.length - 1) {
+            await sleep(delays[attempt])
+            continue
+          }
+          if (!isCancelled) {
+            setError(
+              'Unable to load community posts. Check your connection and try again.',
+            )
+            setLoadingPosts(false)
+          }
         }
-
-        setPosts(
-          (data ?? []).map((row) => ({
-            id: row.id,
-            title: row.title,
-            body: row.body,
-            created_at: row.created_at,
-            author_display_name: row.author_display_name ?? null,
-          })),
-        )
-      } finally {
-        if (!isCancelled) setLoadingPosts(false)
       }
     }
 
-    fetchPosts().catch((fetchError) => {
+    fetchPostsReliable().catch(() => {
       if (isCancelled) return
-      setError(
-        fetchError instanceof Error
-          ? fetchError.message
-          : 'Unable to load community posts right now. Please try again later.',
-      )
+      setError('Unable to load community posts. Check your connection and try again.')
       setLoadingPosts(false)
     })
 
@@ -88,18 +111,28 @@ function ForumListingPage() {
         'postgres_changes',
         { event: '*', schema: 'public', table: 'forum_posts' },
         () => {
-          fetchPosts().catch(() => {})
+          fetchPostsReliable().catch(() => {})
         },
       )
       .subscribe()
 
     // Refresh on window focus
-    const onFocus = () => fetchPosts().catch(() => {})
+    const onFocus = () => fetchPostsReliable().catch(() => {})
+    const onOnline = () => fetchPostsReliable().catch(() => {})
+    const onVisible = () => {
+      if (document.visibilityState === 'visible') {
+        fetchPostsReliable().catch(() => {})
+      }
+    }
     window.addEventListener('focus', onFocus)
+    window.addEventListener('online', onOnline)
+    document.addEventListener('visibilitychange', onVisible)
 
     return () => {
       isCancelled = true
       window.removeEventListener('focus', onFocus)
+      window.removeEventListener('online', onOnline)
+      document.removeEventListener('visibilitychange', onVisible)
       supabaseClient.removeChannel(channel)
     }
   }, [supabaseClient])
@@ -125,21 +158,28 @@ function ForumListingPage() {
           <code>VITE_SUPABASE_ANON_KEY</code> to enable community posts.
         </section>
       ) : loadingPosts ? (
-        <section className="flex flex-col gap-4">
-          {Array.from({ length: 3 }).map((_, i) => (
-            <article key={i} className="rounded bg-surface px-6 py-5">
-              <Skeleton className="h-6 w-1/2" />
-              <Skeleton className="mt-2 h-3 w-1/3" />
-              <Skeleton className="mt-4 h-4 w-full" />
-              <Skeleton className="mt-2 h-4 w-11/12" />
-              <Skeleton className="mt-2 h-4 w-10/12" />
-            </article>
-          ))}
-        </section>
+        <p className="text-sm text-muted">Loading posts…</p>
       ) : error ? (
-        <p className="rounded bg-surface px-6 py-6 text-sm text-red-200">
-          {error}
-        </p>
+        <div className="rounded bg-surface px-6 py-6 text-sm text-red-200 space-y-3">
+          <p>{error}</p>
+          <button
+            type="button"
+            className="rounded bg-highlight-low px-3 py-2 text-text hover:bg-highlight-med"
+            onClick={() => {
+              setError(null)
+              setLoadingPosts(true)
+              // trigger reliable fetch again
+              ;(async () => {
+                try {
+                  const event = new Event('focus')
+                  window.dispatchEvent(event)
+                } catch {}
+              })()
+            }}
+          >
+            Try again
+          </button>
+        </div>
       ) : !posts.length ? (
         <p className="text-sm text-muted">
           No community posts yet. Be the first to log a Free-Range lesson.
