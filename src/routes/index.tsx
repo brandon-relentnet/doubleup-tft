@@ -1,5 +1,5 @@
 import * as motion from 'motion/react-client'
-import { ArrowRight, User, Users } from 'lucide-react'
+import { ArrowRight, Package, Target, Users } from 'lucide-react'
 import { Link, createFileRoute } from '@tanstack/react-router'
 import ScrollHighlight from '@/components/ScrollHighlight'
 import TypewriterChangeContentExample from '@/components/Typewriter'
@@ -9,44 +9,7 @@ export const Route = createFileRoute('/')({
   component: App,
 })
 
-const quickLinks = [
-  {
-    to: '/discussions',
-    label: 'Discussions',
-    tidbit: 'Patchside Field Notes',
-    description:
-      'Harvest long-form reports, patch reflections, and duo troubleshooting direct from the coop.',
-    search: { tag: undefined },
-  },
-  {
-    to: '/items',
-    label: 'Items',
-    tidbit: 'Pantry Staples',
-    description:
-      'Stock up on slam priorities, augment pairings, and flex lines that keep your pantry versatile.',
-  },
-  {
-    to: '/strategies',
-    label: 'Strategies',
-    tidbit: 'Crop Rotation Plans',
-    description:
-      'Map stage-by-stage pivots, reroll angles, and duo coordination that survive meta swings.',
-  },
-  {
-    to: '/units',
-    label: 'Units',
-    tidbit: 'Livestock Ledger',
-    description:
-      'Profile headline carries, frontline workhorses, and trait pairings that keep boards hearty.',
-  },
-  {
-    to: '/forum',
-    label: 'Forum',
-    tidbit: 'Community Coop',
-    description:
-      'Swap Free-Range lessons with other tacticians. Share your field notes, duo triumphs, and patch scrambles.',
-  },
-]
+// Quick links grid removed for a calmer hero. See Explore band below.
 
 function App() {
   usePageMeta({
@@ -70,36 +33,54 @@ function App() {
 
           <div className="flex-1">
             <TypewriterChangeContentExample />
-            <div className="gap-6 grid grid-cols-2 mt-6 w-full">
-              {quickLinks.map((link) => (
-                <div
-                  key={link.to}
-                  className="group relative flex-1 bg-surface p-4 rounded overflow-hidden transition-all hover:-translate-y-1 duration-200"
-                >
-                  <span className="font-semibold text-lg gradient-text">
-                    {link.label}
-                    <ArrowRight className="inline-block opacity-0 group-hover:opacity-100 mb-1 ml-2 size-4 text-text transition-opacity duration-200" />
-                  </span>
-                  <div className="group-hover:blur-sm transition-all duration-200">
-                    <span className="block mb-4 text-md italic">
-                      {link.tidbit}
-                    </span>
-                    <p>{link.description}</p>
-                  </div>
-
-                  <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                    <Link
-                      to={link.to}
-                      search={link.search}
-                      className="flex w-full items-center justify-evenly gap-4 rounded-lg px-4 py-3"
-                    >
-                      <User className="size-10" />
-                      <Users className="size-10" />
-                    </Link>
-                  </div>
-                </div>
-              ))}
+            <div className="mt-6 flex flex-wrap gap-3">
+              <Link
+                to="/forum"
+                className="inline-flex items-center justify-center gap-2 rounded bg-linear-to-r from-primary to-secondary px-5 py-3 font-semibold text-base"
+              >
+                Open Community Forum
+              </Link>
+              <Link
+                to="/discussions"
+                search={{ tag: undefined }}
+                className="inline-flex items-center justify-center gap-2 rounded bg-highlight-low px-5 py-3 font-semibold text-base text-text hover:bg-highlight-med transition"
+              >
+                Browse Discussions
+              </Link>
             </div>
+          </div>
+        </div>
+      </section>
+      {/* Explore band: compact tiles for learn pages */}
+      <section className="container">
+        <div className="rounded bg-surface px-6 py-6">
+          <div className="mb-4 text-center lg:text-left">
+            <span className="text-xs font-semibold uppercase tracking-[0.35em] gradient-text">
+              Explore
+            </span>
+          </div>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+            <Link to="/items" className="rounded bg-highlight-low px-5 py-4 hover:bg-highlight-med transition">
+              <div className="flex items-center gap-3">
+                <Package className="size-5" />
+                <span className="font-semibold">Items</span>
+              </div>
+              <p className="mt-2 text-sm text-muted">Slam priorities and flexible pairings.</p>
+            </Link>
+            <Link to="/strategies" className="rounded bg-highlight-low px-5 py-4 hover:bg-highlight-med transition">
+              <div className="flex items-center gap-3">
+                <Target className="size-5" />
+                <span className="font-semibold">Strategies</span>
+              </div>
+              <p className="mt-2 text-sm text-muted">Stage plans and resilient pivots.</p>
+            </Link>
+            <Link to="/units" className="rounded bg-highlight-low px-5 py-4 hover:bg-highlight-med transition">
+              <div className="flex items-center gap-3">
+                <Users className="size-5" />
+                <span className="font-semibold">Units</span>
+              </div>
+              <p className="mt-2 text-sm text-muted">Carries, frontlines, and synergies.</p>
+            </Link>
           </div>
         </div>
       </section>
