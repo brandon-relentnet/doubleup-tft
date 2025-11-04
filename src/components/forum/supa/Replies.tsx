@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link } from '@tanstack/react-router'
 import { supabase } from '@/lib/supabaseClient'
 import { useAuth } from '@/components/AuthProvider'
@@ -35,46 +35,64 @@ export function Replies({ postId, initialFocusId }: { postId: string; initialFoc
   const pageCount = Math.max(1, Math.ceil(total / PAGE_SIZE))
   const offset = (page - 1) * PAGE_SIZE
 
-  const fetchTotal = async (): Promise<number> => {
-    if (!supabase) return 0
-    const { count, error: err } = await supabase
-      .from('forum_comments')
-      .select('id', { count: 'exact', head: true })
-      .eq('post_id', postId)
-    if (err) throw err
-    const next = count ?? 0
-    setTotal(next)
-    return next
+  const supaUrl = (import.meta as any).env.VITE_SUPABASE_URL as string | undefined
+  const supaKey = (import.meta as any).env.VITE_SUPABASE_ANON_KEY as string | undefined
+  const restHeaders: HeadersInit = {
+    apikey: supaKey || '',
+    authorization: `Bearer ${supaKey || ''}`,
+    Prefer: 'count=exact',
+  }
+  const parseTotal = (res: Response, fallback: number) => {
+    const cr = res.headers.get('content-range') || res.headers.get('Content-Range')
+    if (!cr) return fallback
+    const m = cr.match(/\/(\d+)$/)
+    return m ? parseInt(m[1], 10) : fallback
   }
 
   const fetchPage = async (nextPage: number) => {
-    if (!supabase) return
+    if (!supaUrl || !supaKey) {
+      setError('Supabase credentials missing. Set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY.')
+      return
+    }
     setLoading(true)
     setError(null)
     const from = (nextPage - 1) * PAGE_SIZE
-    const to = from + PAGE_SIZE - 1
-    const { data, error: err } = await supabase
-      .from('forum_comments')
-      .select('id, post_id, author_id, author_display_name, body, created_at, parent_id')
-      .eq('post_id', postId)
-      .order('created_at', { ascending: true })
-      .range(from, to)
-    if (err) {
-      setError('Unable to load replies.')
+    const rest = `${supaUrl}/rest/v1/forum_comments?post_id=eq.${postId}&select=id,post_id,author_id,author_display_name,body,created_at,parent_id&order=created_at.asc&limit=${PAGE_SIZE}&offset=${from}`
+    try {
+      const controller = new AbortController()
+      const timer = window.setTimeout(() => controller.abort(), 12000)
+      const res = await fetch(rest, { headers: restHeaders, signal: controller.signal })
+      window.clearTimeout(timer)
+      if (!res.ok) {
+        const text = await res.text().catch(() => '')
+        setError(`Unable to load replies (${res.status}). ${text || ''}`)
+        setLoading(false)
+        return
+      }
+      const data = (await res.json()) as ReplyRow[]
+      const tot = parseTotal(res, data.length)
+      setTotal(tot)
+      setRows(data ?? [])
       setLoading(false)
-      return
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Network error loading replies.')
+      setLoading(false)
     }
-    setRows(data ?? [])
-    setLoading(false)
   }
 
-  const load = async () => {
-    await fetchTotal()
-    await fetchPage(page)
+  const fetchTotal = async (): Promise<number> => {
+    if (!supaUrl || !supaKey) return total
+    const rest = `${supaUrl}/rest/v1/forum_comments?post_id=eq.${postId}&select=id&limit=1`
+    const res = await fetch(rest, { headers: restHeaders })
+    if (!res.ok) return total
+    const tot = parseTotal(res, total)
+    setTotal(tot)
+    return tot
   }
 
   useEffect(() => {
-    load().catch((e) => setError(e instanceof Error ? e.message : 'Unable to load'))
+    setPage(1)
+    fetchPage(1).catch(() => {})
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [postId])
 
@@ -83,13 +101,7 @@ export function Replies({ postId, initialFocusId }: { postId: string; initialFoc
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page])
 
-  const handleRealtimeChange = useCallback(() => {
-    // Refetch counts and current page to reflect live updates
-    fetchTotal().catch(() => {})
-    fetchPage(page).catch(() => {})
-  }, [page])
-
-  useRepliesRealtime(postId, handleRealtimeChange)
+  // Realtime disabled to avoid potential hangs; manual refresh on insert
 
   // If an initial comment id is provided (e.g., deep link), jump to it once data is available
   useEffect(() => {
@@ -141,6 +153,7 @@ export function Replies({ postId, initialFocusId }: { postId: string; initialFoc
     const nextPage = Math.max(1, Math.ceil(counted / PAGE_SIZE))
     pendingAnchor.current = counted
     setPage(nextPage)
+    await fetchPage(nextPage)
   }
 
   const view = rows
@@ -154,9 +167,8 @@ export function Replies({ postId, initialFocusId }: { postId: string; initialFoc
   }
 
   const gotoOriginal = async (commentId: string) => {
-    if (!supabase) return
-    // find the quoted row in current batch
-    const inCurrent = view.findIndex((r) => r.id === commentId)
+    // find in current rows first
+    const inCurrent = rows.findIndex((r) => r.id === commentId)
     if (inCurrent >= 0) {
       const anchorIndex = offset + inCurrent + 1
       const el = document.getElementById(`reply-${anchorIndex}`)
@@ -167,22 +179,31 @@ export function Replies({ postId, initialFocusId }: { postId: string; initialFoc
         return
       }
     }
-    // else, compute its 1-based index by counting replies up to its created_at
-    const { data: row, error: err1 } = await supabase
-      .from('forum_comments')
-      .select('id, created_at')
-      .eq('id', commentId)
-      .maybeSingle()
-    if (err1 || !row) return
-    const { count } = await supabase
-      .from('forum_comments')
-      .select('id', { count: 'exact', head: true })
-      .eq('post_id', postId)
-      .lte('created_at', row.created_at)
-    const idx = count ?? 1
-    const targetPage = Math.ceil(idx / PAGE_SIZE)
-    pendingAnchor.current = idx
-    setPage(targetPage)
+    if (!supaUrl || !supaKey) return
+    try {
+      const resRow = await fetch(
+        `${supaUrl}/rest/v1/forum_comments?id=eq.${commentId}&select=id,created_at`,
+        { headers: restHeaders },
+      )
+      if (!resRow.ok) return
+      const arr = (await resRow.json()) as Array<{ id: string; created_at: string }>
+      const row = arr?.[0]
+      if (!row) return
+      const resCnt = await fetch(
+        `${supaUrl}/rest/v1/forum_comments?post_id=eq.${postId}&created_at=lte.${encodeURIComponent(
+          row.created_at,
+        )}&select=id&limit=1`,
+        { headers: restHeaders },
+      )
+      if (!resCnt.ok) return
+      const idx = parseTotal(resCnt, 1)
+      const targetPage = Math.ceil(idx / PAGE_SIZE)
+      pendingAnchor.current = idx
+      setPage(targetPage)
+      await fetchPage(targetPage)
+    } catch {
+      // ignore
+    }
   }
 
   if (!supabase) {
@@ -282,14 +303,17 @@ function ReplyingToChip({ postId, commentId, onClear }: { postId: string; commen
   useEffect(() => {
     let alive = true
     async function run() {
-      if (!supabase) return
-      const { data } = await supabase
-        .from('forum_comments')
-        .select('created_at, author_display_name')
-        .eq('id', commentId)
-        .maybeSingle()
+      const supaUrl = (import.meta as any).env.VITE_SUPABASE_URL as string | undefined
+      const supaKey = (import.meta as any).env.VITE_SUPABASE_ANON_KEY as string | undefined
+      if (!supaUrl || !supaKey) return
+      const res = await fetch(
+        `${supaUrl}/rest/v1/forum_comments?id=eq.${commentId}&select=created_at,author_display_name`,
+        { headers: { apikey: supaKey, authorization: `Bearer ${supaKey}` } },
+      )
       if (!alive) return
-      setMeta(data ?? null)
+      if (!res.ok) return
+      const arr = (await res.json()) as Array<{ created_at: string; author_display_name: string | null }>
+      setMeta(arr?.[0] ?? null)
     }
     run().catch(() => {})
     return () => { alive = false }
@@ -310,14 +334,17 @@ function QuotedBlock({ commentId, onViewOriginal }: { commentId: string; onViewO
   useEffect(() => {
     let alive = true
     async function run() {
-      if (!supabase) return
-      const { data } = await supabase
-        .from('forum_comments')
-        .select('id, post_id, author_id, author_display_name, body, created_at, parent_id')
-        .eq('id', commentId)
-        .maybeSingle()
+      const supaUrl = (import.meta as any).env.VITE_SUPABASE_URL as string | undefined
+      const supaKey = (import.meta as any).env.VITE_SUPABASE_ANON_KEY as string | undefined
+      if (!supaUrl || !supaKey) return
+      const res = await fetch(
+        `${supaUrl}/rest/v1/forum_comments?id=eq.${commentId}&select=id,post_id,author_id,author_display_name,body,created_at,parent_id`,
+        { headers: { apikey: supaKey, authorization: `Bearer ${supaKey}` } },
+      )
       if (!alive) return
-      setRow((data as ReplyRow | null) ?? null)
+      if (!res.ok) return
+      const arr = (await res.json()) as ReplyRow[]
+      setRow(arr?.[0] ?? null)
     }
     run().catch(() => {})
     return () => { alive = false }
