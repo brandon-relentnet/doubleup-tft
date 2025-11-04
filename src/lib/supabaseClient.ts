@@ -14,6 +14,8 @@ export const supabase = supabaseUrl && supabaseAnonKey
       auth: {
         persistSession: true,
         autoRefreshToken: true,
+        storage: typeof window !== 'undefined' ? window.localStorage : undefined,
+        storageKey: 'sb-auth',
       },
     })
   : null
