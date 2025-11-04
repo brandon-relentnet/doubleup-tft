@@ -1,4 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router'
+import ComingSoon from '@/components/ComingSoon'
 import { usePageMeta } from '@/lib/usePageMeta'
 
 export const Route = createFileRoute('/doubleup')({
@@ -13,26 +14,17 @@ function DoubleUpPage() {
   })
 
   return (
-    <main className="container px-4 py-16 sm:px-6 lg:px-8">
-      <div className="rounded-3xl border border-border bg-surface px-8 py-12 space-y-5">
-        <h1 className="text-3xl font-extrabold tracking-tight">
-          Duo playbook loading
-        </h1>
-        <p className="text-muted">
-          This hub will host our Free-Range Double Up utilities: synced scouting
-          logs, shared econ plans, and broadcast-ready checklists that help you
-          and your partner stay on the same page.
-        </p>
-        <ul className="list-disc space-y-2 pl-5 text-muted">
-          <li>Editable duo boards to track spikes, items, and shop overlap.</li>
-          <li>Progress trackers that celebrate streaks and pinpoint pain points.</li>
-          <li>Exportable reports so your partner can prep even when offline.</li>
-        </ul>
-        <p className="text-muted">
-          We&apos;re tilling the soil now. Keep playing Free-Range and the tools will be
-          ready before the next ranked sprint.
-        </p>
-      </div>
-    </main>
+    <ComingSoon
+      layout="stacked"
+      variant="outlined"
+      title="Duo playbook loading"
+      lead="This hub will host our Free-Range Double Up utilities: synced scouting logs, shared econ plans, and broadcast-ready checklists that help you and your partner stay on the same page."
+      bullets={[
+        'Editable duo boards to track spikes, items, and shop overlap.',
+        'Progress trackers that celebrate streaks and pinpoint pain points.',
+        'Exportable reports so your partner can prep even when offline.',
+      ]}
+      closing="We&apos;re tilling the soil now. Keep playing Free-Range and the tools will be ready before the next ranked sprint."
+    />
   )
 }
