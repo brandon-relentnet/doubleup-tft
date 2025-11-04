@@ -35,9 +35,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     let isMounted = true
 
-    supabase.auth
-      .getSession()
-      .then(async ({ data }) => {
+    const rehydrate = async (_reason: string) => {
+      try {
+        const { data } = await supabase!.auth.getSession()
         if (!isMounted) return
         setSession(data.session)
         setUser(data.session?.user ?? null)
@@ -46,13 +46,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (data.session?.user) {
           await ensureProfile(data.session.user)
         }
-      })
-      .catch(() => {
+      } catch {
         if (isMounted) {
           setLoading(false)
           setIsPasswordRecovery(false)
         }
-      })
+      }
+    }
+
+    // Initial rehydrate
+    void rehydrate('initial')
 
     const {
       data: { subscription },
@@ -67,9 +70,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     })
 
+    // Fallback rehydrate shortly after mount in case storage is slow
+    const fallbackTimer = window.setTimeout(() => {
+      if (isMounted && !user && !session) void rehydrate('fallback')
+    }, 400)
+
+    const onFocus = () => void rehydrate('focus')
+    const onVisible = () => {
+      if (document.visibilityState === 'visible') void rehydrate('visible')
+    }
+    const onStorage = () => void rehydrate('storage')
+    window.addEventListener('focus', onFocus)
+    document.addEventListener('visibilitychange', onVisible)
+    window.addEventListener('storage', onStorage)
+
     return () => {
       isMounted = false
       subscription.unsubscribe()
+      window.clearTimeout(fallbackTimer)
+      window.removeEventListener('focus', onFocus)
+      document.removeEventListener('visibilitychange', onVisible)
+      window.removeEventListener('storage', onStorage)
     }
   }, [])
 
