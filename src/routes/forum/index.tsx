@@ -106,9 +106,7 @@ function ForumListingPage() {
           <code>VITE_SUPABASE_ANON_KEY</code> to enable community posts.
         </section>
       ) : loadingPosts ? (
-        <p className="text-sm text-muted min-h-screen text-center">
-          Loading posts…
-        </p>
+        <div className="min-h-screen" />
       ) : error ? (
         <FetchErrorCard
           message={error}
@@ -125,55 +123,51 @@ function ForumListingPage() {
       ) : (
         <section className="flex flex-col gap-4">
           {posts.map((post) => (
-            <motion.article
-              animate={{ opacity: 1, y: 0 }}
-              initial={{ opacity: 0, y: 10 }}
-              whileHover={{ x: 5 }}
-              whileTap={{ x: 10 }}
-              key={post.id}
-              transition={{
-                delay: posts.findIndex((p) => p.id === post.id) * 0.06,
-              }}
-              className="rounded bg-surface px-6 py-5"
-            >
-              <header className="flex flex-col gap-1">
-                <h3 className="text-xl font-semibold text-text">
+            <Link to="/forum/$postId" params={{ postId: post.id }}>
+              <motion.article
+                animate={{ opacity: 1, y: 0 }}
+                initial={{ opacity: 0, y: 10 }}
+                whileHover={{ x: 5 }}
+                whileTap={{ x: 10 }}
+                key={post.id}
+                transition={{
+                  delay: posts.findIndex((p) => p.id === post.id) * 0.1,
+                }}
+                className="rounded bg-surface px-6 py-5 group"
+              >
+                <header className="flex flex-col gap-1">
+                  <h3 className="text-xl font-semibold text-text">
+                    {post.title}
+                  </h3>
+                  <span className="text-xs uppercase tracking-[0.2em] text-muted">
+                    {new Date(post.created_at).toLocaleString()} •{' '}
+                    {post.author_display_name ? (
+                      <Link
+                        to="/u/$name"
+                        params={{ name: post.author_display_name }}
+                        className="gradient-text"
+                      >
+                        {post.author_display_name}
+                      </Link>
+                    ) : (
+                      'Anonymous tactician'
+                    )}
+                  </span>
+                </header>
+                <p className="mt-3 whitespace-pre-wrap text-sm leading-6 text-text">
+                  {post.body}
+                </p>
+                <div className="mt-3">
                   <Link
                     to="/forum/$postId"
                     params={{ postId: post.id }}
-                    className="hover:underline"
+                    className="text-sm font-medium text-subtle group-hover:text-accent hover:underline transition duration-200"
                   >
-                    {post.title}
+                    Open discussion →
                   </Link>
-                </h3>
-                <span className="text-xs uppercase tracking-[0.2em] text-muted">
-                  {new Date(post.created_at).toLocaleString()} •{' '}
-                  {post.author_display_name ? (
-                    <Link
-                      to="/u/$name"
-                      params={{ name: post.author_display_name }}
-                      className="hover:underline"
-                    >
-                      {post.author_display_name}
-                    </Link>
-                  ) : (
-                    'Anonymous tactician'
-                  )}
-                </span>
-              </header>
-              <p className="mt-3 whitespace-pre-wrap text-sm leading-6 text-text">
-                {post.body}
-              </p>
-              <div className="mt-3">
-                <Link
-                  to="/forum/$postId"
-                  params={{ postId: post.id }}
-                  className="text-sm font-medium text-primary hover:underline"
-                >
-                  Open discussion →
-                </Link>
-              </div>
-            </motion.article>
+                </div>
+              </motion.article>
+            </Link>
           ))}
         </section>
       )}
