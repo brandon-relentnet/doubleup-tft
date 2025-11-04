@@ -49,7 +49,9 @@ export default function DiscussionsLayout({
               {title}
             </h1>
             {description ? (
-              <div className="text-lg text-muted-foreground">{description}</div>
+              <div className="text-lg text-muted-foreground max-w-xl">
+                {description}
+              </div>
             ) : null}
           </div>
           {actions ? <div className="shrink-0">{actions}</div> : null}

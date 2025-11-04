@@ -6,6 +6,7 @@ import FetchErrorCard from '@/components/FetchErrorCard'
 import { fetchJson } from '@/lib/supaRest'
 import { supabase } from '@/lib/supabaseClient'
 import { useAuth } from '@/components/AuthProvider'
+import * as motion from 'motion/react-client'
 
 type ForumPost = {
   id: string
@@ -50,7 +51,9 @@ function ForumListingPage() {
         )
       } catch (e) {
         if (!isCancelled) {
-          setError(e instanceof Error ? e.message : 'Network error loading posts.')
+          setError(
+            e instanceof Error ? e.message : 'Network error loading posts.',
+          )
         }
       } finally {
         if (!isCancelled) setLoadingPosts(false)
@@ -103,7 +106,9 @@ function ForumListingPage() {
           <code>VITE_SUPABASE_ANON_KEY</code> to enable community posts.
         </section>
       ) : loadingPosts ? (
-        <p className="text-sm text-muted">Loading posts…</p>
+        <p className="text-sm text-muted min-h-screen text-center">
+          Loading posts…
+        </p>
       ) : error ? (
         <FetchErrorCard
           message={error}
@@ -120,7 +125,17 @@ function ForumListingPage() {
       ) : (
         <section className="flex flex-col gap-4">
           {posts.map((post) => (
-            <article key={post.id} className="rounded bg-surface px-6 py-5">
+            <motion.article
+              animate={{ opacity: 1, y: 0 }}
+              initial={{ opacity: 0, y: 10 }}
+              whileHover={{ x: 5 }}
+              whileTap={{ x: 10 }}
+              key={post.id}
+              transition={{
+                delay: posts.findIndex((p) => p.id === post.id) * 0.06,
+              }}
+              className="rounded bg-surface px-6 py-5"
+            >
               <header className="flex flex-col gap-1">
                 <h3 className="text-xl font-semibold text-text">
                   <Link
@@ -158,7 +173,7 @@ function ForumListingPage() {
                   Open discussion →
                 </Link>
               </div>
-            </article>
+            </motion.article>
           ))}
         </section>
       )}
