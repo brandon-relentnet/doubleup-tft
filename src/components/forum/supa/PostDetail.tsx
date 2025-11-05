@@ -6,6 +6,7 @@ import { Replies } from './Replies'
 import FetchErrorCard from '@/components/FetchErrorCard'
 import { fetchForumPost, type ForumPostRow } from '@/lib/forumApi'
 import { noTagSearch } from '@/lib/router'
+import { formatDateTime } from '@/lib/dateFormatting'
 
 export default function PostDetail({
   postId,
@@ -85,7 +86,7 @@ export default function PostDetail({
       title={post.title}
       description={
         <span className="text-sm uppercase tracking-[0.2em] text-muted">
-          {new Date(post.created_at).toLocaleString()} •{' '}
+          {formatDateTime(post.created_at)} •{' '}
           {post.author_display_name ? (
             <Link
               to="/u/$name"

@@ -3,19 +3,11 @@ import { PenSquare } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import DiscussionsLayout from '@/components/DiscussionsLayout'
 import FetchErrorCard from '@/components/FetchErrorCard'
-import { fetchJson } from '@/lib/supaRest'
+import { fetchForumPosts, type ForumPostRow } from '@/lib/forumApi'
 import { supabase } from '@/lib/supabaseClient'
 import { useAuth } from '@/components/AuthProvider'
 import * as motion from 'motion/react-client'
 import { useRouter } from '@tanstack/react-router'
-
-type ForumPost = {
-  id: string
-  title: string
-  body: string
-  created_at: string
-  author_display_name: string | null
-}
 
 export const Route = createFileRoute('/forum/')({
   component: ForumListingPage,
@@ -26,7 +18,7 @@ function ForumListingPage() {
 
   const supabaseClient = supabase
   const { user, loading } = useAuth()
-  const [posts, setPosts] = useState<Array<ForumPost>>([])
+  const [posts, setPosts] = useState<Array<ForumPostRow>>([])
   const [loadingPosts, setLoadingPosts] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -39,19 +31,9 @@ function ForumListingPage() {
       setLoadingPosts(true)
       setError(null)
       try {
-        const { data: rows } = await fetchJson<Array<any>>(
-          '/rest/v1/forum_posts?select=id,title,body,created_at,author_display_name&order=created_at.desc',
-        )
+        const rows = await fetchForumPosts()
         if (isCancelled) return
-        setPosts(
-          (rows ?? []).map((row) => ({
-            id: row.id,
-            title: row.title,
-            body: row.body,
-            created_at: row.created_at,
-            author_display_name: row.author_display_name ?? null,
-          })),
-        )
+        setPosts(rows)
       } catch (e) {
         if (!isCancelled) {
           setError(

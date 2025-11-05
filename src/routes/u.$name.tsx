@@ -1,12 +1,16 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import DiscussionsLayout from '@/components/DiscussionsLayout'
 import FetchErrorCard from '@/components/FetchErrorCard'
-import { fetchJson } from '@/lib/supaRest'
 import { useEffect, useMemo, useState } from 'react'
+import {
+  fetchForumPostsByAuthor,
+  fetchForumCommentsByAuthor,
+  findAuthorIdByDisplayName,
+  type ForumPostSummary,
+  type ForumCommentSummary,
+} from '@/lib/forumApi'
+import { getProfileByName } from '@/lib/profiles'
 import { noTagSearch } from '@/lib/router'
-
-type PostRow = { id: string; title: string; created_at: string }
-type CommentRow = { id: string; post_id: string; created_at: string; body: string }
 
 export const Route = createFileRoute('/u/$name')({
   component: UserProfilePage,
@@ -23,8 +27,8 @@ function UserProfilePage() {
     bio: string | null
     avatar_url: string | null
   } | null>(null)
-  const [posts, setPosts] = useState<PostRow[]>([])
-  const [comments, setComments] = useState<CommentRow[]>([])
+  const [posts, setPosts] = useState<ForumPostSummary[]>([])
+  const [comments, setComments] = useState<ForumCommentSummary[]>([])
 
   useEffect(() => {
     let alive = true
@@ -32,56 +36,29 @@ function UserProfilePage() {
       setLoading(true)
       setError(null)
       const supaUrl = (import.meta as any).env.VITE_SUPABASE_URL as string | undefined
-      const supaKey = (import.meta as any).env.VITE_SUPABASE_ANON_KEY as string | undefined
-      if (!supaUrl || !supaKey) {
+      if (!supaUrl) {
         setError('Profiles require Supabase credentials.')
         setLoading(false)
         return
       }
       try {
-        // Try profiles match by display_name
         let authorId: string | null = null
         let display = name
         let createdAt: string | null = null
         let bio: string | null = null
         let avatar: string | null = null
 
-        try {
-          const { data: arr } = await fetchJson<Array<{
-            user_id: string
-            display_name: string
-            created_at: string | null
-            bio: string | null
-            avatar_url: string | null
-          }>>(
-            `/rest/v1/profiles?display_name=eq.${encodeURIComponent(name)}&select=user_id,display_name,created_at,bio,avatar_url&limit=1`,
-          )
-          const prof = arr?.[0]
-          if (prof) {
-            authorId = prof.user_id
-            display = prof.display_name ?? name
-            createdAt = prof.created_at ?? null
-            bio = prof.bio ?? null
-            avatar = prof.avatar_url ?? null
-          }
-        } catch {}
+        const profileRecord = await getProfileByName(name)
+        if (profileRecord) {
+          authorId = profileRecord.user_id
+          display = profileRecord.display_name ?? name
+          createdAt = profileRecord.created_at ?? null
+          bio = profileRecord.bio ?? null
+          avatar = profileRecord.avatar_url ?? null
+        }
 
-        // Fallback to infer from forum posts/comments by display_name
         if (!authorId) {
-          try {
-            const { data: pArr } = await fetchJson<Array<{ author_id: string }>>(
-              `/rest/v1/forum_posts?author_display_name=eq.${encodeURIComponent(name)}&select=author_id&order=created_at.desc&limit=1`,
-            )
-            authorId = pArr?.[0]?.author_id ?? null
-          } catch {}
-          if (!authorId) {
-            try {
-              const { data: cArr } = await fetchJson<Array<{ author_id: string }>>(
-                `/rest/v1/forum_comments?author_display_name=eq.${encodeURIComponent(name)}&select=author_id&order=created_at.desc&limit=1`,
-              )
-              authorId = cArr?.[0]?.author_id ?? null
-            } catch {}
-          }
+          authorId = await findAuthorIdByDisplayName(name)
         }
 
         if (!authorId) {
@@ -93,13 +70,9 @@ function UserProfilePage() {
           return
         }
 
-        const [{ data: postRows }, { data: commentRows }] = await Promise.all([
-          fetchJson<PostRow[]>(
-            `/rest/v1/forum_posts?author_id=eq.${authorId}&select=id,title,created_at&order=created_at.desc`,
-          ),
-          fetchJson<CommentRow[]>(
-            `/rest/v1/forum_comments?author_id=eq.${authorId}&select=id,post_id,created_at,body&order=created_at.desc`,
-          ),
+        const [postRows, commentRows] = await Promise.all([
+          fetchForumPostsByAuthor(authorId),
+          fetchForumCommentsByAuthor(authorId),
         ])
 
         if (!alive) return

@@ -1,19 +1,16 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link } from '@tanstack/react-router'
 import { supabase } from '@/lib/supabaseClient'
-import { fetchJson, parseContentRange } from '@/lib/supaRest'
 import { useAuth } from '@/components/AuthProvider'
 import SupabaseConfigNotice from '@/components/SupabaseConfigNotice'
-
-type ReplyRow = {
-  id: string
-  post_id: string
-  author_id: string
-  author_display_name: string | null
-  body: string
-  created_at: string
-  parent_id: string | null
-}
+import {
+  countForumComments,
+  fetchForumComment,
+  fetchForumCommentIndex,
+  fetchForumCommentMeta,
+  fetchForumCommentsPage,
+  type ForumCommentRow,
+} from '@/lib/forumApi'
 
 const PAGE_SIZE = 10
 
@@ -22,69 +19,86 @@ function snippet(text: string, n = 120) {
   return s.length > n ? s.slice(0, n - 1) + '…' : s
 }
 
-export function Replies({ postId, initialFocusId }: { postId: string; initialFocusId?: string | null }) {
+export function Replies({
+  postId,
+  initialFocusId,
+}: {
+  postId: string
+  initialFocusId?: string | null
+}) {
   const { user } = useAuth()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [total, setTotal] = useState(0)
   const [page, setPage] = useState(1)
-  const [rows, setRows] = useState<ReplyRow[]>([])
+  const [rows, setRows] = useState<ForumCommentRow[]>([])
   const [replyText, setReplyText] = useState('')
   const [replyToId, setReplyToId] = useState<string | null>(null)
 
   const pendingAnchor = useRef<number | null>(null)
-
   const pageCount = Math.max(1, Math.ceil(total / PAGE_SIZE))
   const offset = (page - 1) * PAGE_SIZE
+  const supaUrl = (import.meta as any).env.VITE_SUPABASE_URL as
+    | string
+    | undefined
 
-  const supaUrl = (import.meta as any).env.VITE_SUPABASE_URL as string | undefined
-
-  const fetchPage = async (nextPage: number) => {
+  const ensurePage = async (targetPage: number) => {
     if (!supaUrl) {
-      setError('Supabase credentials missing. Set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY.')
+      setError(
+        'Supabase credentials missing. Set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY.',
+      )
       return
     }
     setLoading(true)
     setError(null)
-    const from = (nextPage - 1) * PAGE_SIZE
-    const rest = `/rest/v1/forum_comments?post_id=eq.${postId}&select=id,post_id,author_id,author_display_name,body,created_at,parent_id&order=created_at.asc&limit=${PAGE_SIZE}&offset=${from}`
+    const from = (targetPage - 1) * PAGE_SIZE
     try {
-      const { data, response } = await fetchJson<ReplyRow[]>(rest, { prefer: 'count=exact' })
-      const tot = parseContentRange(response) ?? data.length
-      setTotal(tot)
-      setRows(data ?? [])
+      const { rows: pageRows, total: count } = await fetchForumCommentsPage(
+        postId,
+        { limit: PAGE_SIZE, offset: from, order: 'asc' },
+      )
+      setRows(pageRows)
+      setTotal(count)
       setLoading(false)
-    } catch (e) {
-      setError(e instanceof Error ? e.message : 'Network error loading replies.')
+    } catch (err) {
+      setError(
+        err instanceof Error
+          ? err.message
+          : 'Network error loading replies.',
+      )
       setLoading(false)
     }
   }
 
-  const fetchTotal = async (): Promise<number> => {
+  const refreshTotal = async () => {
     if (!supaUrl) return total
-    const { response } = await fetchJson(`/rest/v1/forum_comments?post_id=eq.${postId}&select=id&limit=1`, { prefer: 'count=exact' })
-    const tot = parseContentRange(response) ?? total
-    setTotal(tot)
-    return tot
+    try {
+      const count = await countForumComments(postId)
+      setTotal(count)
+      return count
+    } catch (err) {
+      setError(
+        err instanceof Error
+          ? err.message
+          : 'Network error loading replies.',
+      )
+      return total
+    }
   }
 
   useEffect(() => {
     setPage(1)
-    fetchPage(1).catch(() => {})
+    ensurePage(1).catch(() => {})
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [postId])
 
   useEffect(() => {
-    fetchPage(page).catch(() => {})
+    ensurePage(page).catch(() => {})
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page])
 
-  // Realtime disabled to avoid potential hangs; manual refresh on insert
-
-  // If an initial comment id is provided (e.g., deep link), jump to it once data is available
   useEffect(() => {
     if (!initialFocusId) return
-    // attempt to jump once rows are loaded
     gotoOriginal(initialFocusId).catch(() => {})
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialFocusId, rows.length])
@@ -97,7 +111,10 @@ export function Replies({ postId, initialFocusId }: { postId: string; initialFoc
       if (el) {
         el.scrollIntoView({ behavior: 'smooth', block: 'center' })
         el.classList.add('highlight-accent-border')
-        setTimeout(() => el.classList.remove('highlight-accent-border'), 1600)
+        setTimeout(
+          () => el.classList.remove('highlight-accent-border'),
+          1600,
+        )
         pendingAnchor.current = null
       }
     }
@@ -112,40 +129,36 @@ export function Replies({ postId, initialFocusId }: { postId: string; initialFoc
       typeof user.user_metadata?.display_name === 'string'
         ? user.user_metadata.display_name
         : null
-    const { error: err } = await supabase
-      .from('forum_comments')
-      .insert({
-        post_id: postId,
-        body: text,
-        parent_id: replyToId,
-        author_id: user.id,
-        author_display_name: displayName,
-      })
+    const { error: err } = await supabase.from('forum_comments').insert({
+      post_id: postId,
+      body: text,
+      parent_id: replyToId,
+      author_id: user.id,
+      author_display_name: displayName,
+    })
     if (err) {
       setError('Failed to post reply.')
       return
     }
     setReplyText('')
     setReplyToId(null)
-    const counted = await fetchTotal()
+    const counted = await refreshTotal()
     const nextPage = Math.max(1, Math.ceil(counted / PAGE_SIZE))
     pendingAnchor.current = counted
     setPage(nextPage)
-    await fetchPage(nextPage)
+    await ensurePage(nextPage)
   }
-
-  const view = rows
 
   const onReplyTo = (id: string) => {
     setReplyToId(id)
-    // focus composer
-    const ta = document.getElementById('reply-textarea') as HTMLTextAreaElement | null
+    const ta = document.getElementById(
+      'reply-textarea',
+    ) as HTMLTextAreaElement | null
     ta?.scrollIntoView({ behavior: 'smooth', block: 'start' })
     setTimeout(() => ta?.focus(), 150)
   }
 
   const gotoOriginal = async (commentId: string) => {
-    // find in current rows first
     const inCurrent = rows.findIndex((r) => r.id === commentId)
     if (inCurrent >= 0) {
       const anchorIndex = offset + inCurrent + 1
@@ -153,36 +166,33 @@ export function Replies({ postId, initialFocusId }: { postId: string; initialFoc
       if (el) {
         el.scrollIntoView({ behavior: 'smooth', block: 'center' })
         el.classList.add('highlight-accent-border')
-        setTimeout(() => el.classList.remove('highlight-accent-border'), 1600)
+        setTimeout(
+          () => el.classList.remove('highlight-accent-border'),
+          1600,
+        )
         return
       }
     }
     if (!supaUrl) return
     try {
-      const { data: arr } = await fetchJson<Array<{ id: string; created_at: string }>>(
-        `/rest/v1/forum_comments?id=eq.${commentId}&select=id,created_at`,
-      )
-      const row = arr?.[0]
-      if (!row) return
-      const { response: resCnt } = await fetchJson(
-        `/rest/v1/forum_comments?post_id=eq.${postId}&created_at=lte.${encodeURIComponent(row.created_at)}&select=id&limit=1`,
-        { prefer: 'count=exact' },
-      )
-      const idx = parseContentRange(resCnt) ?? 1
-      const targetPage = Math.ceil(idx / PAGE_SIZE)
-      pendingAnchor.current = idx
+      const comment = await fetchForumComment(commentId)
+      if (!comment) return
+      const index = await fetchForumCommentIndex(postId, comment.created_at)
+      const anchorIndex = index > 0 ? index : 1
+      const targetPage = Math.max(1, Math.ceil(anchorIndex / PAGE_SIZE))
+      pendingAnchor.current = anchorIndex
       setPage(targetPage)
-      await fetchPage(targetPage)
+      await ensurePage(targetPage)
     } catch {
       // ignore
     }
   }
 
   if (!supabase) {
-    return (
-      <SupabaseConfigNotice variant="inline" feature="replies" />
-    )
+    return <SupabaseConfigNotice variant="inline" feature="replies" />
   }
+
+  const view = rows
 
   return (
     <div className="flex flex-col gap-4">
@@ -204,24 +214,41 @@ export function Replies({ postId, initialFocusId }: { postId: string; initialFoc
             const index = offset + i + 1
             const hasQuote = Boolean(r.parent_id)
             return (
-              <li key={r.id} id={`reply-${index}`} className="rounded bg-surface px-4 py-3 transition-colors duration-300">
+              <li
+                key={r.id}
+                id={`reply-${index}`}
+                className="rounded bg-surface px-4 py-3 transition-colors duration-300"
+              >
                 <div className="flex items-center justify-between">
                   <div className="text-xs uppercase tracking-[0.2em] text-muted">
-                    #{index} • {new Date(r.created_at).toLocaleString()} • {r.author_display_name ? (
-                      <Link to="/u/$name" params={{ name: r.author_display_name }} className="hover:underline">
+                    #{index} • {new Date(r.created_at).toLocaleString()} •{' '}
+                    {r.author_display_name ? (
+                      <Link
+                        to="/u/$name"
+                        params={{ name: r.author_display_name }}
+                        className="hover:underline"
+                      >
                         {r.author_display_name}
                       </Link>
-                    ) : 'Anonymous'}
+                    ) : (
+                      'Anonymous'
+                    )}
                   </div>
                   {user ? (
-                    <button className="text-xs text-primary hover:underline" onClick={() => onReplyTo(r.id)}>
+                    <button
+                      className="text-xs text-primary hover:underline"
+                      onClick={() => onReplyTo(r.id)}
+                    >
                       Reply
                     </button>
                   ) : null}
                 </div>
 
                 {hasQuote ? (
-                  <QuotedBlock commentId={r.parent_id!} onViewOriginal={gotoOriginal} />
+                  <QuotedBlock
+                    commentId={r.parent_id!}
+                    onViewOriginal={gotoOriginal}
+                  />
                 ) : null}
 
                 <p className="mt-2 text-sm whitespace-pre-wrap">{r.body}</p>
@@ -232,19 +259,38 @@ export function Replies({ postId, initialFocusId }: { postId: string; initialFoc
       )}
 
       <footer className="flex items-center justify-between pt-2">
-        <span className="text-xs text-muted">Page {page} of {pageCount}</span>
+        <span className="text-xs text-muted">
+          Page {page} of {pageCount}
+        </span>
         <div className="flex items-center gap-2">
-          <button className="rounded border border-border px-3 py-1 text-sm disabled:opacity-50" onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page === 1}>
+          <button
+            className="rounded border border-border px-3 py-1 text-sm disabled:opacity-50"
+            onClick={() => setPage((p) => Math.max(1, p - 1))}
+            disabled={page === 1}
+          >
             Prev
           </button>
-          <button className="rounded border border-border px-3 py-1 text-sm disabled:opacity-50" onClick={() => setPage((p) => Math.min(pageCount, p + 1))} disabled={page === pageCount}>
+          <button
+            className="rounded border border-border px-3 py-1 text-sm disabled:opacity-50"
+            onClick={() => setPage((p) => Math.min(pageCount, p + 1))}
+            disabled={page === pageCount}
+          >
             Next
           </button>
         </div>
       </footer>
 
-      <form onSubmit={onSubmit} className="rounded bg-surface p-4 flex flex-col gap-2">
-        {replyToId ? <ReplyingToChip postId={postId} commentId={replyToId} onClear={() => setReplyToId(null)} /> : null}
+      <form
+        onSubmit={onSubmit}
+        className="rounded bg-surface p-4 flex flex-col gap-2"
+      >
+        {replyToId ? (
+          <ReplyingToChip
+            postId={postId}
+            commentId={replyToId}
+            onClear={() => setReplyToId(null)}
+          />
+        ) : null}
         {user ? (
           <>
             <textarea
@@ -256,7 +302,10 @@ export function Replies({ postId, initialFocusId }: { postId: string; initialFoc
               className="rounded border border-border bg-surface px-3 py-2 text-sm"
             />
             <div className="flex items-center gap-2 justify-end">
-              <button type="submit" className="rounded bg-linear-to-r from-primary to-secondary text-base px-4 py-2 text-sm font-semibold">
+              <button
+                type="submit"
+                className="rounded bg-linear-to-r from-primary to-secondary text-base px-4 py-2 text-sm font-semibold"
+              >
                 Post Reply
               </button>
             </div>
@@ -269,68 +318,100 @@ export function Replies({ postId, initialFocusId }: { postId: string; initialFoc
   )
 }
 
-function ReplyingToChip({ postId, commentId, onClear }: { postId: string; commentId: string; onClear: () => void }) {
-  const [meta, setMeta] = useState<{ created_at: string; author_display_name: string | null } | null>(null)
+function ReplyingToChip({
+  postId,
+  commentId,
+  onClear,
+}: {
+  postId: string
+  commentId: string
+  onClear: () => void
+}) {
+  const [meta, setMeta] = useState<{
+    created_at: string
+    author_display_name: string | null
+  } | null>(null)
 
   useEffect(() => {
     let alive = true
     async function run() {
-      const supaUrl = (import.meta as any).env.VITE_SUPABASE_URL as string | undefined
-      const supaKey = (import.meta as any).env.VITE_SUPABASE_ANON_KEY as string | undefined
-      if (!supaUrl || !supaKey) return
-      const res = await fetch(
-        `${supaUrl}/rest/v1/forum_comments?id=eq.${commentId}&select=created_at,author_display_name`,
-        { headers: { apikey: supaKey, authorization: `Bearer ${supaKey}` } },
-      )
+      const supaUrl = (import.meta as any).env.VITE_SUPABASE_URL as
+        | string
+        | undefined
+      if (!supaUrl) return
+      const result = await fetchForumCommentMeta(commentId)
       if (!alive) return
-      if (!res.ok) return
-      const arr = (await res.json()) as Array<{ created_at: string; author_display_name: string | null }>
-      setMeta(arr?.[0] ?? null)
+      setMeta(result ?? null)
     }
     run().catch(() => {})
-    return () => { alive = false }
+    return () => {
+      alive = false
+    }
   }, [postId, commentId])
 
   if (!meta) return null
   return (
     <div className="rounded bg-surface p-2 text-xs flex items-center justify-between">
-      <div className="truncate">Replying to • {new Date(meta.created_at).toLocaleString()} • {meta.author_display_name ?? 'Anonymous'}</div>
-      <button type="button" className="ml-3 text-primary hover:underline" onClick={onClear}>Cancel</button>
+      <div className="truncate">
+        Replying to • {new Date(meta.created_at).toLocaleString()} •{' '}
+        {meta.author_display_name ?? 'Anonymous'}
+      </div>
+      <button
+        type="button"
+        className="ml-3 text-primary hover:underline"
+        onClick={onClear}
+      >
+        Cancel
+      </button>
     </div>
   )
 }
 
-function QuotedBlock({ commentId, onViewOriginal }: { commentId: string; onViewOriginal: (id: string) => void }) {
-  const [row, setRow] = useState<ReplyRow | null>(null)
+function QuotedBlock({
+  commentId,
+  onViewOriginal,
+}: {
+  commentId: string
+  onViewOriginal: (id: string) => void
+}) {
+  const [row, setRow] = useState<ForumCommentRow | null>(null)
 
   useEffect(() => {
     let alive = true
     async function run() {
-      const supaUrl = (import.meta as any).env.VITE_SUPABASE_URL as string | undefined
-      const supaKey = (import.meta as any).env.VITE_SUPABASE_ANON_KEY as string | undefined
-      if (!supaUrl || !supaKey) return
-      const res = await fetch(
-        `${supaUrl}/rest/v1/forum_comments?id=eq.${commentId}&select=id,post_id,author_id,author_display_name,body,created_at,parent_id`,
-        { headers: { apikey: supaKey, authorization: `Bearer ${supaKey}` } },
-      )
+      const supaUrl = (import.meta as any).env.VITE_SUPABASE_URL as
+        | string
+        | undefined
+      if (!supaUrl) return
+      const result = await fetchForumComment(commentId)
       if (!alive) return
-      if (!res.ok) return
-      const arr = (await res.json()) as ReplyRow[]
-      setRow(arr?.[0] ?? null)
+      setRow(result ?? null)
     }
     run().catch(() => {})
-    return () => { alive = false }
+    return () => {
+      alive = false
+    }
   }, [commentId])
 
   if (!row) return null
-  const summary = `Quoted from • ${new Date(row.created_at).toLocaleString()} • ${row.author_display_name ?? 'Anonymous'} — “${snippet(row.body)}”`
+  const summary = `Quoted from • ${new Date(row.created_at).toLocaleString()} • ${
+    row.author_display_name ?? 'Anonymous'
+  } — “${snippet(row.body)}”`
 
   return (
     <details className="mt-2 rounded bg-surface">
-      <summary className="cursor-pointer select-none list-none px-3 py-2 text-xs text-muted">{summary}</summary>
+      <summary className="cursor-pointer select-none list-none px-3 py-2 text-xs text-muted">
+        {summary}
+      </summary>
       <div className="px-3 pb-3 space-y-2">
-        <blockquote className="text-sm text-subtle whitespace-pre-wrap">{row.body}</blockquote>
-        <button type="button" className="text-xs text-primary hover:underline" onClick={() => onViewOriginal(row.id)}>
+        <blockquote className="text-sm text-subtle whitespace-pre-wrap">
+          {row.body}
+        </blockquote>
+        <button
+          type="button"
+          className="text-xs text-primary hover:underline"
+          onClick={() => onViewOriginal(row.id)}
+        >
           View original
         </button>
       </div>
@@ -338,17 +419,23 @@ function QuotedBlock({ commentId, onViewOriginal }: { commentId: string; onViewO
   )
 }
 
-// Live updates for replies (subscribe to inserts/updates/deletes)
-// Hook this into the component lifecycle
-// We embed it here for clarity instead of a separate hook file
 export function useRepliesRealtime(postId: string, onChange: () => void) {
   useEffect(() => {
     if (!supabase) return
     const channel = supabase
       .channel(`forum_comments:post:${postId}`)
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'forum_comments', filter: `post_id=eq.${postId}` }, () => {
-        onChange()
-      })
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'forum_comments',
+          filter: `post_id=eq.${postId}`,
+        },
+        () => {
+          onChange()
+        },
+      )
       .subscribe()
     return () => {
       supabase?.removeChannel(channel)
