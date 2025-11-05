@@ -38,7 +38,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const rehydrate = async (_reason: string) => {
       try {
         const { data } = await supabase!.auth.getSession()
-        console.log('[Auth] rehydrate', _reason, data)
         if (!isMounted) return
         setSession(data.session)
         setUser(data.session?.user ?? null)
@@ -61,7 +60,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, nextSession) => {
-      console.log('[Auth] onAuthStateChange', event, nextSession)
       if (!isMounted) return
       setSession(nextSession)
       setUser(nextSession?.user ?? null)
