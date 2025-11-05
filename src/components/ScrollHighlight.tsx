@@ -2,6 +2,7 @@ import { Link } from '@tanstack/react-router'
 import { motion } from 'motion/react'
 import { useState } from 'react'
 import type { Dispatch, SetStateAction } from 'react'
+import { noTagSearch } from '@/lib/router'
 
 interface Skill {
   name: string
@@ -116,7 +117,7 @@ function ScrollHighlightItem({
             <Link
               to="/discussions/$slug"
               params={{ slug: skill.cta.slug }}
-              search={{ tag: undefined }}
+              search={noTagSearch()}
               className="underline"
             >
               {skill.cta.label}

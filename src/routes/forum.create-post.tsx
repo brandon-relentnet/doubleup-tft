@@ -3,6 +3,7 @@ import { useMemo, useState } from 'react'
 import DiscussionsLayout from '@/components/DiscussionsLayout'
 import { useAuth } from '@/components/AuthProvider'
 import SupabaseConfigNotice from '@/components/SupabaseConfigNotice'
+import { TAGLESS_SEARCH } from '@/lib/router'
 import { supabase } from '@/lib/supabaseClient'
 
 export const Route = createFileRoute('/forum/create-post')({
@@ -55,7 +56,7 @@ function CreatePostPage() {
 
   return (
     <DiscussionsLayout
-      backTo={{ to: '/forum', label: 'Back to forum', search: { tag: undefined } }}
+      backTo={{ to: '/forum', label: 'Back to forum', search: TAGLESS_SEARCH }}
       title="Create a new post"
       description="Share a topic or question to start a discussion."
     >

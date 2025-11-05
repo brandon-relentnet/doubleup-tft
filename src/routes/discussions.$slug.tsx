@@ -2,15 +2,11 @@ import { createFileRoute } from '@tanstack/react-router'
 
 import { findPostBySlug } from '../content/posts'
 import DiscussionsLayout from '../components/DiscussionsLayout'
+import { formatPostDate } from '@/lib/dateFormatting'
+import { noTagSearch } from '@/lib/router'
 
 export const Route = createFileRoute('/discussions/$slug')({
   component: BlogPostPage,
-})
-
-const dateFormatter = new Intl.DateTimeFormat('en', {
-  year: 'numeric',
-  month: 'long',
-  day: 'numeric',
 })
 
 function BlogPostPage() {
@@ -24,7 +20,7 @@ function BlogPostPage() {
         backTo={{
           to: '/discussions',
           label: 'Back to discussions',
-          search: { tag: activeTag },
+          search: activeTag ? { tag: activeTag } : noTagSearch(),
         }}
         title="Post not found"
         description="That write-up either moved coops or hasn't been harvested yet."
@@ -41,7 +37,7 @@ function BlogPostPage() {
 
   const eyebrow = (
     <>
-      <span>{dateFormatter.format(new Date(date))}</span>
+      <span>{formatPostDate(date, 'long')}</span>
       <span>{readTimeMinutes} min read</span>
       {tags?.length
         ? tags.map((badgeTag) => (
@@ -61,7 +57,7 @@ function BlogPostPage() {
       backTo={{
         to: '/discussions',
         label: 'Back to discussions',
-        search: { tag: activeTag },
+        search: activeTag ? { tag: activeTag } : noTagSearch(),
       }}
       title={title}
       description={summary}

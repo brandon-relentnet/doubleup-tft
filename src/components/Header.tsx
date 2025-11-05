@@ -16,6 +16,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import type { ComponentType } from 'react'
 import { useRouterState } from '@tanstack/react-router'
 import { useAuth } from './AuthProvider'
+import { TAGLESS_SEARCH } from '@/lib/router'
 
 type NavItem = {
   to: string
@@ -36,7 +37,7 @@ const LEARN_ITEMS: Array<BaseItem> = [
     to: '/discussions',
     icon: Scroll,
     label: 'Discussions',
-    search: { tag: undefined },
+    search: TAGLESS_SEARCH,
   },
   { to: '/items', icon: Package, label: 'Items' },
   { to: '/strategies', icon: Target, label: 'Strategies' },

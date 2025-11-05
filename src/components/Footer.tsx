@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion'
 import { Link } from '@tanstack/react-router'
 import { listPosts } from '../content/posts'
+import { TAGLESS_SEARCH, noTagSearch } from '@/lib/router'
 
 type FooterLink = {
   label: string
@@ -13,7 +14,7 @@ type FooterLink = {
 
 const PRIMARY_LINKS: Array<FooterLink> = [
   { label: 'Home', to: '/' },
-  { label: 'Discussions', to: '/discussions', search: { tag: undefined } },
+  { label: 'Discussions', to: '/discussions', search: TAGLESS_SEARCH },
   { label: 'Items', to: '/items' },
   { label: 'Strategies', to: '/strategies' },
   { label: 'Units', to: '/units' },
@@ -27,7 +28,7 @@ export default function Footer() {
       label: post.title,
       to: '/discussions/$slug',
       params: { slug: post.slug },
-      search: { tag: undefined },
+      search: noTagSearch(),
       hint: `${post.readTimeMinutes} min read • ${new Date(
         post.date,
       ).toLocaleDateString('en', {

@@ -3,6 +3,7 @@ import DiscussionsLayout from '@/components/DiscussionsLayout'
 import FetchErrorCard from '@/components/FetchErrorCard'
 import { fetchJson } from '@/lib/supaRest'
 import { useEffect, useMemo, useState } from 'react'
+import { noTagSearch } from '@/lib/router'
 
 type PostRow = { id: string; title: string; created_at: string }
 type CommentRow = { id: string; post_id: string; created_at: string; body: string }
@@ -122,7 +123,7 @@ function UserProfilePage() {
 
   return (
     <DiscussionsLayout
-      backTo={{ to: '/forum', label: 'Back to forum', search: { tag: undefined } }}
+      backTo={{ to: '/forum', label: 'Back to forum', search: noTagSearch() }}
       title={profile?.display_name ?? name}
       description={
         <span className="text-sm text-muted">

@@ -4,15 +4,11 @@ import { useMemo } from 'react'
 import DiscussionsLayout from '../../components/DiscussionsLayout'
 import { listPosts } from '../../content/posts'
 import { useAuth } from '@/components/AuthProvider'
+import { formatPostDate } from '@/lib/dateFormatting'
+import { noTagSearch } from '@/lib/router'
 
 export const Route = createFileRoute('/discussions/')({
   component: DiscussionsIndexPage,
-})
-
-const dateFormatter = new Intl.DateTimeFormat('en', {
-  year: 'numeric',
-  month: 'short',
-  day: 'numeric',
 })
 
 function DiscussionsIndexPage() {
@@ -38,7 +34,7 @@ function DiscussionsIndexPage() {
           onClick={() =>
             navigate({
               to: '/discussions',
-              search: () => ({ tag: undefined }),
+              search: () => noTagSearch(),
               replace: true,
             })
           }
@@ -64,7 +60,7 @@ function DiscussionsIndexPage() {
               <Link
                 key={availableTag}
                 to="/discussions"
-                search={{ tag: isActive ? undefined : availableTag }}
+                search={isActive ? noTagSearch() : { tag: availableTag }}
                 className={`rounded-full border px-3 py-1 text-xs font-semibold transition ${
                   isActive
                     ? 'border-primary bg-primary text-primary-foreground'
@@ -85,7 +81,7 @@ function DiscussionsIndexPage() {
             className="rounded-xl bg-surface px-6 py-5 transition hover:-translate-y-0.5 hover:bg-highlight-low"
           >
             <div className="flex flex-wrap items-center gap-3 text-xs uppercase tracking-[0.16em] text-muted-foreground">
-              <span>{dateFormatter.format(new Date(post.date))}</span>
+              <span>{formatPostDate(post.date)}</span>
               <span>{post.readTimeMinutes} min read</span>
               {post.tags?.length ? (
                 <span className="flex gap-2">

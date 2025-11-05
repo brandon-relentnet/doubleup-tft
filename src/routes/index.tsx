@@ -5,6 +5,7 @@ import { Link, createFileRoute } from '@tanstack/react-router'
 import ScrollHighlight from '@/components/ScrollHighlight'
 import TypewriterChangeContentExample from '@/components/Typewriter'
 import { usePageMeta } from '@/lib/usePageMeta'
+import { noTagSearch } from '@/lib/router'
 
 export const Route = createFileRoute('/')({
   component: App,
@@ -57,7 +58,7 @@ function App() {
                   Open Community Forum
                 </motion.span>
               </Link>
-              <Link to="/discussions" search={{ tag: undefined }}>
+              <Link to="/discussions" search={noTagSearch()}>
                 <motion.span
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
@@ -120,14 +121,14 @@ function App() {
               <Link
                 to="/discussions/$slug"
                 params={{ slug: 'farm-fresh-tft' }}
-                search={{ tag: undefined }}
+                search={noTagSearch()}
                 className="inline-flex items-center gap-2 bg-linear-to-r from-primary to-secondary px-4 py-2 rounded font-semibold text-base transition hover:-translate-y-0.5 duration-200"
               >
                 Learn More
               </Link>
               <Link
                 to="/discussions"
-                search={{ tag: undefined }}
+                search={noTagSearch()}
                 className="group inline-flex items-center text-muted hover:text-accent transition duration-200"
               >
                 See all discussions
@@ -187,7 +188,7 @@ function App() {
                   >
                     Join Newsletter
                   </motion.button>
-                  <Link to="/discussions" search={{ tag: undefined }}>
+                  <Link to="/discussions" search={noTagSearch()}>
                     <motion.div
                       whileHover={{ scale: 1.1 }}
                       whileTap={{ x: 10 }}

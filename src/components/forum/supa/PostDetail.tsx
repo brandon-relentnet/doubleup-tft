@@ -4,15 +4,8 @@ import DiscussionsLayout from '@/components/DiscussionsLayout'
 // Using direct REST fetch for reliability here
 import { Replies } from './Replies'
 import FetchErrorCard from '@/components/FetchErrorCard'
-import { fetchJson } from '@/lib/supaRest'
-
-type PostRow = {
-  id: string
-  title: string
-  body: string
-  created_at: string
-  author_display_name: string | null
-}
+import { fetchForumPost, type ForumPostRow } from '@/lib/forumApi'
+import { noTagSearch } from '@/lib/router'
 
 export default function PostDetail({
   postId,
@@ -21,7 +14,7 @@ export default function PostDetail({
   postId: string
   initialCommentId?: string | null
 }) {
-  const [post, setPost] = useState<PostRow | null>(null)
+  const [post, setPost] = useState<ForumPostRow | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -31,15 +24,13 @@ export default function PostDetail({
       setLoading(true)
       setError(null)
       try {
-        const { data: rows } = await fetchJson<Array<PostRow>>(
-          `/rest/v1/forum_posts?id=eq.${postId}&select=id,title,body,created_at,author_display_name`,
-        )
-        if (!rows?.length) {
+        const row = await fetchForumPost(postId)
+        if (!row) {
           setError('Post not found.')
           setLoading(false)
           return
         }
-        setPost(rows[0])
+        setPost(row)
         setLoading(false)
       } catch (e) {
         if (alive) {
@@ -89,7 +80,7 @@ export default function PostDetail({
       backTo={{
         to: '/forum',
         label: 'Back to forum',
-        search: { tag: undefined },
+        search: noTagSearch(),
       }}
       title={post.title}
       description={
