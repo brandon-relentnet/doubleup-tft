@@ -31,32 +31,33 @@ export type ForumCommentSummary = Pick<
 
 
 export async function fetchForumPosts() {
-  const { data } = await fetchJson<ForumPostRow[]>(
+  const { data } = await fetchJson<Array<ForumPostRow>>(
     `/rest/v1/forum_posts?select=${POST_FIELDS}&order=created_at.desc`,
   )
-  return data ?? []
+  return data
 }
 
 export async function fetchForumPost(postId: string) {
   const encoded = encodeURIComponent(postId)
-  const { data } = await fetchJson<ForumPostRow[]>(
+  const { data } = await fetchJson<Array<ForumPostRow>>(
     `/rest/v1/forum_posts?id=eq.${encoded}&select=${POST_FIELDS}&limit=1`,
   )
-  return data?.[0] ?? null
+  const row = data.at(0)
+  return row ?? null
 }
 
 export async function fetchForumPostsByAuthor(authorId: string) {
-  const { data } = await fetchJson<ForumPostSummary[]>(
+  const { data } = await fetchJson<Array<ForumPostSummary>>(
     `/rest/v1/forum_posts?author_id=eq.${authorId}&select=id,title,created_at&order=created_at.desc`,
   )
-  return data ?? []
+  return data
 }
 
 export async function fetchForumCommentsByAuthor(authorId: string) {
-  const { data } = await fetchJson<ForumCommentSummary[]>(
+  const { data } = await fetchJson<Array<ForumCommentSummary>>(
     `/rest/v1/forum_comments?author_id=eq.${authorId}&select=id,post_id,created_at,body&order=created_at.desc`,
   )
-  return data ?? []
+  return data
 }
 
 export async function findAuthorIdByDisplayName(name: string) {
@@ -64,13 +65,13 @@ export async function findAuthorIdByDisplayName(name: string) {
   const { data: fromPosts } = await fetchJson<Array<{ author_id: string }>>(
     `/rest/v1/forum_posts?author_display_name=eq.${encoded}&select=author_id&order=created_at.desc&limit=1`,
   )
-  const postMatch = fromPosts?.[0]?.author_id
+  const postMatch = fromPosts[0]?.author_id
   if (postMatch) return postMatch
 
   const { data: fromComments } = await fetchJson<Array<{ author_id: string }>>(
     `/rest/v1/forum_comments?author_display_name=eq.${encoded}&select=author_id&order=created_at.desc&limit=1`,
   )
-  return fromComments?.[0]?.author_id ?? null
+  return fromComments[0]?.author_id ?? null
 }
 
 export async function fetchForumCommentsPage(
@@ -81,20 +82,21 @@ export async function fetchForumCommentsPage(
   },
 ) {
   const order = options.order ?? 'asc'
-  const { data, response } = await fetchJson<ForumCommentRow[]>(
+  const { data, response } = await fetchJson<Array<ForumCommentRow>>(
     `/rest/v1/forum_comments?post_id=eq.${postId}&select=${COMMENT_FIELDS}&order=created_at.${order}&limit=${options.limit}&offset=${options.offset}`,
     { prefer: 'count=exact' },
   )
-  const total = parseContentRange(response) ?? data?.length ?? 0
-  return { rows: data ?? [], total }
+  const total = parseContentRange(response)
+  return { rows: data, total: total === null ? data.length : total }
 }
 
 export async function fetchForumComment(commentId: string) {
   const encoded = encodeURIComponent(commentId)
-  const { data } = await fetchJson<ForumCommentRow[]>(
+  const { data } = await fetchJson<Array<ForumCommentRow>>(
     `/rest/v1/forum_comments?id=eq.${encoded}&select=${COMMENT_FIELDS}&limit=1`,
   )
-  return data?.[0] ?? null
+  const row = data.at(0)
+  return row ?? null
 }
 
 export async function fetchForumCommentMeta(commentId: string) {
@@ -104,7 +106,8 @@ export async function fetchForumCommentMeta(commentId: string) {
   >(
     `/rest/v1/forum_comments?id=eq.${encoded}&select=created_at,author_display_name&limit=1`,
   )
-  return data?.[0] ?? null
+  const row = data.at(0)
+  return row ?? null
 }
 
 export async function fetchForumCommentIndex(postId: string, createdAt: string) {
@@ -114,7 +117,8 @@ export async function fetchForumCommentIndex(postId: string, createdAt: string) 
     `/rest/v1/forum_comments?post_id=eq.${encodedPost}&created_at=lte.${encodedDate}&select=id&limit=1`,
     { prefer: 'count=exact' },
   )
-  return parseContentRange(response) ?? 0
+  const count = parseContentRange(response)
+  return count === null ? 0 : count
 }
 
 export async function countForumComments(postId: string) {
@@ -123,5 +127,6 @@ export async function countForumComments(postId: string) {
     `/rest/v1/forum_comments?post_id=eq.${encoded}&select=id&limit=1`,
     { prefer: 'count=exact' },
   )
-  return parseContentRange(response) ?? 0
+  const count = parseContentRange(response)
+  return count === null ? 0 : count
 }

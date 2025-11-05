@@ -68,7 +68,7 @@ export default function AccountPage() {
   const [profileSaveMessage, setProfileSaveMessage] = useState<string | null>(null)
 
   const displayNameMeta =
-    typeof user?.user_metadata?.display_name === 'string'
+    user && typeof user.user_metadata.display_name === 'string'
       ? user.user_metadata.display_name.trim()
       : ''
 
@@ -87,7 +87,7 @@ export default function AccountPage() {
     }
 
     const metadataDisplayName =
-      typeof user.user_metadata?.display_name === 'string'
+      typeof user.user_metadata.display_name === 'string'
         ? user.user_metadata.display_name.trim()
         : ''
 
@@ -97,7 +97,7 @@ export default function AccountPage() {
       return
     }
 
-    const client = supabaseClient as NonNullable<typeof supabaseClient>
+    const client = supabaseClient
     const currentUser = user
 
     let isCancelled = false
@@ -165,7 +165,7 @@ export default function AccountPage() {
     if (!supabaseClient || !user) return
     setProfileSaveStatus('submitting')
     try {
-      const safeName = profileDisplayName?.trim() || null
+      const safeName = profileDisplayName.trim() || null
       const safeKey = safeName ? safeName.toLocaleLowerCase() : null
       const { error } = await supabaseClient
         .from('profiles')

@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link } from '@tanstack/react-router'
+import type { ForumCommentRow } from '@/lib/forumApi'
 import { supabase } from '@/lib/supabaseClient'
 import { useAuth } from '@/components/AuthProvider'
 import SupabaseConfigNotice from '@/components/SupabaseConfigNotice'
@@ -9,7 +10,6 @@ import {
   fetchForumCommentIndex,
   fetchForumCommentMeta,
   fetchForumCommentsPage,
-  type ForumCommentRow,
 } from '@/lib/forumApi'
 
 const PAGE_SIZE = 10
@@ -31,7 +31,7 @@ export function Replies({
   const [error, setError] = useState<string | null>(null)
   const [total, setTotal] = useState(0)
   const [page, setPage] = useState(1)
-  const [rows, setRows] = useState<ForumCommentRow[]>([])
+  const [rows, setRows] = useState<Array<ForumCommentRow>>([])
   const [replyText, setReplyText] = useState('')
   const [replyToId, setReplyToId] = useState<string | null>(null)
 
@@ -89,18 +89,15 @@ export function Replies({
   useEffect(() => {
     setPage(1)
     ensurePage(1).catch(() => {})
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [postId])
 
   useEffect(() => {
     ensurePage(page).catch(() => {})
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page])
 
   useEffect(() => {
     if (!initialFocusId) return
     gotoOriginal(initialFocusId).catch(() => {})
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialFocusId, rows.length])
 
   useEffect(() => {
@@ -126,7 +123,7 @@ export function Replies({
     const text = replyText.trim()
     if (!text) return
     const displayName =
-      typeof user.user_metadata?.display_name === 'string'
+      typeof user.user_metadata.display_name === 'string'
         ? user.user_metadata.display_name
         : null
     const { error: err } = await supabase.from('forum_comments').insert({
@@ -341,7 +338,7 @@ function ReplyingToChip({
       if (!supaUrl) return
       const result = await fetchForumCommentMeta(commentId)
       if (!alive) return
-      setMeta(result ?? null)
+      setMeta(result)
     }
     run().catch(() => {})
     return () => {
@@ -385,7 +382,7 @@ function QuotedBlock({
       if (!supaUrl) return
       const result = await fetchForumComment(commentId)
       if (!alive) return
-      setRow(result ?? null)
+      setRow(result)
     }
     run().catch(() => {})
     return () => {

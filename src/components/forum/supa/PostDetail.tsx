@@ -1,10 +1,10 @@
 import { Link } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
-import DiscussionsLayout from '@/components/DiscussionsLayout'
-// Using direct REST fetch for reliability here
 import { Replies } from './Replies'
+import type { ForumPostRow } from '@/lib/forumApi'
+import DiscussionsLayout from '@/components/DiscussionsLayout'
 import FetchErrorCard from '@/components/FetchErrorCard'
-import { fetchForumPost, type ForumPostRow } from '@/lib/forumApi'
+import { fetchForumPost } from '@/lib/forumApi'
 import { noTagSearch } from '@/lib/router'
 import { formatDateTime } from '@/lib/dateFormatting'
 
@@ -49,8 +49,14 @@ export default function PostDetail({
     }
   }, [postId])
 
-  if (loading && !post) {
-    return <div className="min-h-screen" />
+  if (loading && !error && !post) {
+    return (
+      <div className="mx-auto w-full max-w-3xl px-6 py-12">
+        <article className="rounded bg-surface px-6 py-5">
+          <p className="text-sm text-muted">Loading post…</p>
+        </article>
+      </div>
+    )
   }
 
   if (error || !post) {

@@ -14,7 +14,7 @@ export async function ensureProfile(user: User) {
   if (!supabase) return
   try {
     const display =
-      typeof user.user_metadata?.display_name === 'string'
+      typeof user.user_metadata.display_name === 'string'
         ? user.user_metadata.display_name
         : null
     const displayKey = display ? display.toLocaleLowerCase() : null

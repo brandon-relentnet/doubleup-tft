@@ -1,4 +1,4 @@
-import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
+import { Link, createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useMemo, useState } from 'react'
 import DiscussionsLayout from '@/components/DiscussionsLayout'
 import { useAuth } from '@/components/AuthProvider'
@@ -32,7 +32,7 @@ function CreatePostPage() {
     setSubmitting(true)
     setError(null)
     const displayName =
-      typeof user.user_metadata?.display_name === 'string'
+      typeof user.user_metadata.display_name === 'string'
         ? user.user_metadata.display_name
         : null
     const { data, error: err } = await supabase
@@ -51,7 +51,7 @@ function CreatePostPage() {
       return
     }
     setSubmitting(false)
-    navigate({ to: '/forum/$postId', params: { postId: data!.id } })
+    navigate({ to: '/forum/$postId', params: { postId: data.id } })
   }
 
   return (

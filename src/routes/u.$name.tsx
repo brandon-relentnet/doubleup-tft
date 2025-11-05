@@ -1,13 +1,12 @@
-import { createFileRoute, Link } from '@tanstack/react-router'
+import { Link, createFileRoute } from '@tanstack/react-router'
+import { useEffect, useMemo, useState } from 'react'
 import DiscussionsLayout from '@/components/DiscussionsLayout'
 import FetchErrorCard from '@/components/FetchErrorCard'
-import { useEffect, useMemo, useState } from 'react'
+import type { ForumCommentSummary, ForumPostSummary } from '@/lib/forumApi'
 import {
-  fetchForumPostsByAuthor,
   fetchForumCommentsByAuthor,
+  fetchForumPostsByAuthor,
   findAuthorIdByDisplayName,
-  type ForumPostSummary,
-  type ForumCommentSummary,
 } from '@/lib/forumApi'
 import { getProfileByName } from '@/lib/profiles'
 import { noTagSearch } from '@/lib/router'
@@ -27,8 +26,8 @@ function UserProfilePage() {
     bio: string | null
     avatar_url: string | null
   } | null>(null)
-  const [posts, setPosts] = useState<ForumPostSummary[]>([])
-  const [comments, setComments] = useState<ForumCommentSummary[]>([])
+  const [posts, setPosts] = useState<Array<ForumPostSummary>>([])
+  const [comments, setComments] = useState<Array<ForumCommentSummary>>([])
 
   useEffect(() => {
     let alive = true
@@ -93,6 +92,7 @@ function UserProfilePage() {
   }, [name])
 
   const joinedLabel = useMemo(() => (profile?.created_at ? new Date(profile.created_at).toLocaleString() : 'Unknown'), [profile?.created_at])
+  const displayInitial = profile ? profile.display_name[0] : undefined
 
   return (
     <DiscussionsLayout
@@ -156,7 +156,7 @@ function UserProfilePage() {
                 />
               ) : (
                 <div className="size-20 rounded-full bg-highlight-low flex items-center justify-center text-xl font-semibold text-text">
-                  {(profile?.display_name?.[0] ?? '?').toUpperCase()}
+                  {(displayInitial ?? '?').toUpperCase()}
                 </div>
               )}
               <div className="text-sm text-muted">Joined: {joinedLabel}</div>
