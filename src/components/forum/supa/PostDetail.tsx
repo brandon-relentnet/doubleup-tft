@@ -50,13 +50,7 @@ export default function PostDetail({
   }, [postId])
 
   if (loading && !error && !post) {
-    return (
-      <div className="mx-auto w-full max-w-3xl px-6 py-12">
-        <article className="rounded bg-surface px-6 py-5">
-          <p className="text-sm text-muted">Loading post…</p>
-        </article>
-      </div>
-    )
+    return <div className="mx-auto w-full"></div>
   }
 
   if (error || !post) {
