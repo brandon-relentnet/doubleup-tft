@@ -1,6 +1,6 @@
+import * as motion from 'motion/react-client'
 import { Link } from '@tanstack/react-router'
 import type { ReactNode } from 'react'
-import * as motion from 'motion/react-client'
 
 type DiscussionsLayoutProps = {
   title: string

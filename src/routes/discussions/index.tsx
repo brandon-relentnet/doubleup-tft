@@ -13,7 +13,7 @@ export const Route = createFileRoute('/discussions/')({
 
 function DiscussionsIndexPage() {
   const posts = listPosts()
-  const { tag: activeTag } = Route.useSearch() as { tag?: string }
+  const { tag: activeTag } = Route.useSearch()
   const navigate = Route.useNavigate()
   useAuth()
   const allTags = useMemo(() => {

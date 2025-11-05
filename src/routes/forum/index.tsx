@@ -1,13 +1,13 @@
-import { createFileRoute, Link } from '@tanstack/react-router'
+import { Link, createFileRoute, useRouter  } from '@tanstack/react-router'
 import { PenSquare } from 'lucide-react'
 import { useEffect, useState } from 'react'
+import * as motion from 'motion/react-client'
+import type {ForumPostRow} from '@/lib/forumApi';
 import DiscussionsLayout from '@/components/DiscussionsLayout'
 import FetchErrorCard from '@/components/FetchErrorCard'
-import { fetchForumPosts, type ForumPostRow } from '@/lib/forumApi'
+import {  fetchForumPosts } from '@/lib/forumApi'
 import { supabase } from '@/lib/supabaseClient'
 import { useAuth } from '@/components/AuthProvider'
-import * as motion from 'motion/react-client'
-import { useRouter } from '@tanstack/react-router'
 
 export const Route = createFileRoute('/forum/')({
   component: ForumListingPage,

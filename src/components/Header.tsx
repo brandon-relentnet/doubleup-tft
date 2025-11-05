@@ -1,4 +1,4 @@
-import { Link } from '@tanstack/react-router'
+import { Link, useRouterState } from '@tanstack/react-router'
 import {
   BookOpen,
   ChevronDown,
@@ -13,9 +13,8 @@ import {
   X,
 } from 'lucide-react'
 import { useEffect, useMemo, useRef, useState } from 'react'
-import type { ComponentType } from 'react'
-import { useRouterState } from '@tanstack/react-router'
 import { useAuth } from './AuthProvider'
+import type { ComponentType } from 'react'
 import { TAGLESS_SEARCH } from '@/lib/router'
 
 type NavItem = {
@@ -65,15 +64,14 @@ export default function Header() {
     }
   }, [isOpen])
 
+  const rawDisplayName = user?.user_metadata.display_name
   const displayName =
-    typeof user?.user_metadata?.display_name === 'string'
-      ? user.user_metadata.display_name.trim()
-      : undefined
+    typeof rawDisplayName === 'string' ? rawDisplayName.trim() : undefined
 
   const normalizePath = (path: string) =>
     path !== '/' && path.endsWith('/') ? path.slice(0, -1) : path
 
-  const currentPath = normalizePath(routerState?.pathname ?? '/')
+  const currentPath = normalizePath(routerState.pathname)
 
   const isPathActive = (path: string) => {
     const normalized = normalizePath(path)
@@ -91,7 +89,7 @@ export default function Header() {
   const accountNavItem: NavItem = {
     to: '/account',
     icon: UserRound,
-    label: displayName ? displayName : 'Account',
+    label: displayName ?? 'Account',
   }
 
   const renderLearnMenu = (variant: 'desktop' | 'mobile') => {

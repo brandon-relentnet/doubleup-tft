@@ -12,7 +12,7 @@ export const Route = createFileRoute('/account/confirmation')({
 })
 
 export default function AccountConfirmationPage() {
-  const { email } = Route.useSearch() as { email?: string }
+  const { email } = Route.useSearch()
   const supabaseClient = supabase
   const [status, setStatus] = useState<
     'idle' | 'submitting' | 'success' | 'error'

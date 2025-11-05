@@ -1,8 +1,8 @@
 import { Link, createFileRoute } from '@tanstack/react-router'
 import { useEffect, useMemo, useState } from 'react'
+import type { ForumCommentSummary, ForumPostSummary } from '@/lib/forumApi'
 import DiscussionsLayout from '@/components/DiscussionsLayout'
 import FetchErrorCard from '@/components/FetchErrorCard'
-import type { ForumCommentSummary, ForumPostSummary } from '@/lib/forumApi'
 import {
   fetchForumCommentsByAuthor,
   fetchForumPostsByAuthor,

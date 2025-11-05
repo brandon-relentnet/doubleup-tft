@@ -1,8 +1,8 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
 import { supabase } from '../lib/supabaseClient'
-import { ensureProfile } from '@/lib/profiles'
 import type { ReactNode } from 'react'
 import type { Session, User } from '@supabase/supabase-js'
+import { ensureProfile } from '@/lib/profiles'
 
 type AuthContextValue = {
   user: User | null

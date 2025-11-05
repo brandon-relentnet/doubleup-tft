@@ -11,7 +11,7 @@ export const Route = createFileRoute('/discussions/$slug')({
 
 function BlogPostPage() {
   const { slug } = Route.useParams()
-  const { tag: activeTag } = Route.useSearch() as { tag?: string }
+  const { tag: activeTag } = Route.useSearch()
   const post = findPostBySlug(slug)
 
   if (!post) {
