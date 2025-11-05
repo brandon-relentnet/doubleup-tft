@@ -3,7 +3,6 @@ import { PenSquare } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import DiscussionsLayout from '@/components/DiscussionsLayout'
 import FetchErrorCard from '@/components/FetchErrorCard'
-import SupabaseConfigNotice from '@/components/SupabaseConfigNotice'
 import { fetchJson } from '@/lib/supaRest'
 import { supabase } from '@/lib/supabaseClient'
 import { useAuth } from '@/components/AuthProvider'
@@ -105,7 +104,10 @@ function ForumListingPage() {
       }
     >
       {!supabaseClient ? (
-        <SupabaseConfigNotice feature="community posts" />
+        <section className="rounded bg-surface px-6 py-6 text-sm text-muted-foreground">
+          Set <code>VITE_SUPABASE_URL</code> and{' '}
+          <code>VITE_SUPABASE_ANON_KEY</code> to enable community posts.
+        </section>
       ) : loadingPosts ? (
         <div className="min-h-screen" />
       ) : error ? (
